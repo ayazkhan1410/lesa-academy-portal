@@ -45,9 +45,6 @@ class Guardian(models.Model):
     address = models.TextField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.name} ({self.phone_number})"
-
 
 class Student(models.Model):
     CLASS_CHOICES = [
@@ -87,9 +84,6 @@ class Student(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.name} - {self.grade}"
-
 
 class FeePayment(models.Model):
     STATUS_CHOICES = [
@@ -117,9 +111,6 @@ class FeePayment(models.Model):
         null=True, blank=True
     )
 
-    def __str__(self):
-        return f"{self.student.name} - {self.month_paid_for.strftime('%B %Y')}"
-
 
 class Teacher(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -132,9 +123,6 @@ class Teacher(models.Model):
     date_joined = models.DateField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return self.name
 
 
 class SalaryPayment(models.Model):
@@ -150,6 +138,3 @@ class SalaryPayment(models.Model):
         upload_to='salary_slips/', blank=True, null=True
     )
     paid_on = models.DateField(auto_now_add=True)
-
-    def __str__(self):
-        return f"{self.teacher.name} - {self.month}"
