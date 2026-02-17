@@ -2,12 +2,13 @@ import traceback
 
 from django.db.models import Sum, Q
 from django.db import transaction
-from datetime import datetime
 
 from .manager import get_tokens_for_user
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
+from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter
@@ -22,7 +23,8 @@ from .models import (
 from .serializers import (
     CreateStudentSerializer,
     CustomStudentSerializer, StudentListSerializer,
-    CreateGuardianSerializer
+    CreateGuardianSerializer, StudentDetailSerializer,
+    FeePaymentSerializer
 )
 
 
@@ -635,6 +637,197 @@ class BulkEnrollStudentAPIView(APIView):
         })
 
 
+class StudentDetailAPIView(APIView):
+    @extend_schema(
+        summary="Retrieve Student Details",
+        description="Get detailed information about a specific student by ID.",
+        responses={
+            200: {
+                'description': 'Student details retrieved successfully',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'id': 7,
+                            'name': 'Ayaz Khan',
+                            'age': 19,
+                            'grade': '12',
+                            'guardian_name': 'Kamran Khan',
+                            'guardian_phone': '0300-1234567',
+                            'is_active': True,
+                            'date_joined': '2024-01-15',
+                            'latest_fee_status': 'paid'
+                        }
+                    }
+                }
+            },
+            404: {
+                'description': 'Student not found',
+                'content': {
+                    'application/json': {
+                        'example': {'error': 'Student not found'}
+                    }
+                }
+            }
+        },
+        tags=['Students']
+    )
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.select_related(
+                'guardian'
+            ).prefetch_related('payments').get(id=student_id)
+            serializer = StudentDetailSerializer(student)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Student.DoesNotExist:
+            return Response(
+                {'error': 'Student not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Partial Update Student",
+        description=(
+            "Update specific fields of a student record. "
+            "You can update student details like grade, active status, etc."
+        ),
+        request={
+            'application/json': {
+                'example': {
+                    'grade': '12',
+                    'is_active': False
+                }
+            }
+        },
+        responses={
+            200: {
+                'description': 'Student updated successfully',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'message': 'Student updated successfully',
+                            'student': {
+                                'id': 7,
+                                'name': 'Ayaz Khan',
+                                'grade': '12',
+                                'is_active': False
+                            }
+                        }
+                    }
+                }
+            },
+            404: {
+                'description': 'Student not found',
+                'content': {
+                    'application/json': {
+                        'example': {'error': 'Student not found'}
+                    }
+                }
+            },
+            400: {
+                'description': 'Invalid data',
+                'content': {
+                    'application/json': {
+                        'example': {'error': 'Invalid grade value'}
+                    }
+                }
+            }
+        },
+        tags=['Students']
+    )
+    def patch(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+
+            # Update allowed fields
+            allowed_fields = [
+                'name', 'age', 'grade', 'is_active', 'date_joined'
+            ]
+
+            for field in allowed_fields:
+                if field in request.data:
+                    setattr(student, field, request.data[field])
+
+            student.save()
+
+            serializer = StudentListSerializer(student)
+            return Response({
+                'message': 'Student updated successfully',
+                'student': serializer.data
+            }, status=status.HTTP_200_OK)
+
+        except Student.DoesNotExist:
+            return Response(
+                {'error': 'Student not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+    @extend_schema(
+        summary="Delete Student",
+        description=(
+            "Delete a student record permanently. "
+            "⚠️ WARNING: This will also delete all associated fee payment "
+            "records due to CASCADE delete."
+        ),
+        responses={
+            200: {
+                'description': 'Student deleted successfully',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'message': 'Student deleted successfully',
+                            'deleted_student_id': 7
+                        }
+                    }
+                }
+            },
+            404: {
+                'description': 'Student not found',
+                'content': {
+                    'application/json': {
+                        'example': {'error': 'Student not found'}
+                    }
+                }
+            }
+        },
+        tags=['Students']
+    )
+    def delete(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+            student_name = student.name
+            student.delete()
+
+            return Response({
+                'message': 'Student deleted successfully',
+                'deleted_student_id': student_id,
+                'deleted_student_name': student_name
+            }, status=status.HTTP_200_OK)
+
+        except Student.DoesNotExist:
+            return Response(
+                {'error': 'Student not found'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class ListGuardianAPIView(APIView):
     @extend_schema(
         summary="List Guardians",
@@ -1059,3 +1252,294 @@ class GuardianDetailAPIView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class ListCreatePaymentAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser)
+
+    @extend_schema(
+        summary="Create or Update Payment Record",
+        description="""
+        Create a new fee payment record or update an existing one
+        for a student.
+
+        **Logic:**
+        - If a payment record exists for the given month, it will be updated
+        - If no record exists for that month, a new one will be created
+        - The student's latest_fee_status will be automatically synced
+
+        **Required Fields:**
+        - student: Student ID
+        - amount: Payment amount in rupees
+        - month_paid_for: Date in YYYY-MM-DD format
+          (e.g., 2026-02-01)
+        - status: Payment status (paid/pending/late)
+
+        **Optional Fields:**
+        - screenshot: Payment proof image (JPG/PNG)
+        """,
+        request=FeePaymentSerializer,
+        responses={
+            200: {
+                'description': 'Payment updated successfully',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'message': (
+                                'Payment updated successfully for '
+                                'February 2026'
+                            ),
+                            'data': {
+                                'id': 1,
+                                'student': 5,
+                                'amount': 5000,
+                                'date_paid': '2026-02-17',
+                                'month_paid_for': '2026-02-01',
+                                'status': 'paid',
+                                'screenshot': '/media/payments/receipt.jpg'
+                            }
+                        }
+                    }
+                }
+            },
+            201: {
+                'description': 'Payment created successfully',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'message': (
+                                'Payment created successfully for '
+                                'February 2026'
+                            ),
+                            'data': {
+                                'id': 2,
+                                'student': 5,
+                                'amount': 5000,
+                                'date_paid': '2026-02-17',
+                                'month_paid_for': '2026-02-01',
+                                'status': 'paid'
+                            }
+                        }
+                    }
+                }
+            },
+            400: {
+                'description': 'Invalid data',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'error': (
+                                'Student ID and Month (YYYY-MM-DD) '
+                                'are required.'
+                            )
+                        }
+                    }
+                }
+            },
+            404: {
+                'description': 'Student not found',
+                'content': {
+                    'application/json': {
+                        'example': {'error': 'Student not found'}
+                    }
+                }
+            }
+        },
+        tags=['Payments']
+    )
+    def post(self, request, *args, **kwargs):
+        data = request.data
+        student_id = data.get('student')
+        date_str = data.get('month_paid_for')
+
+        if not student_id or not date_str:
+            return Response(
+                {"error": "Student ID and Month (YYYY-MM-DD) are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            payment_date = parse_date(date_str)
+            if not payment_date:
+                raise ValueError
+        except ValueError:
+            return Response({
+                "error": "Invalid date format"
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        existing_payment = FeePayment.objects.filter(
+            student_id=student_id,
+            month_paid_for__year=payment_date.year,
+            month_paid_for__month=payment_date.month
+        ).first()
+
+        if existing_payment:
+            serializer = FeePaymentSerializer(
+                existing_payment, data=data, partial=True
+            )
+            action = "updated"
+            http_status = status.HTTP_200_OK
+        else:
+            serializer = FeePaymentSerializer(data=data)
+            action = "created"
+            http_status = status.HTTP_201_CREATED
+
+        if serializer.is_valid():
+            payment = serializer.save()
+
+            try:
+                student = Student.objects.get(id=student_id)
+                student.latest_fee_status = payment.status
+                student.save()
+            except Student.DoesNotExist:
+                return Response({
+                    "error": "Student not found"
+                }, status=status.HTTP_404_NOT_FOUND)
+
+            return Response({
+                "message": (
+                    f"Payment {action} successfully for "
+                    f"{payment_date.strftime('%B %Y')}"
+                ),
+                "data": serializer.data
+            }, status=http_status)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @extend_schema(
+        summary="List All Payments",
+        description="""
+        Retrieve a paginated list of all fee payments with filtering
+        and sorting.
+
+        **Filtering Options:**
+        - student: Filter by student ID (e.g., ?student=5)
+        - status: Filter by payment status (e.g., ?status=paid)
+        - month: Filter by month (YYYY-MM format, e.g., ?month=2026-02)
+
+        **Sorting Options:**
+        - ordering: Sort by field (e.g., ?ordering=-date_paid)
+          - Available fields: date_paid, amount, month_paid_for
+          - Prefix with '-' for descending order
+
+        **Pagination:**
+        - page: Page number (e.g., ?page=2)
+        - page_size: Items per page (default: 10, max: 100)
+        """,
+        parameters=[
+            OpenApiParameter(
+                name='student',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description='Filter by student ID'
+            ),
+            OpenApiParameter(
+                name='status',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description=(
+                    'Filter by payment status (paid/pending/late)'
+                ),
+                enum=['paid', 'pending', 'late']
+            ),
+            OpenApiParameter(
+                name='month',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description='Filter by month (YYYY-MM format)'
+            ),
+            OpenApiParameter(
+                name='ordering',
+                type=str,
+                location=OpenApiParameter.QUERY,
+                description='Sort by field (prefix with - for descending)',
+                enum=['date_paid', '-date_paid', 'amount', '-amount',
+                      'month_paid_for', '-month_paid_for']
+            ),
+            OpenApiParameter(
+                name='page',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description='Page number'
+            ),
+            OpenApiParameter(
+                name='page_size',
+                type=int,
+                location=OpenApiParameter.QUERY,
+                description='Number of results per page (max: 100)'
+            ),
+        ],
+        responses={
+            200: {
+                'description': 'Paginated list of payments',
+                'content': {
+                    'application/json': {
+                        'example': {
+                            'count': 50,
+                            'next': (
+                                'http://127.0.0.1:8000/api/'
+                                'payments/?page=2'
+                            ),
+                            'previous': None,
+                            'results': [
+                                {
+                                    'id': 1,
+                                    'student': 5,
+                                    'amount': 5000,
+                                    'date_paid': '2026-02-17',
+                                    'month_paid_for': '2026-02-01',
+                                    'status': 'paid',
+                                    'screenshot': '/media/payments/receipt.jpg'
+                                }
+                            ]
+                        }
+                    }
+                }
+            }
+        },
+        tags=['Payments']
+    )
+    def get(self, request):
+        # Start with all payments
+        queryset = FeePayment.objects.all()
+
+        # Filtering
+        student_id = request.query_params.get('student')
+        if student_id:
+            queryset = queryset.filter(student_id=student_id)
+
+        payment_status = request.query_params.get('status')
+        if payment_status:
+            queryset = queryset.filter(status=payment_status)
+
+        month_filter = request.query_params.get('month')
+        if month_filter:
+            try:
+                year, month = month_filter.split('-')
+                queryset = queryset.filter(
+                    month_paid_for__year=int(year),
+                    month_paid_for__month=int(month)
+                )
+            except (ValueError, AttributeError):
+                pass
+
+        # Sorting
+        ordering = request.query_params.get('ordering', '-date_paid')
+        allowed_orderings = [
+            'date_paid', '-date_paid',
+            'amount', '-amount',
+            'month_paid_for', '-month_paid_for'
+        ]
+        if ordering in allowed_orderings:
+            queryset = queryset.order_by(ordering)
+        else:
+            queryset = queryset.order_by('-date_paid')
+
+        # Pagination
+        paginator = StudentPagination()
+        paginated_queryset = paginator.paginate_queryset(
+            queryset, request
+        )
+
+        serializer = FeePaymentSerializer(paginated_queryset, many=True)
+        return paginator.get_paginated_response(serializer.data)

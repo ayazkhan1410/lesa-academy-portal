@@ -1,5 +1,8 @@
 from django.contrib import admin
 from django.urls import path
+from django.conf.urls.static import static
+from django.conf import settings
+
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -10,7 +13,9 @@ from students.views import (
     ListCreateStudentAPIView,
     BulkEnrollStudentAPIView,
     ListGuardianAPIView,
-    GuardianDetailAPIView
+    GuardianDetailAPIView,
+    StudentDetailAPIView,
+    ListCreatePaymentAPIView
 )
 
 
@@ -40,6 +45,12 @@ urlpatterns = [
     path('api/guardian/', ListGuardianAPIView.as_view()),
     path('api/guardian/<int:pk>/', GuardianDetailAPIView.as_view()),
     path("api/students/", ListCreateStudentAPIView.as_view()),
+    path('api/students/<int:student_id>/', StudentDetailAPIView.as_view()),
     path('api/bulk-enroll-students', BulkEnrollStudentAPIView.as_view()),
-
+    path('api/payments/', ListCreatePaymentAPIView.as_view()),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
+    )

@@ -1,4 +1,5 @@
 from django.db import transaction
+from django.db import models
 
 from rest_framework import serializers
 from .models import Student, Guardian, FeePayment
@@ -87,3 +88,84 @@ class StudentListSerializer(serializers.ModelSerializer):
     def get_latest_fee_status(self, obj):
         latest_payment = obj.payments.order_by('-date_paid').first()
         return latest_payment.status if latest_payment else 'no_payment'
+
+
+class GuardianDetailSerializer(serializers.ModelSerializer):
+    """Serializer for detailed guardian information"""
+    class Meta:
+        model = Guardian
+        fields = ['id', 'name', 'cnic', 'phone_number', 'address']
+
+
+class FeePaymentSerializer(serializers.ModelSerializer):
+    """Serializer for fee payment details"""
+    class Meta:
+        model = FeePayment
+        fields = [
+            'id', 'amount', 'date_paid', 'month_paid_for',
+            'status', 'screenshot'
+        ]
+
+
+class StudentDetailSerializer(serializers.ModelSerializer):
+    """
+    Comprehensive serializer for student detail view.
+    Includes all student info, guardian details, and fee payments.
+    """
+    guardian = GuardianDetailSerializer(read_only=True)
+    guardian_name = serializers.CharField(
+        source='guardian.name', read_only=True
+    )
+    guardian_cnic = serializers.CharField(
+        source='guardian.cnic', read_only=True
+    )
+    guardian_phone = serializers.CharField(
+        source='guardian.phone_number', read_only=True
+    )
+    address = serializers.CharField(
+        source='guardian.address', read_only=True
+    )
+    payments = FeePaymentSerializer(many=True, read_only=True)
+    latest_fee_status = serializers.SerializerMethodField()
+    total_fees_paid = serializers.SerializerMethodField()
+    total_fees_pending = serializers.SerializerMethodField()
+    payment_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = [
+            'id', 'name', 'age', 'grade', 'is_active', 'date_joined',
+            'guardian', 'guardian_name', 'guardian_cnic',
+            'guardian_phone', 'address',
+            'payments', 'latest_fee_status',
+            'total_fees_paid', 'total_fees_pending', 'payment_count'
+        ]
+
+    def get_latest_fee_status(self, obj):
+        """Get the status of the most recent payment"""
+        latest_payment = obj.payments.order_by('-date_paid').first()
+        return latest_payment.status if latest_payment else 'no_payment'
+
+    def get_total_fees_paid(self, obj):
+        """Calculate total amount of paid fees"""
+        paid_fees = obj.payments.filter(
+            status='paid'
+        ).aggregate(total=models.Sum('amount'))
+        return paid_fees['total'] or 0
+
+    def get_total_fees_pending(self, obj):
+        """Calculate total amount of pending fees"""
+        pending_fees = obj.payments.filter(
+            status='pending'
+        ).aggregate(total=models.Sum('amount'))
+        return pending_fees['total'] or 0
+
+    def get_payment_count(self, obj):
+        """Get total number of payments"""
+        return obj.payments.count()
+
+
+class FeePaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FeePayment
+        fields = '__all__'

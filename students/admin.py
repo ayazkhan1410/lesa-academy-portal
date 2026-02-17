@@ -33,7 +33,6 @@ class StudentAdmin(admin.ModelAdmin):
     list_filter = ('grade', 'is_active', 'date_joined')
     search_fields = ('name', 'guardian__name')
     autocomplete_fields = ['guardian']
-    ordering = ('id',)
 
 
 @admin.register(FeePayment)
