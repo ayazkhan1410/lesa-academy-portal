@@ -1,0 +1,10 @@
+# Frontend .dockerignore
+node_modules
+npm-debug.log
+yarn-error.log
+.git/
+.gitignore
+.vscode/
+dist/
+build/
+coverage/

@@ -7,7 +7,9 @@ from .models import (
 
 @admin.register(CustomUser)
 class CustomUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'username', 'is_active', 'is_admin', 'is_staff')
+    list_display = (
+        'id', 'email', 'username', 'is_active', 'is_admin', 'is_staff'
+    )
     list_filter = ('is_active', 'is_admin')
     search_fields = ('email', 'username')
     ordering = ('email',)
@@ -15,26 +17,29 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 @admin.register(Guardian)
 class GuardianAdmin(admin.ModelAdmin):
-    list_display = ('name', 'cnic', 'phone_number', 'address', 'created_at')
+    list_display = (
+        'id', 'name', 'cnic', 'phone_number', 'address', 'created_at'
+    )
     search_fields = ('name', 'cnic', 'phone_number')
 
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'age', 'grade',
+        'id', 'name', 'age', 'grade',
         'guardian', 'date_joined',
         'is_active', 'created_at'
     )
     list_filter = ('grade', 'is_active', 'date_joined')
     search_fields = ('name', 'guardian__name')
     autocomplete_fields = ['guardian']
+    ordering = ('id',)
 
 
 @admin.register(FeePayment)
 class FeePaymentAdmin(admin.ModelAdmin):
     list_display = (
-        'student', 'amount', 'month_paid_for', 'date_paid', 'status'
+        'id', 'student', 'amount', 'month_paid_for', 'date_paid', 'status'
     )
     list_filter = ('status', 'month_paid_for', 'date_paid')
     search_fields = ('student__name',)
@@ -44,7 +49,7 @@ class FeePaymentAdmin(admin.ModelAdmin):
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = (
-        'name', 'phone_number', 'subject',
+        'id', 'name', 'phone_number', 'subject',
         'salary', 'date_joined', 'created_at'
     )
     list_filter = ('subject', 'date_joined')
@@ -53,6 +58,8 @@ class TeacherAdmin(admin.ModelAdmin):
 
 @admin.register(SalaryPayment)
 class SalaryPaymentAdmin(admin.ModelAdmin):
-    list_display = ('teacher', 'amount', 'month', 'paid_on', 'salary_slip')
+    list_display = (
+        'id', 'teacher', 'amount', 'month', 'paid_on', 'salary_slip'
+    )
     list_filter = ('month', 'paid_on')
     search_fields = ('teacher__name',)
