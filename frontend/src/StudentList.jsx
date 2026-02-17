@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import jsPDF from 'jspdf'; 
+import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
   Search, FileDown, Filter, Edit, Trash2,
@@ -34,6 +34,7 @@ const StudentList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
 
+  // ✅ 1. Fetch Logic
   const fetchStudents = useCallback(async () => {
     setLoading(true);
     try {
@@ -49,24 +50,18 @@ const StudentList = () => {
       });
 
       if (response.data.results) {
-        // ✅ SORT LOGIC: Priority to 'pending', then secondary sort by ID
+        // Sort: Pending first, then by ID
         const sortedResults = response.data.results.sort((a, b) => {
-          if (a.latest_fee_status === 'pending' && b.latest_fee_status !== 'pending') return -1;
-          if (a.latest_fee_status !== 'pending' && b.latest_fee_status === 'pending') return 1;
-          return b.id - a.id; // Keep newest students first within the same status
-        });
-        
-        setStudents(sortedResults);
-        setTotalCount(response.data.count);
-      } else {
-        const flatData = Array.isArray(response.data) ? response.data : [];
-        const sortedFlat = flatData.sort((a, b) => {
           if (a.latest_fee_status === 'pending' && b.latest_fee_status !== 'pending') return -1;
           if (a.latest_fee_status !== 'pending' && b.latest_fee_status === 'pending') return 1;
           return b.id - a.id;
         });
-        setStudents(sortedFlat);
-        setTotalCount(sortedFlat.length);
+        setStudents(sortedResults);
+        setTotalCount(response.data.count);
+      } else {
+        const flatData = Array.isArray(response.data) ? response.data : [];
+        setStudents(flatData);
+        setTotalCount(flatData.length);
       }
     } catch (error) {
       toast.error("Sync failed.");
@@ -77,7 +72,11 @@ const StudentList = () => {
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  // ✅ 2. THE MISSING FUNCTIONS (Fixed)
+  const confirmDelete = (student) => {
+    setStudentToDelete(student);
+    setIsDeleteModalOpen(true);
+  };
 
   const executeDelete = async () => {
     try {
@@ -85,13 +84,15 @@ const StudentList = () => {
       await axios.delete(`http://127.0.0.1:8000/api/students/${studentToDelete.id}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      toast.success("Record deleted");
+      toast.success("Entry purged.");
       fetchStudents();
       setIsDeleteModalOpen(false);
     } catch (error) {
-      toast.error("Delete failed");
+      toast.error("Delete failed.");
     }
   };
+
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
 
   return (
     <div className="flex h-screen bg-[#0f172a] overflow-hidden font-sans text-slate-200">
@@ -99,7 +100,7 @@ const StudentList = () => {
       <Sidebar />
 
       <main className="flex-1 flex flex-col p-6 md:p-8 overflow-y-auto relative z-10 custom-scrollbar">
-        
+
         <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 shrink-0">
           <div>
             <h2 className="text-3xl font-black text-white tracking-tighter italic">Student Detail List</h2>
@@ -134,15 +135,15 @@ const StudentList = () => {
 
           <div className="relative w-full md:w-80">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" size={16} />
-            <input 
-              type="text" placeholder="Search..." value={searchTerm} 
-              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
-              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-slate-950/50 border border-white/5 text-xs font-bold text-white outline-none focus:border-blue-500/50" 
+            <input
+              type="text" placeholder="Search..." value={searchTerm}
+              onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
+              className="w-full pl-12 pr-4 py-3 rounded-2xl bg-slate-950/50 border border-white/5 text-xs font-bold text-white outline-none focus:border-blue-500/50"
             />
           </div>
         </div>
 
-        {/* ✅ Table Container: Auto-height for clean scroll-free design */}
+        {/* Table Container */}
         <div className="bg-slate-900/40 backdrop-blur-xl border border-white/5 rounded-[2.5rem] shadow-2xl">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-separate border-spacing-y-2 px-6">
@@ -171,8 +172,8 @@ const StudentList = () => {
                       </td>
                       <td className="py-4 px-4 text-right rounded-r-2xl">
                         <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                          <button onClick={() => { setEditingStudent(s); setIsModalOpen(true); }} className="p-2 hover:bg-blue-600 rounded-lg"><Edit size={14} /></button>
-                          <button onClick={() => confirmDelete(s)} className="p-2 hover:bg-rose-600 rounded-lg"><Trash2 size={14} /></button>
+                          <button onClick={() => { setEditingStudent(s); setIsModalOpen(true); }} className="p-2 hover:bg-blue-600 rounded-lg transition-all"><Edit size={14} /></button>
+                          <button onClick={() => confirmDelete(s)} className="p-2 hover:bg-rose-600 rounded-lg transition-all"><Trash2 size={14} /></button>
                         </div>
                       </td>
                     </tr>
@@ -185,7 +186,7 @@ const StudentList = () => {
           {/* Centered Pagination */}
           <div className="p-8 border-t border-white/5 bg-slate-950/30 flex flex-col items-center gap-4 rounded-b-[2.5rem]">
             <div className="flex items-center gap-4">
-              <button 
+              <button
                 disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}
                 className="p-3 bg-slate-950 border border-white/5 rounded-2xl hover:bg-blue-600 disabled:opacity-20 transition-all shadow-xl"
               >
@@ -194,13 +195,14 @@ const StudentList = () => {
               <div className="px-8 py-2 bg-slate-950 rounded-2xl border border-white/5 font-black text-[10px] uppercase tracking-widest text-slate-400">
                 Page <span className="text-blue-500 mx-1">{currentPage}</span> of {totalPages || 1}
               </div>
-              <button 
+              <button
                 disabled={currentPage >= totalPages} onClick={() => setCurrentPage(p => p + 1)}
                 className="p-3 bg-slate-950 border border-white/5 rounded-2xl hover:bg-blue-600 disabled:opacity-20 transition-all shadow-xl"
               >
                 <ChevronRight size={18} />
               </button>
             </div>
+            <p className="text-[9px] font-black text-slate-600 uppercase tracking-[0.4em]">Record Count: {totalCount} Sequential Entries</p>
           </div>
         </div>
 

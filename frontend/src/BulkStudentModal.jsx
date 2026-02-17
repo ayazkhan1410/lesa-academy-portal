@@ -194,6 +194,18 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                                     <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Contact String</label>
                                     <input value={guardian.phone_number} placeholder="0300-0000000" required onChange={(e) => setGuardian({ ...guardian, phone_number: e.target.value })} className="w-full p-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono text-sm" />
                                 </div>
+
+                                {/* ✅ ADDED: Residential Address (Full Width Row) */}
+                                <div className="col-span-1 md:col-span-4">
+                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Residential Address</label>
+                                    <input
+                                        value={guardian.address}
+                                        placeholder="House #, Street, Area, City"
+                                        required
+                                        onChange={(e) => setGuardian({ ...guardian, address: e.target.value })}
+                                        className="w-full p-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-bold"
+                                    />
+                                </div>
                             </div>
                         </div>
 

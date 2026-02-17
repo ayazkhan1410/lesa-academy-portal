@@ -614,6 +614,9 @@ class BulkEnrollStudentAPIView(APIView):
                 guardian.phone_number = guardian_data.get(
                     'phone_number', guardian.phone_number
                 )
+                guardian.address = guardian_data.get(
+                    'address', guardian.address
+                )
                 guardian.save()
 
             created_students = []
