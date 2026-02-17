@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
     ArrowLeft, User, Phone, MapPin, CreditCard, Calendar,
-    Hash, FileText, LayoutDashboard, Users, Edit2
+    Hash, FileText, LayoutDashboard, Users, Edit2, Image as ImageIcon,
+    ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PaymentModal from './PaymentModal';
@@ -14,20 +15,33 @@ const StudentDetail = () => {
     const [student, setStudent] = useState(null);
     const [loading, setLoading] = useState(true);
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
 
-    // Refactored fetch function so it can be called from modal onSuccess
-    const fetchStudent = async () => {
+    // Refactored fetch function with pagination support
+    const fetchStudent = async (page = 1) => {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/students/${id}/`, {
+            const response = await axios.get(`http://127.0.0.1:8000/api/students/${id}/?page=${page}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setStudent(response.data);
+
+            // Update pagination state if backend returns paginated payments
+            if (response.data.payments_paginated) {
+                setTotalPages(Math.ceil(response.data.payments_paginated.count / 10));
+            }
         } catch (error) {
             console.error("Error fetching data:", error);
         } finally {
             setLoading(false);
         }
+    };
+
+    // Handle page changes
+    const handlePageChange = (newPage) => {
+        setCurrentPage(newPage);
+        fetchStudent(newPage);
     };
 
     useEffect(() => {
@@ -158,22 +172,69 @@ const StudentDetail = () => {
                             <div className="space-y-3">
                                 {student.payments && student.payments.length > 0 ? (
                                     student.payments.map((payment) => (
-                                        <div key={payment.id} className="bg-slate-800/50 p-4 rounded-xl border border-slate-700 flex justify-between items-center">
-                                            <div>
-                                                <p className="text-white font-bold">Rs. {payment.amount}</p>
-                                                <p className="text-xs text-slate-500 flex items-center gap-1 mt-1">
-                                                    <Calendar size={10} /> {payment.date_paid}
-                                                </p>
+                                        <div key={payment.id} className="flex items-center justify-between p-4 bg-slate-950/40 border border-white/5 rounded-2xl mb-3 group hover:border-blue-500/30 transition-all">
+                                            <div className="flex items-center gap-4">
+                                                <div className="bg-slate-900 p-2 rounded-xl text-slate-400 group-hover:text-blue-400">
+                                                    <Calendar size={16} />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm font-black text-white">Rs. {payment.amount}</p>
+                                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                                                        {new Date(payment.month_paid_for).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                                                    </p>
+                                                </div>
                                             </div>
-                                            <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded uppercase">
-                                                {payment.status}
-                                            </span>
+
+                                            <div className="flex items-center gap-3">
+                                                {/* ✅ NEW: VIEW PROOF BUTTON */}
+                                                {payment.screenshot && (
+                                                    <a
+                                                        href={payment.screenshot}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="p-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-all"
+                                                        title="View Payment Proof"
+                                                    >
+                                                        <ImageIcon size={14} />
+                                                    </a>
+                                                )}
+
+                                                <span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-tighter ${payment.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                                                    }`}>
+                                                    {payment.status}
+                                                </span>
+                                            </div>
                                         </div>
                                     ))
                                 ) : (
                                     <div className="text-slate-600 text-sm text-center py-4 italic">No payment history found.</div>
                                 )}
                             </div>
+
+                            {/* --- PAGINATION CONTROLS --- */}
+                            {student.payments && student.payments.length > 0 && totalPages > 1 && (
+                                <div className="flex items-center justify-between mt-6 px-2">
+                                    <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
+                                        Page {currentPage} of {totalPages}
+                                    </p>
+                                    <div className="flex gap-2">
+                                        <button
+                                            disabled={currentPage === 1}
+                                            onClick={() => handlePageChange(currentPage - 1)}
+                                            className="p-2 bg-slate-900 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <ChevronLeft size={16} />
+                                        </button>
+                                        <button
+                                            disabled={currentPage === totalPages}
+                                            onClick={() => handlePageChange(currentPage + 1)}
+                                            className="p-2 bg-slate-900 border border-white/5 rounded-xl text-slate-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                                        >
+                                            <ChevronRight size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Total Stats */}
                             <div className="mt-8 pt-6 border-t border-slate-800">

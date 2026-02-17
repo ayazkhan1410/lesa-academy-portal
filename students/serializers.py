@@ -166,6 +166,8 @@ class StudentDetailSerializer(serializers.ModelSerializer):
 
 
 class FeePaymentSerializer(serializers.ModelSerializer):
+    screenshot = serializers.ImageField(use_url=True, required=False)
+
     class Meta:
         model = FeePayment
         fields = '__all__'
