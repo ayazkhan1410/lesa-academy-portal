@@ -77,17 +77,23 @@ class StudentListSerializer(serializers.ModelSerializer):
         source='guardian.phone_number', read_only=True
     )
     latest_fee_status = serializers.SerializerMethodField()
+    fees_amount = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
         fields = [
             'id', 'name', 'grade', 'guardian_name',
-            'guardian_phone', 'is_active', 'latest_fee_status'
+            'guardian_phone', 'is_active', 'latest_fee_status',
+            'fees_amount'
         ]
 
     def get_latest_fee_status(self, obj):
         latest_payment = obj.payments.order_by('-date_paid').first()
         return latest_payment.status if latest_payment else 'no_payment'
+
+    def get_fees_amount(self, obj):
+        latest_payments = obj.payments.order_by('-date_paid').first()
+        return latest_payments.amount if latest_payments else 0
 
 
 class GuardianDetailSerializer(serializers.ModelSerializer):
@@ -171,3 +177,20 @@ class FeePaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = FeePayment
         fields = '__all__'
+
+
+class DashboardStatsSerializer(serializers.ModelSerializer):
+    fee_status = serializers.SerializerMethodField()
+    guardian_name = serializers.CharField(
+        source='guardian.name', read_only=True
+    )
+
+    class Meta:
+        model = Student
+        fields = [
+            'id', 'name', 'grade', 'date_joined', "fee_status", "guardian_name"
+        ]
+
+    def get_fee_status(self, obj):
+        latest_payment = obj.payments.order_by('-date_paid').first()
+        return latest_payment.status if latest_payment else 'no_payment'

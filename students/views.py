@@ -4,6 +4,7 @@ from django.db.models import (
     Sum, Q, Case, When, IntegerField, Subquery, OuterRef
 )
 from django.db import transaction
+from django.db import models
 
 from .manager import get_tokens_for_user
 
@@ -26,7 +27,7 @@ from .serializers import (
     CreateStudentSerializer,
     CustomStudentSerializer, StudentListSerializer,
     CreateGuardianSerializer, StudentDetailSerializer,
-    FeePaymentSerializer
+    FeePaymentSerializer, DashboardStatsSerializer
 )
 
 
@@ -1562,3 +1563,38 @@ class ListCreatePaymentAPIView(APIView):
 
         serializer = FeePaymentSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
+
+
+class DashboardStatsAPIView(APIView):
+    def get(self, request):
+        try:
+            students = Student.objects.filter(
+                is_active=True
+            ).order_by('-created_at')[:5]
+            serializer = DashboardStatsSerializer(students, many=True)
+            stats = {
+                'total_students': Student.objects.count(),
+                'total_active_students': Student.objects.filter(
+                    is_active=True
+                ).count(),
+                "pending_fees_amount": FeePayment.objects.filter(
+                    status='pending'
+                ).aggregate(total=models.Sum('amount'))['total'] or 0,
+                "paid_fees_amount": FeePayment.objects.filter(
+                    status='paid'
+                ).aggregate(total=models.Sum('amount'))['total'] or 0,
+                "total_revenue": FeePayment.objects.aggregate(
+                    total=models.Sum('amount')
+                )['total'] or 0,
+            }
+            return Response({
+                "message": "Recent students fetched successfully",
+                "students": serializer.data,
+                "stats": stats
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(traceback.format_exc())
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
