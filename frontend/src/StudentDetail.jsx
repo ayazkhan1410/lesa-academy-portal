@@ -189,7 +189,7 @@ const StudentDetail = () => {
                                                 {/* ✅ NEW: VIEW PROOF BUTTON */}
                                                 {payment.screenshot && (
                                                     <a
-                                                        href={payment.screenshot}
+                                                        href={`http://127.0.0.1:8000${payment.screenshot}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="p-2 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-lg transition-all"
