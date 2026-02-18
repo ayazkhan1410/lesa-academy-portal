@@ -3,9 +3,10 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Users, LayoutDashboard, LogOut, Wallet, AlertCircle,
-  School, ChevronLeft, ChevronRight, Sparkles,
+  ChevronLeft, ChevronRight, Sparkles,
   TrendingUp, UserCheck, Sun, Moon, ArrowUpRight, Loader2
 } from 'lucide-react';
+import academyLogo from './assets/academy_logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import Login from './Login';
@@ -59,12 +60,12 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
           onClick={() => navigate('/')}
           className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 cursor-pointer group`}
         >
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-3 rounded-2xl shadow-lg group-hover:scale-105 transition-transform">
-            <School size={24} className="text-white" />
+          <div className="rounded-2xl shadow-lg group-hover:scale-105 transition-transform overflow-hidden w-12 h-12 shrink-0">
+            <img src={academyLogo} alt="Academy Logo" className="w-full h-full object-cover" />
           </div>
           {!isCollapsed && (
-            <h1 className={`text-sm font-black uppercase group-hover:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              Educational<br />Science Academy
+            <h1 className={`text-[11px] font-black uppercase leading-tight group-hover:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              The Learning &<br />Educational<br />Science Academy
             </h1>
           )}
         </div>

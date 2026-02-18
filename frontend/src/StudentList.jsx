@@ -137,7 +137,7 @@ const StudentList = () => {
       // Header
       doc.setFontSize(18);
       doc.setFont('helvetica', 'bold');
-      doc.text('LESA - Educational Science Academy', 14, 20);
+      doc.text('The Learning & Educational Science Academy, Bahawalnagar', 14, 20);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'normal');
       doc.setTextColor(100);
@@ -204,10 +204,10 @@ const StudentList = () => {
         doc.setFontSize(8);
         doc.setTextColor(150);
         doc.text(`Page ${i} of ${pageCount}`, 196, 290, { align: 'right' });
-        doc.text('LESA Academy • Confidential', 14, 290);
+        doc.text('The Learning & Educational Science Academy • Confidential', 14, 290);
       }
 
-      doc.save(`LESA_Student_Records_${new Date().toISOString().slice(0, 10)}.pdf`);
+      doc.save(`LESA_Academy_Student_Records_${new Date().toISOString().slice(0, 10)}.pdf`);
       toast.success('PDF exported successfully');
     } catch (error) {
       console.error('PDF Export Error:', error);
