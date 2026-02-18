@@ -1,6 +1,8 @@
 import traceback
 
-from django.db.models import Sum, Q
+from django.db.models import (
+    Sum, Q, Case, When, IntegerField, Subquery, OuterRef
+)
 from django.db import transaction
 
 from .manager import get_tokens_for_user
@@ -206,10 +208,16 @@ class ListCreateStudentAPIView(APIView):
     )
     def get(self, request):
         try:
-            # Base queryset with optimizations
+            # Get the latest payment status using Subquery
+            latest_payment_status = FeePayment.objects.filter(
+                student=OuterRef('pk')
+            ).order_by('-date_paid').values('status')[:1]
+
             queryset = Student.objects.select_related(
                 'guardian'
-            ).prefetch_related('payments').order_by('-id')
+            ).prefetch_related('payments').annotate(
+                latest_status=Subquery(latest_payment_status)
+            )
 
             # Filtering
             grade = request.query_params.get('grade')
@@ -222,15 +230,6 @@ class ListCreateStudentAPIView(APIView):
                 is_active_bool = is_active.lower() == 'true'
                 queryset = queryset.filter(is_active=is_active_bool)
 
-            # Sorting
-            ordering = request.query_params.get('ordering', '-date_joined')
-            allowed_orderings = [
-                'name', '-name', 'grade', '-grade',
-                'date_joined', '-date_joined'
-            ]
-            if ordering in allowed_orderings:
-                queryset = queryset.order_by(ordering)
-
             # Search
             search = request.query_params.get('search')
             if search:
@@ -239,6 +238,26 @@ class ListCreateStudentAPIView(APIView):
                     Q(guardian__name__icontains=search) |
                     Q(guardian__phone_number__icontains=search)
                 )
+
+            # Sorting - only apply custom ordering if explicitly requested
+            ordering = request.query_params.get('ordering')
+            if ordering:
+                allowed_orderings = [
+                    'name', '-name', 'grade', '-grade',
+                    'date_joined', '-date_joined'
+                ]
+                if ordering in allowed_orderings:
+                    queryset = queryset.order_by(ordering)
+            else:
+                # Default: Order by payment status (pending first), then by ID
+                queryset = queryset.annotate(
+                    pending_priority=Case(
+                        When(latest_status='pending', then=0),
+                        When(latest_status='paid', then=1),
+                        default=2,
+                        output_field=IntegerField(),
+                    )
+                ).order_by('pending_priority', '-id')
 
             # Pagination
             paginator = StudentPagination()
@@ -1388,12 +1407,9 @@ class ListCreatePaymentAPIView(APIView):
             http_status = status.HTTP_201_CREATED
 
         if serializer.is_valid():
-            payment = serializer.save()
-
+            serializer.save()
             try:
-                student = Student.objects.get(id=student_id)
-                student.latest_fee_status = payment.status
-                student.save()
+                Student.objects.get(id=student_id)
             except Student.DoesNotExist:
                 return Response({
                     "error": "Student not found"
