@@ -6,12 +6,13 @@ import autoTable from 'jspdf-autotable';
 import {
   Search, FileDown, Filter, Edit, Trash2,
   ChevronLeft, ChevronRight, Loader2, Users,
-  Sun, Moon, ArrowUpRight
+  Sun, Moon, ArrowUpRight, MessageSquare
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import DeleteModal from './DeleteModal';
 import StudentModal from './StudentModal';
+import MessageModal from './MessageModal';
 import { Sidebar } from './Dashboard';
 
 const GRADE_OPTIONS = ['All', 'Nursery', 'Prep', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
@@ -46,6 +47,29 @@ const StudentList = () => {
   const [studentToDelete, setStudentToDelete] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+
+  // Messaging
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
+  const [messageMode, setMessageMode] = useState('selected'); // 'selected' or 'all'
+
+  const toggleStudentSelection = (student) => {
+    setSelectedStudents(prev => {
+      const exists = prev.find(s => s.id === student.id);
+      if (exists) return prev.filter(s => s.id !== student.id);
+      return [...prev, student];
+    });
+  };
+
+  const isAllSelected = students.length > 0 && students.every(s => selectedStudents.find(sel => sel.id === s.id));
+  const toggleSelectAll = () => {
+    if (isAllSelected) {
+      setSelectedStudents(prev => prev.filter(sel => !students.find(s => s.id === sel.id)));
+    } else {
+      const newSelections = students.filter(s => !selectedStudents.find(sel => sel.id === s.id));
+      setSelectedStudents(prev => [...prev, ...newSelections]);
+    }
+  };
 
   const fetchStudents = useCallback(async () => {
     setLoading(true);
@@ -302,6 +326,37 @@ const StudentList = () => {
                 {exporting ? <Loader2 size={16} className="animate-spin" /> : <FileDown size={16} />}
                 {exporting ? 'Exporting...' : 'Export PDF'}
               </motion.button>
+
+              {/* Message Buttons */}
+              {selectedStudents.length > 0 && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.02, translateY: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => { setMessageMode('selected'); setIsMessageModalOpen(true); }}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all border ${isDark
+                      ? 'bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600 hover:text-white hover:border-blue-500'
+                      : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-500'
+                    }`}
+                >
+                  <MessageSquare size={16} />
+                  Message ({selectedStudents.length})
+                </motion.button>
+              )}
+
+              <motion.button
+                whileHover={{ scale: 1.02, translateY: -2 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => { setMessageMode('all'); setIsMessageModalOpen(true); }}
+                className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all border ${isDark
+                    ? 'bg-amber-600/10 text-amber-400 border-amber-500/20 hover:bg-amber-600 hover:text-white hover:border-amber-500'
+                    : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-600 hover:text-white hover:border-amber-500'
+                  }`}
+              >
+                <Users size={16} />
+                Message All
+              </motion.button>
             </div>
           </header>
 
@@ -377,7 +432,15 @@ const StudentList = () => {
               <table className="w-full text-left">
                 <thead>
                   <tr className={`text-[10px] uppercase tracking-[0.15em] font-black ${isDark ? 'text-slate-500 bg-slate-950/40' : 'text-slate-400 bg-slate-50'}`}>
-                    <th className="py-5 px-6">ID</th>
+                    <th className="py-5 px-4 w-12">
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={toggleSelectAll}
+                        className="w-4 h-4 rounded border-slate-600 bg-transparent accent-blue-600 cursor-pointer"
+                      />
+                    </th>
+                    <th className="py-5 px-4">ID</th>
                     <th className="py-5 px-4">Student</th>
                     <th className="py-5 px-4">Guardian</th>
                     <th className="py-5 px-4 text-center">Grade</th>
@@ -389,13 +452,13 @@ const StudentList = () => {
                 <tbody>
                   {loading ? (
                     <tr>
-                      <td colSpan="6" className="py-24 text-center">
+                      <td colSpan="8" className="py-24 text-center">
                         <Loader2 className="animate-spin mx-auto text-blue-500" size={36} />
                       </td>
                     </tr>
                   ) : students.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className={`py-24 text-center text-sm font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                      <td colSpan="8" className={`py-24 text-center text-sm font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
                         No students found
                       </td>
                     </tr>
@@ -414,7 +477,15 @@ const StudentList = () => {
                             } ${isDark ? 'border-b border-white/5' : 'border-b border-slate-100'}`}
                           onClick={() => navigate(`/students/${s.id}`)}
                         >
-                          <td className="py-4 px-6">
+                          <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              checked={!!selectedStudents.find(sel => sel.id === s.id)}
+                              onChange={() => toggleStudentSelection(s)}
+                              className="w-4 h-4 rounded border-slate-600 bg-transparent accent-blue-600 cursor-pointer"
+                            />
+                          </td>
+                          <td className="py-4 px-4">
                             <span className="font-mono text-[10px] text-blue-500 font-bold">#{s.id}</span>
                           </td>
                           <td className="py-4 px-4">
@@ -528,6 +599,11 @@ const StudentList = () => {
 
         <DeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={executeDelete} studentName={studentToDelete?.name} />
         <StudentModal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingStudent(null); }} studentToEdit={editingStudent} onSuccess={() => fetchStudents()} />
+        <MessageModal
+          isOpen={isMessageModalOpen}
+          onClose={() => { setIsMessageModalOpen(false); }}
+          students={messageMode === 'all' ? students : selectedStudents}
+        />
       </main>
     </div>
   );

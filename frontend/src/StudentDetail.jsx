@@ -4,10 +4,11 @@ import axios from 'axios';
 import {
     ArrowLeft, User, Phone, MapPin, CreditCard, Calendar,
     Hash, FileText, LayoutDashboard, Users, Edit2, Image as ImageIcon,
-    ChevronLeft, ChevronRight
+    ChevronLeft, ChevronRight, MessageSquare
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import PaymentModal from './PaymentModal';
+import MessageModal from './MessageModal';
 
 const StudentDetail = () => {
     const { id } = useParams();
@@ -17,6 +18,7 @@ const StudentDetail = () => {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
 
     // Refactored fetch function with pagination support
     const fetchStudent = async (page = 1) => {
@@ -118,9 +120,17 @@ const StudentDetail = () => {
 
                         {/* Section 2: Guardian Details */}
                         <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="bg-slate-900 border border-slate-800 rounded-3xl p-8">
-                            <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-                                <User className="text-indigo-500" size={20} />
-                                <h3 className="text-lg font-bold text-white">Guardian / Father Details</h3>
+                            <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                                <div className="flex items-center gap-3">
+                                    <User className="text-indigo-500" size={20} />
+                                    <h3 className="text-lg font-bold text-white">Guardian / Father Details</h3>
+                                </div>
+                                <button
+                                    onClick={() => setIsMessageModalOpen(true)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl transition-all text-xs font-bold uppercase tracking-wider border border-blue-500/20 hover:border-blue-600"
+                                >
+                                    <MessageSquare size={14} /> Send Message
+                                </button>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                                 <InfoField label="Father Name" value={student.guardian?.name || student.guardian_name} />
@@ -264,6 +274,18 @@ const StudentDetail = () => {
                         // Reload the page to see the green status immediately
                         window.location.reload();
                     }}
+                />
+
+                {/* Message Modal */}
+                <MessageModal
+                    isOpen={isMessageModalOpen}
+                    onClose={() => setIsMessageModalOpen(false)}
+                    students={student ? [{
+                        id: student.id,
+                        name: student.name,
+                        guardian_name: student.guardian?.name || student.guardian_name,
+                        guardian_phone: student.guardian?.phone_number || student.guardian_phone
+                    }] : []}
                 />
 
             </div>

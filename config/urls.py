@@ -16,7 +16,8 @@ from students.views import (
     GuardianDetailAPIView,
     StudentDetailAPIView,
     ListCreatePaymentAPIView,
-    DashboardStatsAPIView
+    DashboardStatsAPIView,
+    SendMessageAPIView
 )
 
 
@@ -50,7 +51,7 @@ urlpatterns = [
     path('api/bulk-enroll-students', BulkEnrollStudentAPIView.as_view()),
     path('api/payments/', ListCreatePaymentAPIView.as_view()),
     path("api/dashboard-stats", DashboardStatsAPIView.as_view()),
-
+    path("api/send-message/", SendMessageAPIView.as_view()),
 ]
 
 if settings.DEBUG:

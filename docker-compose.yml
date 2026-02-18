@@ -10,20 +10,46 @@ services:
     ports:
       - "5432:5432"
 
+  redis:
+    image: redis:8.6-alpine
+    ports:
+      - "6379:6379"
+
   backend:
     build: .
     volumes:
       - .:/app
     ports:
       - "8000:8000"
-    environment:
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
+    env_file:
+      - .env
     depends_on:
       - db
+      - redis
+
+  celery_worker:
+    build: .
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - db
+      - redis
+    command: celery -A config.celery_app worker --loglevel=info
+
+  flower:
+    build: .
+    volumes:
+      - .:/app
+    ports:
+      - "5555:5555"
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - celery_worker
+    command: celery -A config.celery_app flower --port=5555
 
   frontend:
     build: ./frontend

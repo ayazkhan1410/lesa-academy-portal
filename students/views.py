@@ -1598,3 +1598,25 @@ class DashboardStatsAPIView(APIView):
                 {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class SendMessageAPIView(APIView):
+    def post(self, request):
+        try:
+            data = request.data
+            student_ids = data.get("student_ids", [])
+
+            if student_ids:
+                students = Student.objects.filter(
+                    is_active=True, id=student_ids
+                )
+                for student in students:
+                    print("STUDENT ====", student)
+
+        except Exception as e:
+            traceback.print_exc()
+            print("ERROR WHILE SENDING MESSAGE ===", str(e))
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
