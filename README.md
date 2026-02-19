@@ -53,7 +53,6 @@ Follow these steps to set up the project locally.
 
 ```bash
 git clone https://github.com/ayazkhan1410/lesa-academy-portal.git
-cd lesa-academy-portal
 ```
 
 ### 2. Backend Setup
