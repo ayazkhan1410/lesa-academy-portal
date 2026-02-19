@@ -107,6 +107,27 @@ const StudentList = () => {
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
+  // Calculate Summary Stats for Search Results
+  const searchSummary = (() => {
+    if (!searchTerm || loading) return null;
+
+    const summary = {
+      totalPending: 0,
+      totalReceived: 0,
+      totalRevenue: 0,
+      count: students.length
+    };
+
+    students.forEach(student => {
+      const amount = parseFloat(student.fees_amount) || 0;
+      if (student.latest_fee_status === 'pending') summary.totalPending += amount;
+      else if (student.latest_fee_status === 'paid') summary.totalReceived += amount;
+      summary.totalRevenue += amount;
+    });
+
+    return summary;
+  })();
+
   // Delete handlers
   const confirmDelete = (student) => {
     setStudentToDelete(student);
@@ -336,8 +357,8 @@ const StudentList = () => {
                   whileTap={{ scale: 0.98 }}
                   onClick={() => { setMessageMode('selected'); setIsMessageModalOpen(true); }}
                   className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all border ${isDark
-                      ? 'bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600 hover:text-white hover:border-blue-500'
-                      : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-500'
+                    ? 'bg-blue-600/10 text-blue-400 border-blue-500/20 hover:bg-blue-600 hover:text-white hover:border-blue-500'
+                    : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-600 hover:text-white hover:border-blue-500'
                     }`}
                 >
                   <MessageSquare size={16} />
@@ -350,8 +371,8 @@ const StudentList = () => {
                 whileTap={{ scale: 0.98 }}
                 onClick={() => { setMessageMode('all'); setIsMessageModalOpen(true); }}
                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-black uppercase text-[10px] tracking-widest transition-all border ${isDark
-                    ? 'bg-amber-600/10 text-amber-400 border-amber-500/20 hover:bg-amber-600 hover:text-white hover:border-amber-500'
-                    : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-600 hover:text-white hover:border-amber-500'
+                  ? 'bg-amber-600/10 text-amber-400 border-amber-500/20 hover:bg-amber-600 hover:text-white hover:border-amber-500'
+                  : 'bg-amber-50 text-amber-600 border-amber-200 hover:bg-amber-600 hover:text-white hover:border-amber-500'
                   }`}
               >
                 <Users size={16} />
@@ -542,6 +563,61 @@ const StudentList = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Summary Section (Only when searching) */}
+            <AnimatePresence>
+              {searchTerm && searchSummary && students.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 20 }}
+                  className={`mt-6 p-6 rounded-2xl border ${isDark ? 'bg-slate-900/50 border-white/10' : 'bg-white border-slate-200'} shadow-xl overflow-hidden relative`}
+                >
+                  <div className={`absolute inset-0 opacity-10 ${isDark ? 'bg-blue-500/10' : 'bg-blue-500/5'}`} />
+                  <div className="relative z-10">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="p-2 bg-blue-500/10 rounded-lg">
+                        <Search size={20} className="text-blue-500" />
+                      </div>
+                      <div>
+                        <h3 className={`font-black uppercase tracking-wider text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                          Search Summary
+                        </h3>
+                        <p className="text-[10px] text-slate-500 font-bold">
+                          Analysis for "{searchTerm}" ({searchSummary.count} records)
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {/* Pending */}
+                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Total Pending</p>
+                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                          Rs. {searchSummary.totalPending.toLocaleString()}
+                        </p>
+                      </div>
+
+                      {/* Received */}
+                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Total Received</p>
+                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                          Rs. {searchSummary.totalReceived.toLocaleString()}
+                        </p>
+                      </div>
+
+                      {/* Total */}
+                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1">Total Amount</p>
+                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                          Rs. {searchSummary.totalRevenue.toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* Pagination */}
             <div className={`p-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${isDark ? 'border-white/5 bg-slate-950/30' : 'border-slate-100 bg-slate-50/50'}`}>

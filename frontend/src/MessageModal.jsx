@@ -216,7 +216,7 @@ const MessageModal = ({ isOpen, onClose, students = [], onSuccess }) => {
                                 {sending ? (
                                     <><Loader2 size={14} className="animate-spin" /> Sending...</>
                                 ) : (
-                                    <><Send size={14} /> {sendToAll ? 'Broadcast' : 'Send Message'}</>
+                                    <><Send size={14} /> Send Message</>
                                 )}
                             </button>
                         </div>

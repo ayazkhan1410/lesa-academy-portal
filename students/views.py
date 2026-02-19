@@ -242,7 +242,8 @@ class ListCreateStudentAPIView(APIView):
                 queryset = queryset.filter(
                     Q(name__icontains=search) |
                     Q(guardian__name__icontains=search) |
-                    Q(guardian__phone_number__icontains=search)
+                    Q(guardian__phone_number__icontains=search) |
+                    Q(guardian__cnic__icontains=search)
                 )
 
             # Sorting - only apply custom ordering if explicitly requested
