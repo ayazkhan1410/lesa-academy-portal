@@ -6,7 +6,7 @@ import autoTable from 'jspdf-autotable';
 import {
   Search, FileDown, Filter, Edit, Trash2,
   ChevronLeft, ChevronRight, Loader2, Users,
-  Sun, Moon, ArrowUpRight, MessageSquare
+  Sun, Moon, ArrowUpRight, MessageSquare, Check
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
@@ -14,6 +14,18 @@ import DeleteModal from './DeleteModal';
 import StudentModal from './StudentModal';
 import MessageModal from './MessageModal';
 import { Sidebar } from './Dashboard';
+
+const CustomCheckbox = ({ checked, onChange, isDark }) => (
+  <div
+    onClick={(e) => { e.stopPropagation(); onChange(); }}
+    className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all duration-200 ${checked
+        ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/30'
+        : `bg-transparent ${isDark ? 'border-slate-700 hover:border-slate-500' : 'border-slate-300 hover:border-slate-400'}`
+      }`}
+  >
+    {checked && <Check size={12} className="text-white" strokeWidth={4} />}
+  </div>
+);
 
 const GRADE_OPTIONS = ['All', 'Nursery', 'Prep', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'];
 
@@ -454,12 +466,7 @@ const StudentList = () => {
                 <thead>
                   <tr className={`text-[10px] uppercase tracking-[0.15em] font-black ${isDark ? 'text-slate-500 bg-slate-950/40' : 'text-slate-400 bg-slate-50'}`}>
                     <th className="py-5 px-4 w-12">
-                      <input
-                        type="checkbox"
-                        checked={isAllSelected}
-                        onChange={toggleSelectAll}
-                        className="w-4 h-4 rounded border-slate-600 bg-transparent accent-blue-600 cursor-pointer"
-                      />
+                      <CustomCheckbox checked={isAllSelected} onChange={toggleSelectAll} isDark={isDark} />
                     </th>
                     <th className="py-5 px-4">ID</th>
                     <th className="py-5 px-4">Student</th>
@@ -499,11 +506,10 @@ const StudentList = () => {
                           onClick={() => navigate(`/students/${s.id}`)}
                         >
                           <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
-                            <input
-                              type="checkbox"
+                            <CustomCheckbox
                               checked={!!selectedStudents.find(sel => sel.id === s.id)}
                               onChange={() => toggleStudentSelection(s)}
-                              className="w-4 h-4 rounded border-slate-600 bg-transparent accent-blue-600 cursor-pointer"
+                              isDark={isDark}
                             />
                           </td>
                           <td className="py-4 px-4">
