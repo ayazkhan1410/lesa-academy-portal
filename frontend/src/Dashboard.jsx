@@ -4,7 +4,8 @@ import axios from 'axios';
 import {
   Users, LayoutDashboard, LogOut, Wallet, AlertCircle,
   ChevronLeft, ChevronRight, Sparkles,
-  TrendingUp, UserCheck, Sun, Moon, ArrowUpRight, Loader2
+  TrendingUp, UserCheck, Sun, Moon, ArrowUpRight, Loader2,
+  Eye, EyeOff
 } from 'lucide-react';
 import academyLogo from './assets/academy_logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,7 +27,8 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
 
   const [isCollapsed, setIsCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
-    return saved === 'true';
+    // Default to 'true' (collapsed) if no value is found, otherwise respect user choice
+    return saved !== 'false';
   });
 
   const isActive = (path) => location.pathname === path;
@@ -120,7 +122,7 @@ const AnimatedNumber = ({ value, prefix = '', isDark }) => {
 };
 
 // --- STAT CARD ---
-const StatCard = ({ title, value, prefix = '', icon, gradient, delay, isDark }) => (
+const StatCard = ({ title, value, prefix = '', icon, gradient, delay, isDark, isSensitive, isVisible, onToggleVisibility }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
@@ -131,12 +133,29 @@ const StatCard = ({ title, value, prefix = '', icon, gradient, delay, isDark }) 
     {/* Background glow */}
     <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity ${gradient}`} />
 
-    <div className="relative z-10">
-      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 ${gradient} shadow-lg`}>
-        {React.cloneElement(icon, { size: 22, className: 'text-white' })}
+    <div className="relative z-10 w-full">
+      <div className="flex justify-between items-start mb-4">
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${gradient} shadow-lg`}>
+          {React.cloneElement(icon, { size: 22, className: 'text-white' })}
+        </div>
+        {/* Toggle Button for Sensitive Stats */}
+        {onToggleVisibility && (
+          <button
+            onClick={(e) => { e.stopPropagation(); onToggleVisibility(); }}
+            className={`p-2 rounded-xl transition-all ${isDark ? 'hover:bg-white/10 text-slate-400 hover:text-white' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-600'}`}
+          >
+            {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
       </div>
       <p className={`text-[10px] font-black uppercase tracking-[0.2em] mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{title}</p>
-      <AnimatedNumber value={value} prefix={prefix} isDark={isDark} />
+      {isSensitive && !isVisible ? (
+        <div className={`h-8 flex items-center text-2xl font-black tracking-widest ${isDark ? 'text-slate-600' : 'text-slate-300'}`}>
+          ••••••••
+        </div>
+      ) : (
+        <AnimatedNumber value={value} prefix={prefix} isDark={isDark} />
+      )}
     </div>
   </motion.div>
 );
@@ -164,6 +183,10 @@ const Dashboard = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+
+  // Privacy State for Finance
+  const [showPendingFees, setShowPendingFees] = useState(false);
+  const [showTotalRevenue, setShowTotalRevenue] = useState(false);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -311,6 +334,9 @@ const Dashboard = () => {
                   gradient="bg-gradient-to-br from-amber-500 to-orange-600"
                   delay={0.3}
                   isDark={isDark}
+                  isSensitive={true}
+                  isVisible={showPendingFees}
+                  onToggleVisibility={() => setShowPendingFees(!showPendingFees)}
                 />
                 <StatCard
                   title="Total Revenue"
@@ -320,6 +346,9 @@ const Dashboard = () => {
                   gradient="bg-gradient-to-br from-violet-500 to-purple-700"
                   delay={0.4}
                   isDark={isDark}
+                  isSensitive={true}
+                  isVisible={showTotalRevenue}
+                  onToggleVisibility={() => setShowTotalRevenue(!showTotalRevenue)}
                 />
               </div>
 
