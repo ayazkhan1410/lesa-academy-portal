@@ -57,7 +57,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
 
-      <div className="p-6">
+      <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
         <div
           onClick={() => navigate('/')}
           className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 cursor-pointer group`}
@@ -78,7 +78,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         <NavItem icon={<Users size={20} />} label="Student Detail Page" collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
       </nav>
 
-      <div className="p-6">
+      <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
         <button onClick={handleLogout} className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 px-4 py-3 rounded-2xl hover:bg-rose-500/10 hover:text-rose-400 transition-all font-bold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
           <LogOut size={20} /> {!isCollapsed && "Sign Out"}
         </button>
