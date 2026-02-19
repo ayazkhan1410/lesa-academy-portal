@@ -6,7 +6,6 @@ from django.db.models import (
 from django.db import transaction
 from django.db import models
 
-from .manager import get_tokens_for_user
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -14,14 +13,20 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import (
+    extend_schema, OpenApiParameter,
+    OpenApiResponse, OpenApiExample
+)
 from drf_spectacular.types import OpenApiTypes
+
 
 from .models import (
     CustomUser, Student,
     Guardian, FeePayment
 )
 
+from .manager import get_tokens_for_user
+from .tasks import send_message
 
 from .serializers import (
     CreateStudentSerializer,
@@ -1601,22 +1606,83 @@ class DashboardStatsAPIView(APIView):
 
 
 class SendMessageAPIView(APIView):
+    @extend_schema(
+        summary="Send Message to Selected Students",
+        description=(
+            "This endpoint sends a message to multiple active students "
+            "in the background using Celery. "
+            "Only students with is_active=True will receive the message."
+        ),
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "student_ids": {
+                        "type": "array",
+                        "items": {"type": "integer"},
+                        "example": [1, 2, 3]
+                    },
+                    "message": {
+                        "type": "string",
+                        "example": "Dear parents, tomorrow is a holiday."
+                    },
+                },
+                "required": ["student_ids", "message"],
+            }
+        },
+        responses={
+            200: OpenApiResponse(
+                response=OpenApiTypes.OBJECT,
+                description="Messages are being sent in background"
+            ),
+            400: OpenApiResponse(
+                description="Invalid request data"
+            ),
+            500: OpenApiResponse(
+                description="Internal server error"
+            ),
+        },
+        examples=[
+            OpenApiExample(
+                "Send message example",
+                value={
+                    "student_ids": [1, 2, 3],
+                    "message": "Dear parents, tomorrow is a holiday."
+                },
+                request_only=True,
+            )
+        ]
+    )
     def post(self, request):
         try:
             data = request.data
             student_ids = data.get("student_ids", [])
+            message = data.get("message", "")
 
             if student_ids:
                 students = Student.objects.filter(
-                    is_active=True, id=student_ids
-                )
-                for student in students:
-                    print("STUDENT ====", student)
+                    is_active=True,
+                    id__in=student_ids
+                ).select_related('guardian').distinct("guardian")
+            else:
+                students = Student.objects.filter(
+                    is_active=True
+                ).select_related('guardian').distinct("guardian")
 
-        except Exception as e:
-            traceback.print_exc()
-            print("ERROR WHILE SENDING MESSAGE ===", str(e))
+            for student in students:
+                if student.guardian and student.guardian.phone_number:
+                    phone_number = str(student.guardian.phone_number)
+                    send_message.delay(phone_number, message)
+
             return Response(
-                {'error': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                {
+                    "message": (
+                        f"Queued {students.count()} SMS messages to be sent "
+                    )
+                },
+                status=status.HTTP_200_OK
             )
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

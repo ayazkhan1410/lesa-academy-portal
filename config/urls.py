@@ -17,7 +17,7 @@ from students.views import (
     StudentDetailAPIView,
     ListCreatePaymentAPIView,
     DashboardStatsAPIView,
-    SendMessageAPIView
+    SendMessageAPIView,
 )
 
 
