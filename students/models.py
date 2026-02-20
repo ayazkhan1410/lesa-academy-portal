@@ -1,5 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
+
 from .manager import MyUserManager
 
 
@@ -86,6 +90,9 @@ class Student(models.Model):
     )
     date_joined = models.DateField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    total_tests_conducted = models.IntegerField(
+        null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -178,3 +185,49 @@ class Expense(models.Model):
     description = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class StudentTestRecords(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE,
+        related_name='test_records',
+        null=True, blank=True
+    )
+    test_date = models.DateField(null=True, blank=True)
+    test_name = models.CharField(
+        max_length=100, null=True, blank=True
+    )
+    subject = models.CharField(
+        max_length=100, null=True, blank=True
+    )
+    total_marks = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    obtained_marks = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    percentage = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    remarks = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.total_marks and self.obtained_marks is not None:
+            self.percentage = (self.obtained_marks / self.total_marks) * 100
+        else:
+            self.percentage = None
+        super().save(*args, **kwargs)
+
+
+@receiver(post_delete, sender=StudentTestRecords)
+def update_student_total_tests(sender, instance, **kwargs):
+    student = instance.student
+
+    if (
+        student and student.total_tests_conducted is not None and
+        student.total_tests_conducted > 0
+    ):
+        student.total_tests_conducted -= 1
+        student.save(update_fields=['total_tests_conducted'])

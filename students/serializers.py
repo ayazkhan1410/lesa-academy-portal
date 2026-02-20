@@ -5,7 +5,7 @@ from django.db import transaction, models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Student, Guardian, FeePayment, Expense
+from .models import Student, Guardian, FeePayment, Expense, StudentTestRecords
 
 
 class Base64ImageField(serializers.ImageField):
@@ -237,4 +237,23 @@ class ReadExpenseSerializer(serializers.ModelSerializer):
 class CreateExpenseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Expense
+        fields = '__all__'
+
+
+class TestRecordInputSerializer(serializers.Serializer):
+    test_date = serializers.DateField()
+    test_name = serializers.CharField()
+    subject = serializers.CharField()
+    obtained_marks = serializers.FloatField()
+    total_marks = serializers.FloatField()
+    remarks = serializers.CharField(required=False, allow_blank=True)
+
+
+class BulkTestRecordsSerializer(serializers.Serializer):
+    records = TestRecordInputSerializer(many=True)
+
+
+class ReadTestRecordsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentTestRecords
         fields = '__all__'

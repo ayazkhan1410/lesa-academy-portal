@@ -21,6 +21,8 @@ from students.views import (
     ListCreateExpenseAPIView,
     ExpenseDetailAPIView,
     MonthlyFinanceSummaryAPIView,
+    BulkTestRecordsAPIView,
+    StudentAcademicSummaryAPIView,
 )
 
 
@@ -60,6 +62,14 @@ urlpatterns = [
     path(
         'api/finances/monthly-summary/',
         MonthlyFinanceSummaryAPIView.as_view()
+    ),
+    path(
+        'api/students/<int:student_id>/test-records-bulk/',
+        BulkTestRecordsAPIView.as_view()
+    ),
+    path(
+        'api/students/<int:student_id>/academic-summary/',
+        StudentAcademicSummaryAPIView.as_view()
     ),
 ]
 

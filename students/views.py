@@ -8,9 +8,9 @@ from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import (
-    Sum, Q, Case, When, IntegerField, Subquery, OuterRef
+    Sum, Q, Case, When, IntegerField, Subquery, OuterRef, Avg, F, Window
 )
-
+from django.db.models.functions import DenseRank
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -27,7 +27,7 @@ from drf_spectacular.types import OpenApiTypes
 
 from .models import (
     CustomUser, Student,
-    Guardian, FeePayment, Expense
+    Guardian, FeePayment, Expense, StudentTestRecords
 )
 
 from .manager import get_tokens_for_user
@@ -39,7 +39,8 @@ from .serializers import (
     CreateGuardianSerializer, StudentDetailSerializer,
     FeePaymentSerializer, DashboardStatsSerializer,
     GuardianDetailSerializer, ReadExpenseSerializer,
-    CreateExpenseSerializer
+    CreateExpenseSerializer, BulkTestRecordsSerializer,
+    ReadTestRecordsSerializer
 )
 
 
@@ -2003,6 +2004,114 @@ class MonthlyFinanceSummaryAPIView(APIView):
                 "total_expenses": total_expenses,
                 "net_profit": total_revenue - total_expenses,
                 "expense_by_category": expense_by_category,
+            })
+
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BulkTestRecordsAPIView(APIView):
+    @extend_schema(
+        request=BulkTestRecordsSerializer,
+        responses={200: None},
+        summary="Create multiple test records for a student in bulk"
+    )
+    def post(self, request, student_id):
+        student = get_object_or_404(Student, id=student_id)
+
+        serializer = BulkTestRecordsSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(
+                {"error": serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        records_data = serializer.validated_data['records']
+        bulk_to_create = []
+        for record in records_data:
+            obtained_marks = record.get('obtained_marks')
+            total_marks = record.get('total_marks')
+
+            if obtained_marks and total_marks:
+                percentage = (obtained_marks / total_marks) * 100
+                record['percentage'] = percentage
+
+            bulk_to_create.append(
+                StudentTestRecords(
+                    student=student,
+                    **record
+                )
+            )
+
+        created_records = StudentTestRecords.objects.bulk_create(
+            bulk_to_create
+        )
+
+        current_total = student.total_tests_conducted or 0
+        student.total_tests_conducted = current_total + len(created_records)
+        student.save()
+
+        return Response({
+            "message": "Test records created successfully",
+            "student": student.id,
+            "count": len(created_records)
+        }, status=status.HTTP_200_OK)
+
+
+class StudentAcademicSummaryAPIView(APIView):
+    def get(self, request, student_id):
+        try:
+            student = Student.objects.get(id=student_id)
+
+            test_records = StudentTestRecords.objects.filter(
+                student_id=student_id
+            )
+            serializer = ReadTestRecordsSerializer(test_records, many=True)
+
+            ranked_students = Student.objects.filter(
+                grade=student.grade
+            ).annotate(
+                total_obtained=Sum('test_records__obtained_marks')
+            ).annotate(
+                position=Window(
+                    expression=DenseRank(),
+                    order_by=F('total_obtained').desc(nulls_last=True)
+                )
+            )
+            my_position = None
+            for s in ranked_students:
+                if s.id == student.id:
+                    my_position = s.position
+                    break
+
+            summary = {
+                'student_id': student_id,
+                'student_name': student.name,
+                'total_students_in_class': Student.objects.filter(
+                    grade=student.grade
+                ).count(),
+                'total_obtained_marks': test_records.aggregate(
+                    Sum('obtained_marks')
+                )['obtained_marks__sum'] or 0,
+                'total_marks': test_records.aggregate(
+                    Sum('total_marks')
+                )['total_marks__sum'] or 0,
+                'average_percentage': test_records.aggregate(
+                    Avg('percentage')
+                )['percentage__avg'] or 0,
+                'total_tests_conducted': Student.objects.get(
+                    id=student_id
+                ).total_tests_conducted,
+                "class_position": my_position,
+            }
+            return Response({
+                'message': 'Test records fetched successfully',
+                'test_records': serializer.data,
+                'summary': summary
             })
 
         except Exception as e:

@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     CustomUser, Guardian, Student,
     FeePayment, Teacher, SalaryPayment,
-    Expense
+    Expense, StudentTestRecords
 )
 
 
@@ -30,7 +30,7 @@ class StudentAdmin(admin.ModelAdmin):
     list_display = (
         'id', 'name', 'age', 'grade', 'student_image',
         'guardian', 'date_joined',
-        'is_active', 'created_at'
+        'is_active', 'total_tests_conducted', 'created_at'
     )
     list_filter = ('grade', 'is_active', 'date_joined')
     search_fields = ('name', 'guardian__name')
@@ -107,3 +107,21 @@ class ExpenseAdmin(admin.ModelAdmin):
             "fields": ("created_at", "updated_at")
         }),
     )
+
+
+@admin.register(StudentTestRecords)
+class StudentTestRecordsAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'student',
+        'test_name',
+        'subject',
+        'test_date',
+        'total_marks',
+        'obtained_marks',
+        'percentage',
+    )
+
+    list_filter = ('subject', 'test_date', 'student')
+    search_fields = ('student__name', 'test_name', 'subject', 'remarks')
+    readonly_fields = ('percentage', 'created_at', 'updated_at')
