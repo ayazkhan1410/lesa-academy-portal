@@ -1800,7 +1800,7 @@ class ListCreateExpenseAPIView(APIView):
     def get(self, request):
         try:
             expenses = Expense.objects.all()
-            print(expenses)
+
             # Search
             search_query = request.query_params.get('search', '')
             if search_query:
