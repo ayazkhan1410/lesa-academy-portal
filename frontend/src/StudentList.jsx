@@ -455,232 +455,238 @@ const StudentList = () => {
           </motion.div>
 
           {/* Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className={`rounded-[2rem] border overflow-hidden transition-colors duration-500 ${isDark ? 'bg-slate-900/40 backdrop-blur-xl border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-lg shadow-slate-200/50'}`}
-          >
-            <div className="overflow-x-auto">
-              <table className="w-full text-left">
-                <thead>
-                  <tr className={`text-[10px] uppercase tracking-[0.15em] font-black ${isDark ? 'text-slate-500 bg-slate-950/40' : 'text-slate-400 bg-slate-50'}`}>
-                    <th className="py-5 px-4 w-12">
-                      <CustomCheckbox checked={isAllSelected} onChange={toggleSelectAll} isDark={isDark} />
-                    </th>
-                    <th className="py-5 px-4">ID</th>
-                    <th className="py-5 px-4">Student</th>
-                    <th className="py-5 px-4">Guardian</th>
-                    <th className="py-5 px-4 text-center">Grade</th>
-                    <th className="py-5 px-4 text-right">Fee Amount</th>
-                    <th className="py-5 px-4 text-center">Fee Status</th>
-                    <th className="py-5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {loading ? (
-                    <tr>
-                      <td colSpan="8" className="py-24 text-center">
-                        <Loader2 className="animate-spin mx-auto text-blue-500" size={36} />
-                      </td>
+          <div className="relative group">
+            {/* Bottom Lighting Effect */}
+            <div className={`absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-12 transition-opacity duration-1000 ${isDark ? 'bg-blue-600/20' : 'bg-blue-400/10'} blur-[60px] pointer-events-none`} />
+            <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-blue-500/50 to-transparent blur-[1px] z-10" />
+
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className={`relative z-0 rounded-[2rem] border overflow-hidden transition-colors duration-500 ${isDark ? 'bg-slate-900/40 backdrop-blur-xl border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-lg shadow-slate-200/50'}`}
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className={`text-[10px] uppercase tracking-[0.15em] font-black ${isDark ? 'text-slate-500 bg-slate-950/40' : 'text-slate-400 bg-slate-50'}`}>
+                      <th className="py-5 px-4 w-12">
+                        <CustomCheckbox checked={isAllSelected} onChange={toggleSelectAll} isDark={isDark} />
+                      </th>
+                      <th className="py-5 px-4">ID</th>
+                      <th className="py-5 px-4">Student</th>
+                      <th className="py-5 px-4">Guardian</th>
+                      <th className="py-5 px-4 text-center">Grade</th>
+                      <th className="py-5 px-4 text-right">Fee Amount</th>
+                      <th className="py-5 px-4 text-center">Fee Status</th>
+                      <th className="py-5 px-4 text-right">Actions</th>
                     </tr>
-                  ) : students.length === 0 ? (
-                    <tr>
-                      <td colSpan="8" className={`py-24 text-center text-sm font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                        No students found
-                      </td>
-                    </tr>
-                  ) : (
-                    students.map((s, index) => {
-                      const statusConfig = getStatusConfig(s.latest_fee_status);
-                      return (
-                        <motion.tr
-                          key={s.id}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
-                          className={`group transition-all cursor-pointer ${s.latest_fee_status === 'pending'
-                            ? isDark ? 'bg-amber-500/[0.03] hover:bg-amber-500/[0.08]' : 'bg-amber-50/50 hover:bg-amber-50'
-                            : isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-blue-50/50'
-                            } ${isDark ? 'border-b border-white/5' : 'border-b border-slate-100'}`}
-                          onClick={() => navigate(`/students/${s.id}`)}
-                        >
-                          <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
-                            <CustomCheckbox
-                              checked={!!selectedStudents.find(sel => sel.id === s.id)}
-                              onChange={() => toggleStudentSelection(s)}
-                              isDark={isDark}
-                            />
-                          </td>
-                          <td className="py-4 px-4">
-                            <span className="font-mono text-[10px] text-blue-500 font-bold">#{s.id}</span>
-                          </td>
-                          <td className="py-4 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 overflow-hidden ${s.latest_fee_status === 'paid'
-                                ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
-                                : s.latest_fee_status === 'pending'
-                                  ? 'bg-gradient-to-br from-amber-500 to-orange-600'
-                                  : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                                } shadow-lg shadow-black/20`}>
-                                {s.student_image ? (
-                                  <img src={`http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  s.name.charAt(0)
-                                )}
+                  </thead>
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="8" className="py-24 text-center">
+                          <Loader2 className="animate-spin mx-auto text-blue-500" size={36} />
+                        </td>
+                      </tr>
+                    ) : students.length === 0 ? (
+                      <tr>
+                        <td colSpan="8" className={`py-24 text-center text-sm font-medium ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                          No students found
+                        </td>
+                      </tr>
+                    ) : (
+                      students.map((s, index) => {
+                        const statusConfig = getStatusConfig(s.latest_fee_status);
+                        return (
+                          <motion.tr
+                            key={s.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.03 }}
+                            className={`group transition-all cursor-pointer ${s.latest_fee_status === 'pending'
+                              ? isDark ? 'bg-amber-500/[0.03] hover:bg-amber-500/[0.08]' : 'bg-amber-50/50 hover:bg-amber-50'
+                              : isDark ? 'hover:bg-white/[0.03]' : 'hover:bg-blue-50/50'
+                              } ${isDark ? 'border-b border-white/5' : 'border-b border-slate-100'}`}
+                            onClick={() => navigate(`/students/${s.id}`)}
+                          >
+                            <td className="py-4 px-4" onClick={(e) => e.stopPropagation()}>
+                              <CustomCheckbox
+                                checked={!!selectedStudents.find(sel => sel.id === s.id)}
+                                onChange={() => toggleStudentSelection(s)}
+                                isDark={isDark}
+                              />
+                            </td>
+                            <td className="py-4 px-4">
+                              <span className="font-mono text-[10px] text-blue-500 font-bold">#{s.id}</span>
+                            </td>
+                            <td className="py-4 px-4">
+                              <div className="flex items-center gap-3">
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 overflow-hidden ${s.latest_fee_status === 'paid'
+                                  ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
+                                  : s.latest_fee_status === 'pending'
+                                    ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                                    : 'bg-gradient-to-br from-slate-500 to-slate-600'
+                                  } shadow-lg shadow-black/20`}>
+                                  {s.student_image ? (
+                                    <img src={`http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    s.name.charAt(0)
+                                  )}
+                                </div>
+                                <span className={`font-bold text-sm ${isDark ? 'text-white group-hover:text-blue-400' : 'text-slate-800 group-hover:text-blue-600'} transition-colors`}>
+                                  {s.name}
+                                </span>
                               </div>
-                              <span className={`font-bold text-sm ${isDark ? 'text-white group-hover:text-blue-400' : 'text-slate-800 group-hover:text-blue-600'} transition-colors`}>
-                                {s.name}
+                            </td>
+                            <td className={`py-4 px-4 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                              {s.guardian_name || '—'}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                                {s.grade}
                               </span>
-                            </div>
-                          </td>
-                          <td className={`py-4 px-4 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                            {s.guardian_name || '—'}
-                          </td>
-                          <td className="py-4 px-4 text-center">
-                            <span className={`inline-block px-3 py-1 rounded-lg text-[10px] font-black ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                              {s.grade}
-                            </span>
-                          </td>
-                          <td className={`py-4 px-4 text-right text-sm font-bold ${isDark ? 'text-white' : 'text-slate-700'}`}>
-                            Rs. {(s.fees_amount || 0).toLocaleString()}
-                          </td>
-                          <td className="py-4 px-4 text-center">
-                            <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${statusConfig.classes}`}>
-                              {statusConfig.label}
-                            </span>
-                          </td>
-                          <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                            <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
-                              <button
-                                onClick={() => { setEditingStudent(s); setIsModalOpen(true); }}
-                                className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-blue-600 text-slate-400 hover:text-white' : 'hover:bg-blue-100 text-slate-400 hover:text-blue-600'}`}
-                              >
-                                <Edit size={14} />
-                              </button>
-                              <button
-                                onClick={() => confirmDelete(s)}
-                                className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-rose-600 text-slate-400 hover:text-white' : 'hover:bg-rose-100 text-slate-400 hover:text-rose-600'}`}
-                              >
-                                <Trash2 size={14} />
-                              </button>
-                            </div>
-                          </td>
-                        </motion.tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Summary Section (Only when searching) */}
-            <AnimatePresence>
-              {searchTerm && searchSummary && students.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 20 }}
-                  className={`mt-6 p-6 rounded-2xl border ${isDark ? 'bg-slate-900/50 border-white/10' : 'bg-white border-slate-200'} shadow-xl overflow-hidden relative`}
-                >
-                  <div className={`absolute inset-0 opacity-10 ${isDark ? 'bg-blue-500/10' : 'bg-blue-500/5'}`} />
-                  <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 bg-blue-500/10 rounded-lg">
-                        <Search size={20} className="text-blue-500" />
-                      </div>
-                      <div>
-                        <h3 className={`font-black uppercase tracking-wider text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                          Search Summary
-                        </h3>
-                        <p className="text-[10px] text-slate-500 font-bold">
-                          Analysis for "{searchTerm}" ({searchSummary.count} records)
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {/* Pending */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Total Pending</p>
-                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                          Rs. {searchSummary.totalPending.toLocaleString()}
-                        </p>
-                      </div>
-
-                      {/* Received */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Total Received</p>
-                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                          Rs. {searchSummary.totalReceived.toLocaleString()}
-                        </p>
-                      </div>
-
-                      {/* Total */}
-                      <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                        <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1">Total Amount</p>
-                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                          Rs. {searchSummary.totalRevenue.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Pagination */}
-            <div className={`p-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${isDark ? 'border-white/5 bg-slate-950/30' : 'border-slate-100 bg-slate-50/50'}`}>
-              <p className={`text-[9px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                Showing {students.length} of {totalCount} records
-              </p>
-              <div className="flex items-center gap-3">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(p => p - 1)}
-                  className={`p-2.5 rounded-xl border transition-all disabled:opacity-20 ${isDark ? 'bg-slate-900 border-white/5 hover:bg-blue-600 text-slate-400 hover:text-white' : 'bg-white border-slate-200 hover:bg-blue-600 text-slate-400 hover:text-white'}`}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-
-                {/* Page numbers */}
-                {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                  let pageNum;
-                  if (totalPages <= 5) {
-                    pageNum = i + 1;
-                  } else if (currentPage <= 3) {
-                    pageNum = i + 1;
-                  } else if (currentPage >= totalPages - 2) {
-                    pageNum = totalPages - 4 + i;
-                  } else {
-                    pageNum = currentPage - 2 + i;
-                  }
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === pageNum
-                        ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                        : isDark
-                          ? 'bg-slate-900 text-slate-400 border border-white/5 hover:bg-slate-800'
-                          : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
-                        }`}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-
-                <button
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(p => p + 1)}
-                  className={`p-2.5 rounded-xl border transition-all disabled:opacity-20 ${isDark ? 'bg-slate-900 border-white/5 hover:bg-blue-600 text-slate-400 hover:text-white' : 'bg-white border-slate-200 hover:bg-blue-600 text-slate-400 hover:text-white'}`}
-                >
-                  <ChevronRight size={16} />
-                </button>
+                            </td>
+                            <td className={`py-4 px-4 text-right text-sm font-bold ${isDark ? 'text-white' : 'text-slate-700'}`}>
+                              Rs. {(s.fees_amount || 0).toLocaleString()}
+                            </td>
+                            <td className="py-4 px-4 text-center">
+                              <span className={`inline-flex px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border ${statusConfig.classes}`}>
+                                {statusConfig.label}
+                              </span>
+                            </td>
+                            <td className="py-4 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-all">
+                                <button
+                                  onClick={() => { setEditingStudent(s); setIsModalOpen(true); }}
+                                  className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-blue-600 text-slate-400 hover:text-white' : 'hover:bg-blue-100 text-slate-400 hover:text-blue-600'}`}
+                                >
+                                  <Edit size={14} />
+                                </button>
+                                <button
+                                  onClick={() => confirmDelete(s)}
+                                  className={`p-2 rounded-lg transition-all ${isDark ? 'hover:bg-rose-600 text-slate-400 hover:text-white' : 'hover:bg-rose-100 text-slate-400 hover:text-rose-600'}`}
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
+                          </motion.tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
               </div>
-            </div>
-          </motion.div>
+
+              {/* Summary Section (Only when searching) */}
+              <AnimatePresence>
+                {searchTerm && searchSummary && students.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    className={`mt-6 p-6 rounded-2xl border ${isDark ? 'bg-slate-900/50 border-white/10' : 'bg-white border-slate-200'} shadow-xl overflow-hidden relative`}
+                  >
+                    <div className={`absolute inset-0 opacity-10 ${isDark ? 'bg-blue-500/10' : 'bg-blue-500/5'}`} />
+                    <div className="relative z-10">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="p-2 bg-blue-500/10 rounded-lg">
+                          <Search size={20} className="text-blue-500" />
+                        </div>
+                        <div>
+                          <h3 className={`font-black uppercase tracking-wider text-sm ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                            Search Summary
+                          </h3>
+                          <p className="text-[10px] text-slate-500 font-bold">
+                            Analysis for "{searchTerm}" ({searchSummary.count} records)
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        {/* Pending */}
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-amber-500 mb-1">Total Pending</p>
+                          <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                            Rs. {searchSummary.totalPending.toLocaleString()}
+                          </p>
+                        </div>
+
+                        {/* Received */}
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-emerald-500 mb-1">Total Received</p>
+                          <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                            Rs. {searchSummary.totalReceived.toLocaleString()}
+                          </p>
+                        </div>
+
+                        {/* Total */}
+                        <div className={`p-4 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-blue-500 mb-1">Total Amount</p>
+                          <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                            Rs. {searchSummary.totalRevenue.toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Pagination */}
+              <div className={`p-6 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${isDark ? 'border-white/5 bg-slate-950/30' : 'border-slate-100 bg-slate-50/50'}`}>
+                <p className={`text-[9px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                  Showing {students.length} of {totalCount} records
+                </p>
+                <div className="flex items-center gap-3">
+                  <button
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => p - 1)}
+                    className={`p-2.5 rounded-xl border transition-all disabled:opacity-20 ${isDark ? 'bg-slate-900 border-white/5 hover:bg-blue-600 text-slate-400 hover:text-white' : 'bg-white border-slate-200 hover:bg-blue-600 text-slate-400 hover:text-white'}`}
+                  >
+                    <ChevronLeft size={16} />
+                  </button>
+
+                  {/* Page numbers */}
+                  {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = i + 1;
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1;
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i;
+                    } else {
+                      pageNum = currentPage - 2 + i;
+                    }
+                    return (
+                      <button
+                        key={pageNum}
+                        onClick={() => setCurrentPage(pageNum)}
+                        className={`w-10 h-10 rounded-xl text-xs font-black transition-all ${currentPage === pageNum
+                          ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
+                          : isDark
+                            ? 'bg-slate-900 text-slate-400 border border-white/5 hover:bg-slate-800'
+                            : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-50'
+                          }`}
+                      >
+                        {pageNum}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    disabled={currentPage >= totalPages}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                    className={`p-2.5 rounded-xl border transition-all disabled:opacity-20 ${isDark ? 'bg-slate-900 border-white/5 hover:bg-blue-600 text-slate-400 hover:text-white' : 'bg-white border-slate-200 hover:bg-blue-600 text-slate-400 hover:text-white'}`}
+                  >
+                    <ChevronRight size={16} />
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
 
         <DeleteModal isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={executeDelete} studentName={studentToDelete?.name} />

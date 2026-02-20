@@ -112,7 +112,7 @@ const GuardianList = () => {
                                 <UserCheck className="text-white" size={32} />
                             </div>
                             <div>
-                                <h1 className="text-3xl font-black tracking-tight tracking-tighter italic uppercase underline decoration-blue-500 decoration-4 underline-offset-8">Guardian Management</h1>
+                                <h1 className="text-3xl font-black tracking-tight tracking-tighter italic uppercase underline decoration-blue-500 decoration-4 underline-offset-8">Guardian Records</h1>
                                 <p className={`text-[10px] font-black uppercase tracking-widest mt-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                                     Managing {totalCount} guardian records
                                 </p>
