@@ -25,7 +25,19 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
         { name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'pending' }, student_image: null, imagePreview: null }
     ]);
 
-    // --- 🔍 RESTORED: CNIC AUTO-COMPLETE LOGIC ---
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+
+        if (name === 'phone_number') {
+            const digitsOnly = value.replace(/[^\d]/g, '');
+            const capped = digitsOnly.slice(0, 11);
+            setGuardian(prev => ({ ...prev, [name]: capped }));
+            return;
+        }
+
+        setGuardian({ ...guardian, [name]: value });
+    };
+
     const handleCnicSearch = async (value) => {
         setGuardian(prev => ({ ...prev, cnic: value }));
 
@@ -217,8 +229,18 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                                 </div>
 
                                 <div>
-                                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block ml-1">Contact String</label>
-                                    <input value={guardian.phone_number} placeholder="0300-0000000" required onChange={(e) => setGuardian({ ...guardian, phone_number: e.target.value })} className="w-full p-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono text-sm" />
+                                    <div className="flex justify-between items-center mb-2 ml-1">
+                                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Contact String</label>
+                                        <span className="text-[8px] font-black text-blue-500/50 uppercase italic tracking-tighter">Format: 03130753830</span>
+                                    </div>
+                                    <input
+                                        name="phone_number"
+                                        value={guardian.phone_number}
+                                        placeholder="03130753830"
+                                        required
+                                        onChange={handleChange}
+                                        className="w-full p-4 bg-slate-950/50 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/10 transition-all font-mono text-sm"
+                                    />
                                 </div>
 
                                 {/* ✅ ADDED: Residential Address (Full Width Row) */}

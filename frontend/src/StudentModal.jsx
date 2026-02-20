@@ -54,8 +54,17 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
     }, [studentToEdit, isOpen]);
 
     const handleChange = (e) => {
-        const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        setFormData({ ...formData, [e.target.name]: value });
+        const { name, value, type, checked } = e.target;
+        const val = type === 'checkbox' ? checked : value;
+
+        if (name === 'guardian_phone') {
+            const digitsOnly = val.replace(/[^\d]/g, '');
+            const capped = digitsOnly.slice(0, 11);
+            setFormData(prev => ({ ...prev, [name]: capped }));
+            return;
+        }
+
+        setFormData({ ...formData, [name]: val });
     };
 
     const handleImageChange = async (e) => {
@@ -228,8 +237,19 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
                                         <input id="guardian_cnic" name="guardian_cnic" value={formData.guardian_cnic} onChange={handleChange} className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500 font-mono" />
                                     </div>
                                     <div>
-                                        <label htmlFor="guardian_phone" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Phone Number</label>
-                                        <input id="guardian_phone" name="guardian_phone" value={formData.guardian_phone} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500 font-mono" />
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label htmlFor="guardian_phone" className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Phone Number</label>
+                                            <span className="text-[8px] font-black text-indigo-400/50 uppercase italic tracking-tighter">Format: 03130753830</span>
+                                        </div>
+                                        <input
+                                            id="guardian_phone"
+                                            name="guardian_phone"
+                                            value={formData.guardian_phone}
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="03130753830"
+                                            className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-indigo-500 font-mono"
+                                        />
                                     </div>
                                     <div>
                                         <label htmlFor="address" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Home Address</label>

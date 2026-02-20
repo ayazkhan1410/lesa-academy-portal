@@ -32,7 +32,17 @@ const GuardianModal = ({ isOpen, onClose, onSuccess, guardianToEdit = null }) =>
     }, [guardianToEdit, isOpen]);
 
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        if (name === 'phone_number') {
+            // Restrict to digits only and cap at 11 characters
+            const digitsOnly = value.replace(/[^\d]/g, '');
+            const capped = digitsOnly.slice(0, 11);
+            setFormData({ ...formData, [name]: capped });
+            return;
+        }
+
+        setFormData({ ...formData, [name]: value });
     };
 
     const handleSubmit = async (e) => {
@@ -148,17 +158,20 @@ const GuardianModal = ({ isOpen, onClose, onSuccess, guardianToEdit = null }) =>
 
                                     {/* Phone */}
                                     <div className="space-y-2 group">
-                                        <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">
-                                            <Phone size={12} className="text-blue-500" /> Phone Number
-                                        </label>
+                                        <div className="flex justify-between items-center px-1">
+                                            <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
+                                                <Phone size={12} className="text-blue-500" /> Phone Number
+                                            </label>
+                                            <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter italic">Format: 03130753830</span>
+                                        </div>
                                         <input
                                             type="text"
                                             name="phone_number"
                                             required
                                             value={formData.phone_number}
                                             onChange={handleChange}
-                                            className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50 focus:bg-slate-950 transition-all placeholder:text-slate-700"
-                                            placeholder="e.g. 0300-1234567"
+                                            className="w-full bg-slate-950/50 border border-white/5 rounded-2xl px-5 py-4 text-sm font-bold text-white outline-none focus:border-blue-500/50 focus:bg-slate-950 transition-all placeholder:text-slate-700 font-mono"
+                                            placeholder="03130753830"
                                         />
                                     </div>
 

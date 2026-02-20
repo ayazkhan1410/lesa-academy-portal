@@ -214,7 +214,7 @@ const GuardianList = () => {
                                                         <td className="px-10 py-7">
                                                             <div className="flex items-center gap-5">
                                                                 <div className={`w-12 h-12 rounded-[1.25rem] flex items-center justify-center font-black text-sm transition-all shadow-xl ${isDark ? 'bg-slate-800 text-blue-400 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-blue-500/40' : 'bg-slate-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white group-hover:shadow-blue-500/30'}`}>
-                                                                    {guardian.name.charAt(0)}
+                                                                    {guardian.name ? guardian.name.charAt(0) : '?'}
                                                                 </div>
                                                                 <div>
                                                                     <span className="font-black text-base tracking-tight italic uppercase block">{guardian.name}</span>
