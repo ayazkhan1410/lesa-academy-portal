@@ -1,15 +1,18 @@
 import traceback
+import base64
+import uuid
 
+from django.db import transaction
+from django.db import models
+from django.core.files.base import ContentFile
 from django.db.models import (
     Sum, Q, Case, When, IntegerField, Subquery, OuterRef
 )
-from django.db import transaction
-from django.db import models
 
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.utils.dateparse import parse_date
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
@@ -141,6 +144,8 @@ class SecureLoginAPIView(APIView):
 
 
 class ListCreateStudentAPIView(APIView):
+    parser_classes = (JSONParser,)
+
     @extend_schema(
         summary="List Students",
         description=(
@@ -256,7 +261,6 @@ class ListCreateStudentAPIView(APIView):
                 if ordering in allowed_orderings:
                     queryset = queryset.order_by(ordering)
             else:
-                # Default: Order by payment status (pending first), then by ID
                 queryset = queryset.annotate(
                     pending_priority=Case(
                         When(latest_status='pending', then=0),
@@ -473,7 +477,30 @@ class ListCreateStudentAPIView(APIView):
             )
 
 
+def decode_base64_image(data):
+    if not isinstance(data, str):
+        return data
+
+    if data.startswith('data:image'):
+        try:
+            format, imgstr = data.split(';base64,')
+            ext = format.split('/')[-1]
+            return ContentFile(
+                base64.b64decode(imgstr),
+                name=f"student_{uuid.uuid4()}.{ext}"
+            )
+        except Exception:
+            return None
+
+    if len(data) > 255:
+        return None
+
+    return data
+
+
 class BulkEnrollStudentAPIView(APIView):
+    parser_classes = (JSONParser,)
+
     @extend_schema(
         summary="Bulk Enroll Students",
         description=(
@@ -648,6 +675,17 @@ class BulkEnrollStudentAPIView(APIView):
             created_students = []
             for student_data in students_list:
                 fee_data = student_data.pop('initial_fee', None)
+                image_data = student_data.pop('student_image', None)
+
+                # Fix for age field error if it's passed as empty string
+                if student_data.get('age') == "":
+                    student_data['age'] = None
+
+                if image_data:
+                    student_data['student_image'] = decode_base64_image(
+                        image_data
+                    )
+
                 student = Student.objects.create(
                     guardian=guardian, **student_data
                 )
@@ -773,14 +811,35 @@ class StudentDetailAPIView(APIView):
         try:
             student = Student.objects.get(id=student_id)
 
-            # Update allowed fields
             allowed_fields = [
-                'name', 'age', 'grade', 'is_active', 'date_joined'
+                'name', 'age', 'grade', 'is_active',
+                'date_joined', 'student_image'
             ]
-
             for field in allowed_fields:
                 if field in request.data:
-                    setattr(student, field, request.data[field])
+                    value = request.data[field]
+
+                    # Fix for the Age integer field error
+                    if field == 'age' and value == "":
+                        value = None
+
+                    # Fix for student_image truncation and URL issues
+                    if field == 'student_image':
+                        # If value is present, check if it's a new image (Base64)
+                        is_b64 = (
+                            value and isinstance(value, str) and
+                            value.startswith('data:image')
+                        )
+                        if is_b64:
+                            value = decode_base64_image(value)
+                        elif value and isinstance(value, str) and \
+                                value.startswith('http'):
+                            # It's an existing URL, don't update the field
+                            continue
+                        elif not value:
+                            value = None
+
+                    setattr(student, field, value)
 
             student.save()
 
@@ -1673,7 +1732,8 @@ class SendMessageAPIView(APIView):
             for student in students:
                 if student.guardian and student.guardian.phone_number:
                     phone_number = str(student.guardian.phone_number)
-                    send_message.delay(phone_number, message)
+                    guardian_id = student.guardian.id
+                    send_message.delay(phone_number, message, guardian_id)
 
             return Response(
                 {

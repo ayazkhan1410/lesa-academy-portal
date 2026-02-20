@@ -77,8 +77,12 @@ const StudentDetail = () => {
                 {/* Header Card */}
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900 border border-slate-800 rounded-3xl p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl">
                     <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-blue-900/50">
-                            {student.name.charAt(0)}
+                        <div className="w-20 h-20 bg-blue-600 rounded-2xl flex items-center justify-center text-3xl font-bold text-white shadow-lg shadow-blue-900/50 overflow-hidden shrink-0">
+                            {student.student_image ? (
+                                <img src={student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`} alt={student.name} className="w-full h-full object-cover" />
+                            ) : (
+                                student.name.charAt(0)
+                            )}
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-white mb-2">{student.name}</h1>
@@ -135,7 +139,20 @@ const StudentDetail = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
                                 <InfoField label="Father Name" value={student.guardian?.name || student.guardian_name} />
                                 <InfoField label="CNIC Number" value={student.guardian?.cnic || student.guardian_cnic} icon={<FileText size={14} className="inline mr-1" />} />
-                                <div className="md:col-span-2">
+                                <div className="md:col-span-1">
+                                    <InfoField
+                                        label="Last SMS Sent"
+                                        value={student.last_message_send ? new Date(student.last_message_send).toLocaleString('en-US', {
+                                            month: 'short',
+                                            day: 'numeric',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        }) : "Never Sent"}
+                                        icon={<MessageSquare size={14} className="inline mr-1 text-indigo-400" />}
+                                    />
+                                </div>
+                                <div className="md:col-span-1">
                                     <p className="text-xs font-bold text-slate-500 uppercase mb-2">Phone Number</p>
                                     <div className="flex items-center gap-3 text-lg font-bold text-indigo-300">
                                         <Phone size={18} /> {student.guardian?.phone_number || student.guardian_phone}

@@ -18,7 +18,8 @@ class CustomUserAdmin(admin.ModelAdmin):
 @admin.register(Guardian)
 class GuardianAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'cnic', 'phone_number', 'address', 'created_at'
+        'id', 'name', 'cnic', 'phone_number',
+        'last_message_send', 'address', 'created_at'
     )
     search_fields = ('name', 'cnic', 'phone_number')
 
@@ -26,7 +27,7 @@ class GuardianAdmin(admin.ModelAdmin):
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'age', 'grade',
+        'id', 'name', 'age', 'grade', 'student_image',
         'guardian', 'date_joined',
         'is_active', 'created_at'
     )

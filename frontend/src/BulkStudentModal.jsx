@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, Loader2, Save, UserPlus, Trash2, CheckCircle, Search, Sparkles, ShieldCheck } from 'lucide-react';
+import { X, Loader2, Save, UserPlus, Trash2, CheckCircle, Search, Sparkles, ShieldCheck, Camera, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { compressImage } from './utils/imageUtils';
 
 const GRADE_OPTIONS = [
     { value: 'Nursery', label: 'Nursery' }, { value: 'Prep', label: 'Prep' },
@@ -21,7 +22,7 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
 
     const [guardian, setGuardian] = useState({ name: '', cnic: '', phone_number: '', address: '' });
     const [students, setStudents] = useState([
-        { name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'paid' } }
+        { name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'pending' }, student_image: null, imagePreview: null }
     ]);
 
     // --- 🔍 RESTORED: CNIC AUTO-COMPLETE LOGIC ---
@@ -78,8 +79,25 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
         setStudents(updatedStudents);
     };
 
+    const handleImageChange = async (index, file) => {
+        if (!file) return;
+        try {
+            const compressed = await compressImage(file, { maxWidth: 500, maxHeight: 500, quality: 0.8 });
+            const updatedStudents = [...students];
+            updatedStudents[index].student_image = compressed;
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                updatedStudents[index].imagePreview = reader.result;
+                setStudents([...updatedStudents]);
+            };
+            reader.readAsDataURL(compressed);
+        } catch (err) {
+            console.error("Image processing error", err);
+        }
+    };
+
     const addStudentRow = () => {
-        setStudents([...students, { name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'paid' } }]);
+        setStudents([...students, { name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'pending' }, student_image: null, imagePreview: null }]);
     };
 
     const removeStudentRow = (index) => {
@@ -92,11 +110,19 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
         e.preventDefault();
         setLoading(true);
 
+        // ✅ Revert to original JSON structure as requested
         const payload = {
             guardian: guardian,
             students: students.map(s => ({
-                ...s,
-                initial_fee: s.initial_fee.amount ? { ...s.initial_fee, month_paid_for: new Date().toISOString().split('T')[0] } : null
+                name: s.name,
+                age: s.age,
+                grade: s.grade,
+                date_joined: s.date_joined,
+                student_image: s.imagePreview, // Send base64 string
+                initial_fee: s.initial_fee.amount ? {
+                    ...s.initial_fee,
+                    month_paid_for: new Date().toISOString().split('T')[0]
+                } : null
             }))
         };
 
@@ -104,15 +130,15 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
             const token = localStorage.getItem('access_token');
             await axios.post('http://127.0.0.1:8000/api/bulk-enroll-students', payload, {
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    'Authorization': `Bearer ${token}`
+                    // Back to application/json default
                 }
             });
 
             onSuccess();
             onClose();
-            // Reset state for next use
-            setStudents([{ name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'paid' } }]);
+            // Reset state
+            setStudents([{ name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'pending' }, student_image: null, imagePreview: null }]);
             setGuardian({ name: '', cnic: '', phone_number: '', address: '' });
         } catch (error) {
             console.error("Bulk upload failed:", error);
@@ -222,29 +248,46 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                                         )}
                                     </div>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                                        {/* Image Preview / Upload Small */}
+                                        <div className="md:col-span-1">
+                                            <label className="relative group/img cursor-pointer block">
+                                                <div className={`w-12 h-12 rounded-xl border border-dashed flex items-center justify-center overflow-hidden transition-all ${student.imagePreview ? 'border-blue-500/50' : 'border-white/10 group-hover/img:border-blue-500/30'}`}>
+                                                    {student.imagePreview ? (
+                                                        <img src={student.imagePreview} alt="S" className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <ImageIcon size={14} className="text-slate-600" />
+                                                    )}
+                                                </div>
+                                                <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-1 rounded-lg shadow-lg opacity-0 group-hover/img:opacity-100 transition-all scale-75">
+                                                    <Camera size={10} />
+                                                </div>
+                                                <input type="file" accept="image/*" onChange={(e) => handleImageChange(index, e.target.files[0])} className="hidden" />
+                                            </label>
+                                        </div>
+
+                                        <div className="md:col-span-3">
+                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1 block">Legal Name</label>
+                                            <input value={student.name} onChange={(e) => handleStudentChange(index, 'name', e.target.value)} required className="w-full p-2.5 bg-slate-950/30 border border-white/5 rounded-xl text-white outline-none focus:border-blue-500/50 font-bold text-sm" placeholder="Name" />
+                                        </div>
+                                        <div className="md:col-span-1">
+                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1 block">Age</label>
+                                            <input type="number" value={student.age} onChange={(e) => handleStudentChange(index, 'age', e.target.value)} required className="w-full p-2.5 bg-slate-950/30 border border-white/5 rounded-xl text-white outline-none focus:border-blue-500/50 text-sm" />
+                                        </div>
                                         <div className="md:col-span-2">
-                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Legal Name</label>
-                                            <input value={student.name} onChange={(e) => handleStudentChange(index, 'name', e.target.value)} required className="w-full p-3 bg-slate-950/30 border border-white/5 rounded-xl text-white outline-none focus:border-blue-500/50 font-bold text-sm" placeholder="Name" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Age</label>
-                                            <input type="number" value={student.age} onChange={(e) => handleStudentChange(index, 'age', e.target.value)} required className="w-full p-3 bg-slate-950/30 border border-white/5 rounded-xl text-white outline-none focus:border-blue-500/50" />
-                                        </div>
-                                        <div>
-                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-2 block">Rank (Grade)</label>
-                                            <select value={student.grade} onChange={(e) => handleStudentChange(index, 'grade', e.target.value)} required className="w-full p-3 bg-slate-950/30 border border-white/5 rounded-xl text-slate-300 outline-none focus:border-blue-500/50 appearance-none text-xs">
+                                            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1 block">Rank</label>
+                                            <select value={student.grade} onChange={(e) => handleStudentChange(index, 'grade', e.target.value)} required className="w-full p-2.5 bg-slate-950/30 border border-white/5 rounded-xl text-slate-300 outline-none focus:border-blue-500/50 appearance-none text-xs">
                                                 <option value="">Select</option>
                                                 {GRADE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
                                             </select>
                                         </div>
-                                        <div>
-                                            <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest mb-2 block">Adm. Fee</label>
-                                            <input type="number" value={student.initial_fee.amount} onChange={(e) => handleStudentChange(index, 'fee_amount', e.target.value)} className="w-full p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-emerald-400 outline-none focus:border-emerald-500/50 font-bold" placeholder="Rs." />
+                                        <div className="md:col-span-2">
+                                            <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest mb-1 block">Fee</label>
+                                            <input type="number" value={student.initial_fee.amount} onChange={(e) => handleStudentChange(index, 'fee_amount', e.target.value)} className="w-full p-2.5 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-emerald-400 outline-none focus:border-emerald-500/50 font-bold text-sm" placeholder="Rs." />
                                         </div>
-                                        <div>
-                                            <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest mb-2 block">Status</label>
-                                            <select value={student.initial_fee.status} onChange={(e) => handleStudentChange(index, 'fee_status', e.target.value)} className="w-full p-3 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-emerald-400 outline-none focus:border-emerald-500/50 appearance-none font-black text-[10px]">
+                                        <div className="md:col-span-2">
+                                            <label className="text-[9px] font-black text-emerald-500/70 uppercase tracking-widest mb-1 block">Status</label>
+                                            <select value={student.initial_fee.status} onChange={(e) => handleStudentChange(index, 'fee_status', e.target.value)} className="w-full p-2.5 bg-emerald-500/5 border border-emerald-500/10 rounded-xl text-emerald-400 outline-none focus:border-emerald-500/50 appearance-none font-black text-xs">
                                                 <option value="paid">PAID</option>
                                                 <option value="pending">PENDING</option>
                                             </select>

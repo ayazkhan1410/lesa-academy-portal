@@ -19,8 +19,8 @@ const CustomCheckbox = ({ checked, onChange, isDark }) => (
   <div
     onClick={(e) => { e.stopPropagation(); onChange(); }}
     className={`w-5 h-5 rounded-lg border-2 flex items-center justify-center cursor-pointer transition-all duration-200 ${checked
-        ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/30'
-        : `bg-transparent ${isDark ? 'border-slate-700 hover:border-slate-500' : 'border-slate-300 hover:border-slate-400'}`
+      ? 'bg-blue-600 border-blue-600 shadow-lg shadow-blue-500/30'
+      : `bg-transparent ${isDark ? 'border-slate-700 hover:border-slate-500' : 'border-slate-300 hover:border-slate-400'}`
       }`}
   >
     {checked && <Check size={12} className="text-white" strokeWidth={4} />}
@@ -517,13 +517,17 @@ const StudentList = () => {
                           </td>
                           <td className="py-4 px-4">
                             <div className="flex items-center gap-3">
-                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 ${s.latest_fee_status === 'paid'
+                              <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 overflow-hidden ${s.latest_fee_status === 'paid'
                                 ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
                                 : s.latest_fee_status === 'pending'
                                   ? 'bg-gradient-to-br from-amber-500 to-orange-600'
                                   : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                                }`}>
-                                {s.name.charAt(0)}
+                                } shadow-lg shadow-black/20`}>
+                                {s.student_image ? (
+                                  <img src={`http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
+                                ) : (
+                                  s.name.charAt(0)
+                                )}
                               </div>
                               <span className={`font-bold text-sm ${isDark ? 'text-white group-hover:text-blue-400' : 'text-slate-800 group-hover:text-blue-600'} transition-colors`}>
                                 {s.name}

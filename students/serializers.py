@@ -1,8 +1,27 @@
-from django.db import transaction
-from django.db import models
-
+import base64
+import uuid
+from django.db import transaction, models
+from django.core.files.base import ContentFile
 from rest_framework import serializers
 from .models import Student, Guardian, FeePayment
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            # format, imgstr = data.split(';base64,')
+            # ext = format.split('/')[-1]
+            try:
+                format, imgstr = data.split(';base64,')
+                ext = format.split('/')[-1]
+                data = ContentFile(
+                    base64.b64decode(imgstr),
+                    name=f"student_{uuid.uuid4()}.{ext}"
+                )
+            except Exception:
+                raise serializers.ValidationError("Invalid base64 image")
+
+        return super().to_internal_value(data)
 
 
 class ReadStudentSerializer(serializers.ModelSerializer):
@@ -30,6 +49,7 @@ class CreateFeePayment(serializers.ModelSerializer):
 class CreateStudentSerializer(serializers.ModelSerializer):
     guardian = CreateGuardianSerializer()
     payments = CreateFeePayment(write_only=True, required=False)
+    student_image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Student
@@ -82,9 +102,9 @@ class StudentListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
-            'id', 'name', 'grade', 'guardian_name',
+            'id', 'name', 'age', 'grade', 'guardian_name',
             'guardian_phone', 'is_active', 'latest_fee_status',
-            'fees_amount'
+            'fees_amount', 'student_image'
         ]
 
     def get_latest_fee_status(self, obj):
@@ -97,14 +117,12 @@ class StudentListSerializer(serializers.ModelSerializer):
 
 
 class GuardianDetailSerializer(serializers.ModelSerializer):
-    """Serializer for detailed guardian information"""
     class Meta:
         model = Guardian
         fields = ['id', 'name', 'cnic', 'phone_number', 'address']
 
 
 class FeePaymentSerializer(serializers.ModelSerializer):
-    """Serializer for fee payment details"""
     class Meta:
         model = FeePayment
         fields = [
@@ -114,10 +132,6 @@ class FeePaymentSerializer(serializers.ModelSerializer):
 
 
 class StudentDetailSerializer(serializers.ModelSerializer):
-    """
-    Comprehensive serializer for student detail view.
-    Includes all student info, guardian details, and fee payments.
-    """
     guardian = GuardianDetailSerializer(read_only=True)
     guardian_name = serializers.CharField(
         source='guardian.name', read_only=True
@@ -131,6 +145,9 @@ class StudentDetailSerializer(serializers.ModelSerializer):
     address = serializers.CharField(
         source='guardian.address', read_only=True
     )
+    last_message_send = serializers.DateTimeField(
+        source='guardian.last_message_send', read_only=True
+    )
     payments = FeePaymentSerializer(many=True, read_only=True)
     latest_fee_status = serializers.SerializerMethodField()
     total_fees_paid = serializers.SerializerMethodField()
@@ -142,32 +159,28 @@ class StudentDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'name', 'age', 'grade', 'is_active', 'date_joined',
             'guardian', 'guardian_name', 'guardian_cnic',
-            'guardian_phone', 'address',
-            'payments', 'latest_fee_status',
+            'guardian_phone', 'address', 'student_image',
+            'payments', 'latest_fee_status', 'last_message_send',
             'total_fees_paid', 'total_fees_pending', 'payment_count'
         ]
 
     def get_latest_fee_status(self, obj):
-        """Get the status of the most recent payment"""
         latest_payment = obj.payments.order_by('-date_paid').first()
         return latest_payment.status if latest_payment else 'no_payment'
 
     def get_total_fees_paid(self, obj):
-        """Calculate total amount of paid fees"""
         paid_fees = obj.payments.filter(
             status='paid'
         ).aggregate(total=models.Sum('amount'))
         return paid_fees['total'] or 0
 
     def get_total_fees_pending(self, obj):
-        """Calculate total amount of pending fees"""
         pending_fees = obj.payments.filter(
             status='pending'
         ).aggregate(total=models.Sum('amount'))
         return pending_fees['total'] or 0
 
     def get_payment_count(self, obj):
-        """Get total number of payments"""
         return obj.payments.count()
 
 
@@ -180,6 +193,7 @@ class FeePaymentSerializer(serializers.ModelSerializer):
 
 
 class DashboardStatsSerializer(serializers.ModelSerializer):
+    student_image = serializers.ImageField(use_url=True, required=False)
     fee_status = serializers.SerializerMethodField()
     guardian_name = serializers.CharField(
         source='guardian.name', read_only=True
@@ -188,7 +202,8 @@ class DashboardStatsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = [
-            'id', 'name', 'grade', 'date_joined', "fee_status", "guardian_name"
+            'id', 'name', 'grade', 'date_joined',
+            "fee_status", "guardian_name", "student_image"
         ]
 
     def get_fee_status(self, obj):

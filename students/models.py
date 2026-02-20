@@ -43,6 +43,7 @@ class Guardian(models.Model):
     )
     phone_number = models.CharField(max_length=15, unique=True)
     address = models.TextField(blank=True, null=True)
+    last_message_send = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -65,6 +66,10 @@ class Student(models.Model):
     ]
 
     name = models.CharField(max_length=100, null=True, blank=True)
+    student_image = models.ImageField(
+        upload_to='students_images/',
+        blank=True, null=True
+    )
     age = models.IntegerField(null=True, blank=True)
     grade = models.CharField(
         max_length=10,

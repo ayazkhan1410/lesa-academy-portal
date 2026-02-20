@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, Loader2, Save, User, Shield, Activity, Sparkles } from 'lucide-react';
+import { X, Loader2, Save, User, Shield, Activity, Sparkles, Image as ImageIcon, Camera } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { compressImage } from './utils/imageUtils';
 
 const GRADE_OPTIONS = [
     { value: 'Nursery', label: 'Nursery' }, { value: 'Prep', label: 'Prep' },
@@ -16,34 +17,39 @@ const GRADE_OPTIONS = [
 
 const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
     const [loading, setLoading] = useState(false);
+    const [imagePreview, setImagePreview] = useState(null);
+    const [selectedImage, setSelectedImage] = useState(null);
 
     // ✅ Flat Form State for UI
     const [formData, setFormData] = useState({
         name: '', age: '', grade: '',
         guardian_name: '', guardian_cnic: '', guardian_phone: '', address: '',
-        initial_fee: '', fee_status: 'paid', is_active: true
+        initial_fee: '', fee_status: 'pending', is_active: true
     });
 
     useEffect(() => {
         if (studentToEdit) {
             setFormData({
                 name: studentToEdit.name || '',
-                age: studentToEdit.age || '',
+                age: studentToEdit.age ?? '',
                 grade: studentToEdit.grade || '',
                 guardian_name: studentToEdit.guardian?.name || '',
                 guardian_cnic: studentToEdit.guardian?.cnic || '',
                 guardian_phone: studentToEdit.guardian?.phone_number || '',
                 address: studentToEdit.guardian?.address || '',
                 initial_fee: '',
-                fee_status: studentToEdit.latest_fee_status || 'paid',
+                fee_status: studentToEdit.latest_fee_status || 'pending',
                 is_active: studentToEdit.is_active ?? true
             });
+            setImagePreview(studentToEdit.student_image ? `http://127.0.0.1:8000${studentToEdit.student_image}` : null);
         } else {
             setFormData({
                 name: '', age: '', grade: '',
                 guardian_name: '', guardian_cnic: '', guardian_phone: '', address: '',
-                initial_fee: '', fee_status: 'paid', is_active: true
+                initial_fee: '', fee_status: 'pending', is_active: true
             });
+            setImagePreview(null);
+            setSelectedImage(null);
         }
     }, [studentToEdit, isOpen]);
 
@@ -52,58 +58,77 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
         setFormData({ ...formData, [e.target.name]: value });
     };
 
+    const handleImageChange = async (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            try {
+                const compressed = await compressImage(file, { maxWidth: 500, maxHeight: 500, quality: 0.8 });
+                setSelectedImage(compressed);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    setImagePreview(reader.result);
+                };
+                reader.readAsDataURL(compressed);
+            } catch (error) {
+                console.error("Compression error:", error);
+                toast.error("Failed to process image");
+            }
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const toastId = toast.loading(studentToEdit ? "Updating student..." : "Registering student...");
         setLoading(true);
+        const toastId = toast.loading(studentToEdit ? "Updating student..." : "Registering student...");
 
         try {
             const token = localStorage.getItem('access_token');
 
-            // ✅ TRANSFORM: Map flat form data to the required nested BE structure
+            // Reconstruct the original nested payload format as requested
             const payload = {
                 name: formData.name,
-                age: parseInt(formData.age, 10),
+                age: formData.age,
                 grade: formData.grade,
-                date_joined: new Date().toISOString().split('T')[0],
+                date_joined: formData.date_joined,
                 is_active: formData.is_active,
                 guardian: {
                     name: formData.guardian_name,
                     cnic: formData.guardian_cnic,
                     phone_number: formData.guardian_phone,
-                    address: formData.address,
+                    address: formData.address
                 },
-                initial_fee: {
-                    amount: parseFloat(formData.initial_fee || 0),
-                    month_paid_for: new Date().toISOString().slice(0, 7) + "-01",
-                    status: formData.fee_status,
+                student_image: imagePreview // This is the base64 string
+            };
+
+            if (!studentToEdit) { // Only include initial_fee for new registrations
+                payload.initial_fee = formData.initial_fee ? {
+                    amount: parseFloat(formData.initial_fee),
+                    month_paid_for: new Date().toISOString().slice(0, 7) + "-01", // Current month
+                    status: formData.fee_status
+                } : null;
+            }
+
+            const config = {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                    // Removed multipart/form-data, back to application/json default
                 }
             };
 
             if (studentToEdit) {
-                // Update mode
-                await axios.patch(`http://127.0.0.1:8000/api/students/${studentToEdit.id}/`, payload, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                toast.success("Record updated successfully!", { id: toastId });
+                await axios.patch(`http://127.0.0.1:8000/api/students/${studentToEdit.id}/`, payload, config);
+                toast.success("Student updated", { id: toastId });
             } else {
-                // Creation mode
-                await axios.post('http://127.0.0.1:8000/api/students/', payload, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                toast.success("Student registered successfully!", { id: toastId });
+                await axios.post('http://127.0.0.1:8000/api/students/', payload, config);
+                toast.success("Student registered", { id: toastId });
             }
-
             onSuccess();
             onClose();
         } catch (error) {
-            console.error("❌ BE Error:", error.response?.data);
+            console.error("Submission error:", error);
             const errorData = error.response?.data;
-            const errorMsg = errorData?.error || "Check your input data.";
-            toast.error(`Failed: ${errorMsg}`, { id: toastId });
+            const errorMsg = typeof errorData === 'object' ? JSON.stringify(errorData) : errorData || "Check your input data.";
+            toast.error(`Failed: ${errorMsg.slice(0, 50)}...`, { id: toastId });
         } finally {
             setLoading(false);
         }
@@ -139,25 +164,45 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
                     <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-8 space-y-8">
                         {/* 1. Student Identity */}
                         <section>
-                            <div className="flex items-center gap-2 mb-6">
-                                <User className="text-blue-400" size={18} />
-                                <h3 className="text-[10px] font-black text-blue-400 uppercase tracking-[0.2em]">Student Identity</h3>
+                            <div className="flex items-center gap-2 mb-6 text-blue-400">
+                                <User size={18} />
+                                <h3 className="text-[10px] font-black uppercase tracking-[0.2em]">Student Identity</h3>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="md:col-span-2">
-                                    <label htmlFor="name" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Student Name</label>
-                                    <input id="name" name="name" value={formData.name} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 transition-all font-bold" />
-                                </div>
-                                <div>
-                                    <label htmlFor="age" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Age</label>
-                                    <input id="age" name="age" type="number" value={formData.age} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 transition-all" />
-                                </div>
-                                <div>
-                                    <label htmlFor="grade" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Grade</label>
-                                    <select id="grade" name="grade" value={formData.grade} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 appearance-none font-bold">
-                                        <option value="">Select Grade</option>
-                                        {GRADE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
-                                    </select>
+                            <div className="flex flex-col md:flex-row gap-8 items-start mb-8">
+                                {/* Image Upload & Preview */}
+                                <label className="relative group cursor-pointer">
+                                    <div className={`w-32 h-32 rounded-3xl overflow-hidden border-2 border-dashed transition-all duration-300 flex items-center justify-center bg-slate-950 ${imagePreview ? 'border-blue-500/50' : 'border-white/10 group-hover:border-blue-500/30'}`}>
+                                        {imagePreview ? (
+                                            <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="text-center p-4">
+                                                <ImageIcon className="mx-auto text-slate-600 mb-2" size={24} />
+                                                <p className="text-[8px] font-black text-slate-500 uppercase">No Image</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="absolute -bottom-2 -right-2 bg-blue-600 hover:bg-blue-500 text-white p-2.5 rounded-2xl shadow-lg shadow-blue-500/30 transition-all hover:scale-110 active:scale-90 border border-white/10">
+                                        <Camera size={16} />
+                                    </div>
+                                    <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
+                                </label>
+
+                                <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                                    <div className="md:col-span-2">
+                                        <label htmlFor="name" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Student Name</label>
+                                        <input id="name" name="name" value={formData.name} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 transition-all font-bold" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="age" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Age</label>
+                                        <input id="age" name="age" type="number" value={formData.age} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 transition-all font-bold" />
+                                    </div>
+                                    <div>
+                                        <label htmlFor="grade" className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2 block">Grade</label>
+                                        <select id="grade" name="grade" value={formData.grade} onChange={handleChange} required className="w-full p-4 bg-slate-950 border border-white/10 rounded-2xl text-white outline-none focus:border-blue-500 appearance-none font-bold">
+                                            <option value="">Select Grade</option>
+                                            {GRADE_OPTIONS.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                                        </select>
+                                    </div>
                                 </div>
                             </div>
                         </section>

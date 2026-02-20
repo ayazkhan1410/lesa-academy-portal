@@ -407,13 +407,17 @@ const Dashboard = () => {
                             </td>
                             <td className="py-4 px-4">
                               <div className="flex items-center gap-3">
-                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white ${s.fee_status === 'paid'
+                                <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-sm font-black text-white shrink-0 overflow-hidden ${s.fee_status === 'paid'
                                   ? 'bg-gradient-to-br from-emerald-500 to-teal-600'
                                   : s.fee_status === 'pending'
                                     ? 'bg-gradient-to-br from-amber-500 to-orange-600'
                                     : 'bg-gradient-to-br from-slate-500 to-slate-600'
-                                  }`}>
-                                  {s.name.charAt(0)}
+                                  } shadow-lg shadow-black/20`}>
+                                  {s.student_image ? (
+                                    <img src={s.student_image.startsWith('http') ? s.student_image : `http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
+                                  ) : (
+                                    s.name.charAt(0)
+                                  )}
                                 </div>
                                 <span className={`font-bold text-sm ${isDark ? 'text-white group-hover:text-blue-400' : 'text-slate-800 group-hover:text-blue-600'} transition-colors`}>
                                   {s.name}
