@@ -35,7 +35,8 @@ from .serializers import (
     CreateStudentSerializer,
     CustomStudentSerializer, StudentListSerializer,
     CreateGuardianSerializer, StudentDetailSerializer,
-    FeePaymentSerializer, DashboardStatsSerializer
+    FeePaymentSerializer, DashboardStatsSerializer,
+    GuardianDetailSerializer
 )
 
 
@@ -825,7 +826,6 @@ class StudentDetailAPIView(APIView):
 
                     # Fix for student_image truncation and URL issues
                     if field == 'student_image':
-                        # If value is present, check if it's a new image (Base64)
                         is_b64 = (
                             value and isinstance(value, str) and
                             value.startswith('data:image')
@@ -1144,7 +1144,7 @@ class GuardianDetailAPIView(APIView):
     def get(self, request, pk):
         try:
             guardian = Guardian.objects.get(pk=pk)
-            serializer = CreateGuardianSerializer(guardian)
+            serializer = GuardianDetailSerializer(guardian)
             return Response(serializer.data)
         except Guardian.DoesNotExist:
             return Response(

@@ -4,12 +4,14 @@ import { Toaster } from 'react-hot-toast'; // ✅ Import here
 import Dashboard from './Dashboard';
 import StudentList from './StudentList';
 import StudentDetail from './StudentDetail';
+import GuardianList from './GuardianList';
+import GuardianDetail from './GuardianDetail';
 
 const App = () => {
   return (
     <Router>
       {/* ✅ GLOBAL DYNAMIC TOASTER CONFIGURATION */}
-      <Toaster 
+      <Toaster
         position="top-right"
         reverseOrder={false}
         gutter={8}
@@ -35,11 +37,13 @@ const App = () => {
           }
         }}
       />
-      
+
       <Routes>
         <Route path="/" element={<Dashboard />} />
         <Route path="/students" element={<StudentList />} />
         <Route path="/students/:id" element={<StudentDetail />} />
+        <Route path="/guardians" element={<GuardianList />} />
+        <Route path="/guardians/:id" element={<GuardianDetail />} />
       </Routes>
     </Router>
   );

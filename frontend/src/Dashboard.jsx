@@ -75,7 +75,8 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
 
       <nav className="flex-1 px-4 space-y-3 mt-4">
         <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
-        <NavItem icon={<Users size={20} />} label="Student Detail Page" collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
+        <NavItem icon={<UserCheck size={20} />} label="Guardian List" collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
+        <NavItem icon={<Users size={20} />} label="Student List" collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
       </nav>
 
       <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>

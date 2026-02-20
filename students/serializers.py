@@ -1,16 +1,16 @@
 import base64
 import uuid
+
 from django.db import transaction, models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
+
 from .models import Student, Guardian, FeePayment
 
 
 class Base64ImageField(serializers.ImageField):
     def to_internal_value(self, data):
         if isinstance(data, str) and data.startswith('data:image'):
-            # format, imgstr = data.split(';base64,')
-            # ext = format.split('/')[-1]
             try:
                 format, imgstr = data.split(';base64,')
                 ext = format.split('/')[-1]
@@ -33,11 +33,22 @@ class ReadStudentSerializer(serializers.ModelSerializer):
 class CreateGuardianSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guardian
-        fields = ['name', 'cnic', 'phone_number', 'address']
+        fields = ['id', 'name', 'cnic', 'phone_number', 'address']
         extra_kwargs = {
             'cnic': {'validators': []},
             'phone_number': {'validators': []}
         }
+
+
+class GuardianDetailSerializer(serializers.ModelSerializer):
+    students = ReadStudentSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Guardian
+        fields = [
+            'id', 'name', 'cnic', 'phone_number',
+            'address', 'students'
+        ]
 
 
 class CreateFeePayment(serializers.ModelSerializer):
@@ -114,12 +125,6 @@ class StudentListSerializer(serializers.ModelSerializer):
     def get_fees_amount(self, obj):
         latest_payments = obj.payments.order_by('-date_paid').first()
         return latest_payments.amount if latest_payments else 0
-
-
-class GuardianDetailSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Guardian
-        fields = ['id', 'name', 'cnic', 'phone_number', 'address']
 
 
 class FeePaymentSerializer(serializers.ModelSerializer):
