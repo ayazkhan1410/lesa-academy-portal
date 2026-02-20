@@ -5,6 +5,8 @@ import uuid
 from django.db import transaction
 from django.db import models
 from django.core.files.base import ContentFile
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.db.models import (
     Sum, Q, Case, When, IntegerField, Subquery, OuterRef
 )
@@ -25,7 +27,7 @@ from drf_spectacular.types import OpenApiTypes
 
 from .models import (
     CustomUser, Student,
-    Guardian, FeePayment
+    Guardian, FeePayment, Expense
 )
 
 from .manager import get_tokens_for_user
@@ -36,7 +38,8 @@ from .serializers import (
     CustomStudentSerializer, StudentListSerializer,
     CreateGuardianSerializer, StudentDetailSerializer,
     FeePaymentSerializer, DashboardStatsSerializer,
-    GuardianDetailSerializer
+    GuardianDetailSerializer, ReadExpenseSerializer,
+    CreateExpenseSerializer
 )
 
 
@@ -1747,3 +1750,264 @@ class SendMessageAPIView(APIView):
             return Response({
                 'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ListCreateExpenseAPIView(APIView):
+    @extend_schema(
+        summary="List expenses",
+        description=(
+            "Retrieve expenses with optional search, filtering, "
+            "sorting, and pagination."
+        ),
+        parameters=[
+            OpenApiParameter(
+                name="search",
+                type=OpenApiTypes.STR,
+                required=False,
+                description=(
+                    "Search by title, description, "
+                    "expense_date, or category."
+                ),
+            ),
+            OpenApiParameter(
+                name="category",
+                type=OpenApiTypes.STR,
+                required=False,
+                enum=["salary", "rent", "utilities", "other"],
+                description="Filter by expense category.",
+            ),
+            OpenApiParameter(
+                name="status",
+                type=OpenApiTypes.STR,
+                required=False,
+                enum=["pending", "paid"],
+                description="Filter by expense status.",
+            ),
+            OpenApiParameter(
+                name="sort",
+                type=OpenApiTypes.STR,
+                required=False,
+                description=(
+                    "Sort by: title, amount, expense_date, "
+                    "category, status, created_at. "
+                    "Use '-' prefix for descending."
+                ),
+            ),
+        ],
+        responses={200: ReadExpenseSerializer},
+    )
+    def get(self, request):
+        try:
+            expenses = Expense.objects.all()
+
+            # Search
+            search_query = request.query_params.get('search', '')
+            if search_query:
+                expenses = expenses.filter(
+                    Q(title__icontains=search_query) |
+                    Q(description__icontains=search_query) |
+                    Q(expense_date__icontains=search_query) |
+                    Q(category__icontains=search_query)
+                )
+
+            # Filter
+            category = request.query_params.get('category', None)
+            if category:
+                expenses = expenses.filter(category=category)
+
+            status = request.query_params.get('status', None)
+            if status:
+                expenses = expenses.filter(status=status)
+
+            # Sort
+            sort = request.query_params.get('sort')
+            allowed_sort_fields = [
+                "title",
+                "amount",
+                "expense_date",
+                "category",
+                "status",
+                "created_at",
+            ]
+
+            if sort:
+                sort_field = sort.lstrip('-')
+                if sort_field in allowed_sort_fields:
+                    expenses = expenses.order_by(sort)
+
+            # Pagination
+            paginator = StudentPagination()
+            paginated_queryset = paginator.paginate_queryset(
+                expenses, request
+            )
+
+            serializer = ReadExpenseSerializer(paginated_queryset, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        except Exception as e:
+            return Response({
+                'error': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @extend_schema(
+        summary="Create expense",
+        description="Create a new expense record.",
+        request=CreateExpenseSerializer,
+        responses={
+            201: ReadExpenseSerializer,
+            400: OpenApiTypes.OBJECT,
+        },
+    )
+    def post(self, request):
+        serializer = CreateExpenseSerializer(data=request.data)
+
+        if serializer.is_valid():
+            expense = serializer.save()
+            response_serializer = ReadExpenseSerializer(expense)
+            return Response(
+                {
+                    "message": "Expense created successfully",
+                    "expense": response_serializer.data,
+                },
+                status=status.HTTP_201_CREATED,
+            )
+        return Response(
+            {"error": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+
+class ExpenseDetailAPIView(APIView):
+    @extend_schema(
+        summary="Retrieve expense",
+        description="Get a single expense by ID.",
+        responses={200: ReadExpenseSerializer},
+    )
+    def get(self, request, pk):
+        expense = get_object_or_404(Expense, pk=pk)
+        serializer = ReadExpenseSerializer(expense)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @extend_schema(
+        summary="Partially update expense",
+        description="Update one or more fields of an expense.",
+        request=CreateExpenseSerializer,
+        responses={
+            200: ReadExpenseSerializer,
+            400: OpenApiTypes.OBJECT,
+        },
+    )
+    def patch(self, request, pk):
+        expense = get_object_or_404(Expense, pk=pk)
+
+        serializer = CreateExpenseSerializer(
+            expense,
+            data=request.data,
+            partial=True,
+        )
+
+        if serializer.is_valid():
+            updated_expense = serializer.save()
+            response_serializer = ReadExpenseSerializer(
+                updated_expense
+            )
+            return Response(
+                response_serializer.data,
+                status=status.HTTP_200_OK,
+            )
+
+        return Response(
+            {"error": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    @extend_schema(
+        summary="Delete expense",
+        description="Delete an expense by ID.",
+        responses={204: None},
+    )
+    def delete(self, request, pk):
+        expense = get_object_or_404(Expense, pk=pk)
+        expense.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class MonthlyFinanceSummaryAPIView(APIView):
+    @extend_schema(
+        summary="Get monthly finance summary",
+        description=(
+            "Returns total revenue, total expenses, net profit, and "
+            "expenses grouped by category for the current month."
+        ),
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string"},
+                    "month_name": {"type": "string", "example": "Feb-2026"},
+                    "total_revenue": {"type": "number", "example": 5000},
+                    "total_expenses": {"type": "number", "example": 3000},
+                    "net_profit": {"type": "number", "example": 2000},
+                    "expense_by_category": {
+                        "type": "object",
+                        "properties": {
+                            "salary": {"type": "number", "example": 1000},
+                            "rent": {"type": "number", "example": 1000},
+                            "utilities": {"type": "number", "example": 500},
+                            "other": {"type": "number", "example": 500},
+                        },
+                    },
+                },
+            },
+            500: {
+                "type": "object",
+                "properties": {
+                    "error": {
+                        "type": "string",
+                        "example": "Internal server error"
+                    },
+                },
+            },
+        },
+    )
+    def get(self, request):
+        try:
+            now = timezone.now()
+            current_month_name = f"{now.strftime('%b')}-{now.year}"
+
+            # Total revenue for this month
+            total_revenue = FeePayment.objects.filter(
+                month_paid_for__month=now.month,
+                month_paid_for__year=now.year,
+            ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            # Total expenses for this month
+            total_expenses = Expense.objects.filter(
+                expense_date__month=now.month,
+                expense_date__year=now.year,
+            ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            # Expenses by category
+            categories = ["salary", "rent", "utilities", "other"]
+            expense_by_category = {}
+            for category in categories:
+                expense_by_category[category] = Expense.objects.filter(
+                    expense_date__month=now.month,
+                    expense_date__year=now.year,
+                    category=category,
+                ).aggregate(Sum('amount'))['amount__sum'] or 0
+
+            return Response({
+                "message": "Monthly finance summary",
+                "month_name": current_month_name,
+                "total_revenue": total_revenue,
+                "total_expenses": total_expenses,
+                "net_profit": total_revenue - total_expenses,
+                "expense_by_category": expense_by_category,
+            })
+
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

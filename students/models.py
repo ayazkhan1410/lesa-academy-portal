@@ -143,3 +143,38 @@ class SalaryPayment(models.Model):
         upload_to='salary_slips/', blank=True, null=True
     )
     paid_on = models.DateField(auto_now_add=True)
+
+
+class ExpenseCategory(models.TextChoices):
+    SALARY = 'salary', 'Salary'
+    RENT = 'rent', 'Rent'
+    UTILITIES = 'utilities', 'Utilities'
+    OTHER = 'other', 'Other'
+
+
+class ExpenseStatus(models.TextChoices):
+    PENDING = 'pending', 'Pending'
+    PAID = 'paid', 'Paid'
+
+
+class Expense(models.Model):
+    title = models.CharField(max_length=100, null=True, blank=True)
+    category = models.CharField(
+        max_length=20,
+        choices=ExpenseCategory.choices,
+        null=True,
+        blank=True
+    )
+    amount = models.DecimalField(
+        max_digits=10, decimal_places=2, null=True, blank=True
+    )
+    expense_date = models.DateField(null=True, blank=True)
+    status = models.CharField(
+        max_length=10,
+        choices=ExpenseStatus.choices,
+        null=True,
+        blank=True
+    )
+    description = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

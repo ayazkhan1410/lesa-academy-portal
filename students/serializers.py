@@ -5,7 +5,7 @@ from django.db import transaction, models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Student, Guardian, FeePayment
+from .models import Student, Guardian, FeePayment, Expense
 
 
 class Base64ImageField(serializers.ImageField):
@@ -214,3 +214,27 @@ class DashboardStatsSerializer(serializers.ModelSerializer):
     def get_fee_status(self, obj):
         latest_payment = obj.payments.order_by('-date_paid').first()
         return latest_payment.status if latest_payment else 'no_payment'
+
+
+class ReadExpenseSerializer(serializers.ModelSerializer):
+    category_display = serializers.CharField(
+        source='get_category_display', read_only=True
+    )
+    status_display = serializers.CharField(
+        source='get_status_display', read_only=True
+    )
+
+    class Meta:
+        model = Expense
+        fields = [
+            'id', 'title', 'category', 'category_display',
+            'status', 'status_display',
+            'amount', 'expense_date', 'description',
+            'created_at', 'updated_at'
+        ]
+
+
+class CreateExpenseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Expense
+        fields = '__all__'

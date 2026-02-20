@@ -1,7 +1,8 @@
 from django.contrib import admin
 from .models import (
     CustomUser, Guardian, Student,
-    FeePayment, Teacher, SalaryPayment
+    FeePayment, Teacher, SalaryPayment,
+    Expense
 )
 
 
@@ -63,3 +64,46 @@ class SalaryPaymentAdmin(admin.ModelAdmin):
     )
     list_filter = ('month', 'paid_on')
     search_fields = ('teacher__name',)
+
+
+@admin.register(Expense)
+class ExpenseAdmin(admin.ModelAdmin):
+    list_display = (
+        "id",
+        "title",
+        "category",
+        "amount",
+        "status",
+        "expense_date",
+        "created_at",
+        "updated_at"
+    )
+
+    list_filter = (
+        "category",
+        "status",
+        "expense_date",
+        "created_at",
+    )
+
+    search_fields = (
+        "title",
+        "description",
+    )
+
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+
+    fieldsets = (
+        ("Basic Information", {
+            "fields": ("title", "category", "amount", "status")
+        }),
+        ("Details", {
+            "fields": ("expense_date", "description")
+        }),
+        ("Timestamps", {
+            "fields": ("created_at", "updated_at")
+        }),
+    )

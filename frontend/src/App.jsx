@@ -1,11 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { Toaster } from 'react-hot-toast'; // ✅ Import here
+import { Toaster } from 'react-hot-toast';
 import Dashboard from './Dashboard';
 import StudentList from './StudentList';
 import StudentDetail from './StudentDetail';
 import GuardianList from './GuardianList';
 import GuardianDetail from './GuardianDetail';
+import ExpenseList from './ExpenseList';
 
 const App = () => {
   return (
@@ -44,6 +45,7 @@ const App = () => {
         <Route path="/students/:id" element={<StudentDetail />} />
         <Route path="/guardians" element={<GuardianList />} />
         <Route path="/guardians/:id" element={<GuardianDetail />} />
+        <Route path="/expenses" element={<ExpenseList />} />
       </Routes>
     </Router>
   );

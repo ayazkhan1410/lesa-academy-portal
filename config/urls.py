@@ -18,6 +18,9 @@ from students.views import (
     ListCreatePaymentAPIView,
     DashboardStatsAPIView,
     SendMessageAPIView,
+    ListCreateExpenseAPIView,
+    ExpenseDetailAPIView,
+    MonthlyFinanceSummaryAPIView,
 )
 
 
@@ -52,6 +55,12 @@ urlpatterns = [
     path('api/payments/', ListCreatePaymentAPIView.as_view()),
     path("api/dashboard-stats", DashboardStatsAPIView.as_view()),
     path("api/send-message/", SendMessageAPIView.as_view()),
+    path("api/expenses/", ListCreateExpenseAPIView.as_view()),
+    path("api/expenses/<int:pk>", ExpenseDetailAPIView.as_view()),
+    path(
+        'api/finances/monthly-summary/',
+        MonthlyFinanceSummaryAPIView.as_view()
+    ),
 ]
 
 if settings.DEBUG:

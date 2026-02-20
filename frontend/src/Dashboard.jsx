@@ -77,6 +77,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
         <NavItem icon={<UserCheck size={20} />} label="Guardian List" collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
         <NavItem icon={<Users size={20} />} label="Student List" collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
+        <NavItem icon={<Wallet size={20} />} label="Expense List" collapsed={isCollapsed} active={isActive('/expenses')} onClick={() => navigate('/expenses')} isDark={isDark} />
       </nav>
 
       <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
@@ -176,6 +177,13 @@ const Dashboard = () => {
     paid_fees_amount: 0,
     total_revenue: 0
   });
+  const [financeSummary, setFinanceSummary] = useState({
+    total_revenue: 0,
+    total_expenses: 0,
+    net_profit: 0,
+    month_name: '',
+    expense_by_category: {}
+  });
 
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('dashboardTheme');
@@ -188,6 +196,7 @@ const Dashboard = () => {
   // Privacy State for Finance
   const [showPendingFees, setShowPendingFees] = useState(false);
   const [showTotalRevenue, setShowTotalRevenue] = useState(false);
+  const [showNetProfit, setShowNetProfit] = useState(false);
 
   const toggleTheme = () => {
     const next = !isDark;
@@ -206,12 +215,16 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const response = await axios.get('http://127.0.0.1:8000/api/dashboard-stats', {
+      const statsResponse = await axios.get('http://127.0.0.1:8000/api/dashboard-stats', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const financeResponse = await axios.get('http://127.0.0.1:8000/api/finances/monthly-summary/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      setStudents(response.data.students || []);
-      if (response.data.stats) setStats(response.data.stats);
+      setStudents(statsResponse.data.students || []);
+      if (statsResponse.data.stats) setStats(statsResponse.data.stats);
+      if (financeResponse.data) setFinanceSummary(financeResponse.data);
     } catch (error) {
       console.error("Dashboard Load Error", error);
       if (error.response?.status === 401) {
@@ -352,6 +365,76 @@ const Dashboard = () => {
                   onToggleVisibility={() => setShowTotalRevenue(!showTotalRevenue)}
                 />
               </div>
+
+              {/* Monthly Finance Overview */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.45 }}
+                className="mb-10"
+              >
+                <div className="flex items-center gap-4 mb-6">
+                  <div className={`h-px flex-1 ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
+                  <h2 className={`text-[10px] font-black uppercase tracking-[0.4em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                    Monthly Revenue & Analytics • {financeSummary.month_name}
+                  </h2>
+                  <div className={`h-px flex-1 ${isDark ? 'bg-white/5' : 'bg-slate-200'}`} />
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                  <StatCard
+                    title="Current Month Revenue"
+                    value={financeSummary.total_revenue}
+                    prefix="Rs. "
+                    icon={<TrendingUp />}
+                    gradient="bg-gradient-to-br from-emerald-400 to-teal-600"
+                    isDark={isDark}
+                    isSensitive={true}
+                    isVisible={showTotalRevenue}
+                    onToggleVisibility={() => setShowTotalRevenue(!showTotalRevenue)}
+                  />
+                  <StatCard
+                    title="Current Month Expenses"
+                    value={financeSummary.total_expenses}
+                    prefix="Rs. "
+                    icon={<Wallet />}
+                    gradient="bg-gradient-to-br from-rose-400 to-amber-600"
+                    isDark={isDark}
+                  />
+                  <StatCard
+                    title="Net Profit / Loss"
+                    value={financeSummary.net_profit}
+                    prefix="Rs. "
+                    icon={<Sparkles />}
+                    gradient={financeSummary.net_profit >= 0 ? "bg-gradient-to-br from-blue-500 to-indigo-700" : "bg-gradient-to-br from-red-500 to-rose-700"}
+                    isDark={isDark}
+                    isSensitive={true}
+                    isVisible={showNetProfit}
+                    onToggleVisibility={() => setShowNetProfit(!showNetProfit)}
+                  />
+                </div>
+
+                {/* Category Breakdown Mini-List */}
+                {financeSummary.expense_by_category && Object.keys(financeSummary.expense_by_category).length > 0 && (
+                  <div className={`mt-6 p-6 rounded-[2rem] border ${isDark ? 'bg-slate-900/20 border-white/5' : 'bg-white border-slate-200 shadow-sm'}`}>
+                    <div className="flex items-center justify-between mb-4 px-2">
+                      <p className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Category Breakdown</p>
+                      <p className={`text-[9px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Distribution</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {Object.entries(financeSummary.expense_by_category).map(([cat, val]) => (
+                        <div key={cat} className={`flex items-center justify-between p-4 rounded-2xl ${isDark ? 'bg-slate-950/40' : 'bg-slate-50'}`}>
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${val > 0 ? 'bg-amber-500 animate-pulse' : 'bg-slate-700'}`} />
+                            <span className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{cat}</span>
+                          </div>
+                          <span className="text-xs font-bold tabular-nums">Rs. {val.toLocaleString()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
 
               {/* Recent Admissions */}
               <motion.section

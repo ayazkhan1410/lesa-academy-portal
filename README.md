@@ -7,8 +7,14 @@
 ## 🚀 Key Features
 
 * **Institutional Dashboard**: Real-time analytics for active students, total revenue, and pending fees.
-  * **Privacy Mode**: toggle visibility of sensitive financial data (Revenue/Fees) with a click.
-  * **Collapsible Sidebar**: maximized workspace efficiency.
+  * **Financial Overview**: Integrated monthly analytics for **Revenue**, **Expenses**, and **Net Profit**.
+  * **Privacy Mode**: Toggle visibility of sensitive financial data with a click for secure presentations.
+  * **Collapsible Sidebar**: Maximized workspace efficiency.
+* **Expense Ledger & Audit System**:
+  * **Interactive Accounting**: Click any expense record (e.g., "Electricity Bill") to view or edit full transaction details instantly.
+  * **Vibrant Analytics**: Glassmorphic stat cards with color-coded iconography for at-a-glance financial health tracking.
+  * **Category Intelligence**: Gridded cost distribution across Salary, Rent, Utilities, and other cost centers.
+  * **Audit-Ready Exports**: Generate professional PDF reports of the academy's expense records.
 * **Student Management**:
   * Comprehensive student profiles (Guardian details, contact info).
   * **Fee History**: Track paid/pending status with screenshot proofs.
