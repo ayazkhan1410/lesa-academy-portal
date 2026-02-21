@@ -18,7 +18,13 @@
 * **Student Management**:
   * Comprehensive student profiles (Guardian details, contact info).
   * **Fee History**: Track paid/pending status with screenshot proofs.
+  * **Attendance Analytics**: Integrated presence tracking metrics within each profile.
   * **Promote/Demote**: Easily manage student progression through grades.
+* **Smart Attendance System**:
+  * **Rapid Roll-Call**: Optimized daily interface for institutional attendance marking.
+  * **Zero-Click Auto-Save**: Instant, background synchronization of individual and bulk attendance records.
+  * **Historical Audit**: Discover and review attendance history by grade and date.
+  * **"Saved" Indicators**: Real-time visual confirmation for processed records.
 * **Smart Messaging System**:
   * **Direct SMS Integration**: Send fee reminders, exam notices, and general announcements to parents via Android SMS server.
   * **Bulk Actions**: Message individual students, multi-select groups, or broadcast to all parents instantly.
