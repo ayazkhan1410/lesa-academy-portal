@@ -11,6 +11,7 @@ from django.db.models import (
     Sum, Q, Case, When, IntegerField, Subquery, OuterRef, Avg, F, Window
 )
 from django.db.models.functions import DenseRank
+from django.core.cache import cache
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -229,6 +230,15 @@ class ListCreateStudentAPIView(APIView):
                 student=OuterRef('pk')
             ).order_by('-date_paid').values('status')[:1]
 
+            # Cache key for this query
+            query_string = request.META.get('QUERY_STRING', '')
+            cache_key = f'student_data_{query_string}'
+
+            # Try to get cached data
+            cached_data = cache.get(cache_key)
+            if cached_data:
+                return Response(cached_data)
+
             queryset = Student.objects.select_related(
                 'guardian'
             ).prefetch_related('payments').annotate(
@@ -304,6 +314,7 @@ class ListCreateStudentAPIView(APIView):
             }
             response = paginator.get_paginated_response(serializer.data)
             response.data['summary'] = summary
+            cache.set(cache_key, response.data, timeout=60)
             return response
 
         except Exception as e:
