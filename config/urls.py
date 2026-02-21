@@ -23,6 +23,7 @@ from students.views import (
     MonthlyFinanceSummaryAPIView,
     BulkTestRecordsAPIView,
     StudentAcademicSummaryAPIView,
+    FinancialTrendsAPIView
 )
 
 
@@ -71,6 +72,7 @@ urlpatterns = [
         'api/students/<int:student_id>/academic-summary/',
         StudentAcademicSummaryAPIView.as_view()
     ),
+    path('api/financial-trends/', FinancialTrendsAPIView.as_view())
 ]
 
 if settings.DEBUG:

@@ -1,14 +1,18 @@
 import traceback
 import base64
 import uuid
+import calendar
 
 from django.db import transaction
+from django.db.models.functions import TruncMonth
 from django.db import models
 from django.core.files.base import ContentFile
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.db.models import (
-    Sum, Q, Case, When, IntegerField, Subquery, OuterRef, Avg, F, Window
+    Sum, Q, Case, When, IntegerField,
+    Subquery, OuterRef, Avg, F, Window,
+    Count
 )
 from django.db.models.functions import DenseRank
 from django.core.cache import cache
@@ -2125,6 +2129,69 @@ class StudentAcademicSummaryAPIView(APIView):
                 'summary': summary
             })
 
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class FinancialTrendsAPIView(APIView):
+    def get(self, request):
+        try:
+            enrollment_demographics = []
+
+            now = timezone.now()
+            expense_data = (
+                Expense.objects
+                .filter(expense_date__year=now.year)
+                .annotate(month=TruncMonth('expense_date'))
+                .values('month')
+                .annotate(total=Sum('amount'))
+            )
+
+            revenue_data = (
+                FeePayment.objects
+                .filter(date_paid__year=now.year)
+                .annotate(month=TruncMonth('date_paid'))
+                .values('month')
+                .annotate(total=Sum('amount'))
+            )
+
+            grade_count = Student.objects.values(
+                'grade'
+            ).annotate(count=Count('id'))
+            for grade in grade_count:
+                grades = {
+                    'grade': f"class {grade['grade']}",
+                    'count': grade['count']
+                }
+                enrollment_demographics.append(grades)
+
+            expense_dict = {
+                item['month'].month: item['total']
+                for item in expense_data
+            }
+
+            revenue_dict = {
+                item['month'].month: item['total']
+                for item in revenue_data
+            }
+
+            financial_trends = []
+            for month in range(1, 13):
+                financial_trends.append({
+                    "month": calendar.month_abbr[month],
+                    "revenue": revenue_dict.get(month, 0),
+                    "expense": expense_dict.get(month, 0),
+                })
+
+            return Response({
+                "message": "Financial trends fetched successfully",
+                "financial_trends": financial_trends,
+                "enrollment_demographics": enrollment_demographics
+            })
         except Exception as e:
             traceback.print_exc()
             return Response(

@@ -13,6 +13,10 @@ import toast, { Toaster } from 'react-hot-toast';
 import Login from './Login';
 import StudentModal from './StudentModal';
 import BulkStudentModal from './BulkStudentModal';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
+  PieChart, Pie, Cell, Legend
+} from 'recharts';
 
 // --- SHARED SIDEBAR COMPONENT ---
 export const Sidebar = ({ isDark: isDarkProp }) => {
@@ -184,6 +188,8 @@ const Dashboard = () => {
     month_name: '',
     expense_by_category: {}
   });
+  const [financialTrends, setFinancialTrends] = useState([]);
+  const [enrollmentDemographics, setEnrollmentDemographics] = useState([]);
 
   const [isDark, setIsDark] = useState(() => {
     const saved = localStorage.getItem('dashboardTheme');
@@ -221,10 +227,17 @@ const Dashboard = () => {
       const financeResponse = await axios.get('http://127.0.0.1:8000/api/finances/monthly-summary/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+      const trendsResponse = await axios.get('http://127.0.0.1:8000/api/financial-trends/', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
 
       setStudents(statsResponse.data.students || []);
       if (statsResponse.data.stats) setStats(statsResponse.data.stats);
       if (financeResponse.data) setFinanceSummary(financeResponse.data);
+      if (trendsResponse.data) {
+        setFinancialTrends(trendsResponse.data.financial_trends || []);
+        setEnrollmentDemographics(trendsResponse.data.enrollment_demographics || []);
+      }
     } catch (error) {
       console.error("Dashboard Load Error", error);
       if (error.response?.status === 401) {
@@ -434,6 +447,97 @@ const Dashboard = () => {
                     </div>
                   </div>
                 )}
+              </motion.div>
+
+              {/* Analytics Charts */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.48 }}
+                className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10"
+              >
+                {/* Financial Trends Area Chart */}
+                <div className={`lg:col-span-2 p-6 rounded-[2rem] border overflow-hidden ${isDark ? 'bg-slate-900/40 backdrop-blur-xl border-white/5 shadow-xl' : 'bg-white border-slate-200 shadow-lg shadow-slate-200/50'}`}>
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>Financial Trends</h3>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Revenue vs Expenses (Annual)</p>
+                    </div>
+                  </div>
+                  <div className="h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={financialTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                          </linearGradient>
+                          <linearGradient id="colorExpense" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#ef4444" stopOpacity={0.4} />
+                            <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"} />
+                        <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: isDark ? '#64748b' : '#94a3b8', fontWeight: 'bold' }} />
+                        <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: isDark ? '#64748b' : '#94a3b8', fontWeight: 'bold' }} tickFormatter={(value) => `Rs.${value / 1000}k`} />
+                        <RechartsTooltip
+                          contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', borderRadius: '1rem', fontFamily: 'Outfit, sans-serif' }}
+                          itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#0f172a' }}
+                          labelStyle={{ fontSize: '10px', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.1em', color: isDark ? '#94a3b8' : '#64748b', marginBottom: '4px' }}
+                        />
+                        <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '10px' }} />
+                        <Area type="monotone" name="Total Revenue" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorRevenue)" />
+                        <Area type="monotone" name="Total Expenses" dataKey="expense" stroke="#ef4444" strokeWidth={3} fillOpacity={1} fill="url(#colorExpense)" />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Enrollment Demographics Pie Chart */}
+                <div className={`p-6 rounded-[2rem] border overflow-hidden ${isDark ? 'bg-slate-900/40 backdrop-blur-xl border-white/5 shadow-xl' : 'bg-white border-slate-200 shadow-lg shadow-slate-200/50'}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <h3 className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>Demographics</h3>
+                      <p className={`text-[10px] font-bold uppercase tracking-[0.2em] mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Students by Class</p>
+                    </div>
+                  </div>
+                  <div className="h-[300px] w-full flex items-center justify-center">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={enrollmentDemographics.map(d => ({
+                            ...d,
+                            displayName: String(d.grade).toUpperCase()
+                          }))}
+                          cx="50%"
+                          cy="45%"
+                          innerRadius={60}
+                          outerRadius={90}
+                          paddingAngle={5}
+                          dataKey="count"
+                          nameKey="displayName"
+                          stroke="none"
+                        >
+                          {enrollmentDemographics.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'][index % 6]} />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip
+                          contentStyle={{ backgroundColor: isDark ? '#0f172a' : '#ffffff', borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)', borderRadius: '1rem', fontFamily: 'Outfit, sans-serif' }}
+                          itemStyle={{ fontSize: '12px', fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#0f172a' }}
+                          formatter={(value, name) => [value, name]}
+                        />
+                        <Legend
+                          iconType="circle"
+                          layout="horizontal"
+                          verticalAlign="bottom"
+                          align="center"
+                          wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.1em', paddingTop: '20px' }}
+                        />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
               </motion.div>
 
               {/* Recent Admissions */}
