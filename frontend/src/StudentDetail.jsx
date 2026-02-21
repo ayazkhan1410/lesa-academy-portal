@@ -7,7 +7,7 @@ import {
     ArrowLeft, User, Phone, MapPin, CreditCard, Calendar,
     Hash, FileText, LayoutDashboard, Users, Edit2, Image as ImageIcon,
     ChevronLeft, ChevronRight, MessageSquare, Award, BookOpen,
-    TrendingUp, FileDown, PlusCircle, Trash2
+    TrendingUp, FileDown, PlusCircle, Trash2, CalendarCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import PaymentModal from './PaymentModal';
@@ -284,6 +284,16 @@ const StudentDetail = () => {
                                         {student.latest_fee_status === 'paid' ? 'CLEAR' : 'REMAINING'}
                                     </p>
                                     <button onClick={() => setActiveTab('fees')} className="mt-4 text-[10px] font-black text-emerald-500 hover:text-white uppercase tracking-widest">View Ledger →</button>
+                                </div>
+                                <div className="bg-amber-600/10 border border-amber-500/20 rounded-3xl p-8 flex flex-col items-center text-center">
+                                    <div className="bg-amber-600 p-4 rounded-full text-white mb-4 shadow-lg shadow-amber-600/30">
+                                        <CalendarCheck size={32} />
+                                    </div>
+                                    <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Overall Attendance</h4>
+                                    <p className={`text-5xl font-black italic tracking-tighter ${student.overall_attendance >= 75 ? 'text-white' : 'text-rose-400'}`}>
+                                        {student.overall_attendance != null ? `${Math.round(student.overall_attendance)}%` : '--'}
+                                    </p>
+                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Presence Rate</p>
                                 </div>
                             </div>
                         </motion.div>

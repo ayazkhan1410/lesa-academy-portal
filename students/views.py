@@ -32,7 +32,8 @@ from drf_spectacular.types import OpenApiTypes
 
 from .models import (
     CustomUser, Student,
-    Guardian, FeePayment, Expense, StudentTestRecords
+    Guardian, FeePayment, Expense, StudentTestRecords,
+    StudentAttendance
 )
 
 from .manager import get_tokens_for_user
@@ -45,7 +46,7 @@ from .serializers import (
     FeePaymentSerializer, DashboardStatsSerializer,
     GuardianDetailSerializer, ReadExpenseSerializer,
     CreateExpenseSerializer, BulkTestRecordsSerializer,
-    ReadTestRecordsSerializer
+    ReadTestRecordsSerializer, BulkStudentAttendanceInputSerializer
 )
 
 
@@ -2085,7 +2086,9 @@ class StudentAcademicSummaryAPIView(APIView):
             test_records = StudentTestRecords.objects.filter(
                 student_id=student_id
             )
-            serializer = ReadTestRecordsSerializer(test_records, many=True)
+            serializer = ReadTestRecordsSerializer(
+                test_records, many=True
+            )
 
             ranked_students = Student.objects.filter(
                 grade=student.grade
@@ -2192,6 +2195,107 @@ class FinancialTrendsAPIView(APIView):
                 "financial_trends": financial_trends,
                 "enrollment_demographics": enrollment_demographics
             })
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AttendanceByClassAPIView(APIView):
+    def get(self, request):
+        try:
+            grade = request.query_params.get('grade', '')
+            date = request.query_params.get('date', '')
+
+            if not grade:
+                return Response({
+                    "message": "Grade parameter is required",
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            if not date:
+                return Response({
+                    "message": "Date parameter is required",
+                }, status=status.HTTP_400_BAD_REQUEST)
+
+            students = Student.objects.filter(grade__icontains=grade)
+            if not students:
+                return Response({
+                    "message": "No students found for this grade",
+                    "students": [],
+                    'class_name': grade,
+                    'date': date
+                }, status=status.HTTP_200_OK)
+
+            student_list = []
+            for student in students:
+                record = StudentAttendance.objects.filter(
+                    student=student, date=date
+                ).first()
+
+                student_data = {
+                    "id": record.id if record else None,
+                    "student_id": student.id,
+                    "student_name": student.name,
+                    "student_image": (
+                        student.student_image.url
+                        if student.student_image else None
+                    ),
+                    "date": date,
+                    "status": record.status if record else "none",
+                    "remarks": record.remarks if record else "",
+                    "created_at": record.created_at if record else None,
+                    "updated_at": record.updated_at if record else None
+                }
+                student_list.append(student_data)
+
+            return Response({
+                "message": "Students fetched successfully",
+                "students": student_list,
+                'class_name': grade,
+                'date': date
+            })
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BulkStudentAttendanceAPIView(APIView):
+    def post(self, request):
+        try:
+            serializer = BulkStudentAttendanceInputSerializer(
+                data=request.data
+            )
+
+            if not serializer.is_valid():
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            date = serializer.validated_data['date']
+            records = serializer.validated_data['records']
+
+            with transaction.atomic():
+                for record in records:
+                    StudentAttendance.objects.update_or_create(
+                        date=date,
+                        student_id=record['student_id'],
+                        defaults={
+                            'status': record['status'],
+                            'remarks': record.get('remarks', '')
+                        }
+                    )
+
+            return Response({
+                'message': 'Attendance records updated successfully',
+                'records': serializer.validated_data['records']
+            })
+
         except Exception as e:
             traceback.print_exc()
             return Response(

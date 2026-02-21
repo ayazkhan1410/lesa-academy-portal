@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
+from django.utils import timezone
 
-from django.db.models.signals import post_delete
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
 from .manager import MyUserManager
@@ -92,6 +93,9 @@ class Student(models.Model):
     is_active = models.BooleanField(default=True)
     total_tests_conducted = models.IntegerField(
         null=True, blank=True
+    )
+    overall_attendance = models.FloatField(
+        null=True, blank=True, default=0.0
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -251,3 +255,52 @@ class TeacherSubject(models.Model):
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class AttendanceStatus(models.TextChoices):
+    PRESENT = 'present', 'Present'
+    ABSENT = 'absent', 'Absent'
+    LEAVE = 'leave', 'Leave'
+    LATE = 'late', 'Late'
+
+
+class StudentAttendance(models.Model):
+    student = models.ForeignKey(
+        Student, on_delete=models.CASCADE,
+        related_name='attendance',
+        null=True, blank=True
+    )
+    date = models.DateField(default=timezone.now)
+    status = models.CharField(
+        max_length=10,
+        choices=AttendanceStatus.choices,
+        null=True, blank=True
+    )
+    remarks = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('student', 'date')
+
+
+def recalc_overall_attendance(student):
+    total = student.attendance.count()
+    if total > 0:
+        present_count = student.attendance.filter(
+            status=AttendanceStatus.PRESENT
+        ).count()
+        student.overall_attendance = present_count / total * 100
+    else:
+        student.overall_attendance = 0
+    student.save(update_fields=['overall_attendance'])
+
+
+@receiver(post_save, sender=StudentAttendance)
+def update_student_attendance(sender, instance, **kwargs):
+    recalc_overall_attendance(instance.student)
+
+
+@receiver(post_delete, sender=StudentAttendance)
+def update_student_attendance_on_delete(sender, instance, **kwargs):
+    recalc_overall_attendance(instance.student)

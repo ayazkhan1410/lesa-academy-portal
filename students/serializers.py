@@ -5,7 +5,10 @@ from django.db import transaction, models
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 
-from .models import Student, Guardian, FeePayment, Expense, StudentTestRecords
+from .models import (
+    Student, Guardian, FeePayment, Expense, StudentTestRecords,
+    StudentAttendance, AttendanceStatus
+)
 
 
 class Base64ImageField(serializers.ImageField):
@@ -257,3 +260,30 @@ class ReadTestRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentTestRecords
         fields = '__all__'
+
+
+class StudentAttendanceSerializer(serializers.ModelSerializer):
+    student_id = serializers.CharField(
+        source='student.id', read_only=True
+    )
+    student_name = serializers.CharField(
+        source='student.name', read_only=True
+    )
+    student_image = serializers.ImageField(
+        source='student.student_image', read_only=True
+    )
+
+    class Meta:
+        model = StudentAttendance
+        exclude = ['student']
+
+
+class StudentAttendanceInputSerializer(serializers.Serializer):
+    student_id = serializers.IntegerField(write_only=True)
+    status = serializers.ChoiceField(choices=AttendanceStatus.choices)
+    remarks = serializers.CharField(required=False, allow_blank=True)
+
+
+class BulkStudentAttendanceInputSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    records = StudentAttendanceInputSerializer(many=True)

@@ -7,6 +7,7 @@ import StudentDetail from './StudentDetail';
 import GuardianList from './GuardianList';
 import GuardianDetail from './GuardianDetail';
 import ExpenseList from './ExpenseList';
+import AttendanceDashboard from './AttendanceDashboard';
 
 const App = () => {
   return (
@@ -46,6 +47,7 @@ const App = () => {
         <Route path="/guardians" element={<GuardianList />} />
         <Route path="/guardians/:id" element={<GuardianDetail />} />
         <Route path="/expenses" element={<ExpenseList />} />
+        <Route path="/attendance" element={<AttendanceDashboard />} />
       </Routes>
     </Router>
   );
