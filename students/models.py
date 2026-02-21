@@ -127,7 +127,6 @@ class FeePayment(models.Model):
 class Teacher(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     phone_number = models.CharField(max_length=15, null=True, blank=True)
-    subject = models.CharField(max_length=50, null=True, blank=True)
     salary = models.DecimalField(
         max_digits=10, decimal_places=2,
         null=True, blank=True
@@ -231,3 +230,24 @@ def update_student_total_tests(sender, instance, **kwargs):
     ):
         student.total_tests_conducted -= 1
         student.save(update_fields=['total_tests_conducted'])
+
+
+class Subject(models.Model):
+    name = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class TeacherSubject(models.Model):
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE,
+        related_name='teacher_subjects',
+        null=True, blank=True
+    )
+    subject = models.ForeignKey(
+        Subject, on_delete=models.CASCADE,
+        related_name='teacher_subjects',
+        null=True, blank=True
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

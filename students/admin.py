@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import (
     CustomUser, Guardian, Student,
     FeePayment, Teacher, SalaryPayment,
-    Expense, StudentTestRecords
+    Expense, StudentTestRecords, Subject, TeacherSubject
 )
 
 
@@ -50,11 +50,11 @@ class FeePaymentAdmin(admin.ModelAdmin):
 @admin.register(Teacher)
 class TeacherAdmin(admin.ModelAdmin):
     list_display = (
-        'id', 'name', 'phone_number', 'subject',
+        'id', 'name', 'phone_number',
         'salary', 'date_joined', 'created_at'
     )
-    list_filter = ('subject', 'date_joined')
-    search_fields = ('name', 'subject')
+    list_filter = ('date_joined', 'created_at')
+    search_fields = ('name', 'phone_number')
 
 
 @admin.register(SalaryPayment)
@@ -125,3 +125,19 @@ class StudentTestRecordsAdmin(admin.ModelAdmin):
     list_filter = ('subject', 'test_date', 'student')
     search_fields = ('student__name', 'test_name', 'subject', 'remarks')
     readonly_fields = ('percentage', 'created_at', 'updated_at')
+
+
+@admin.register(Subject)
+class SubjectAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'updated_at')
+    search_fields = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
+
+
+@admin.register(TeacherSubject)
+class TeacherSubjectAdmin(admin.ModelAdmin):
+    list_display = ('id', 'teacher', 'subject', 'created_at', 'updated_at')
+    list_filter = ('created_at', 'updated_at')
+    search_fields = ('teacher__name', 'subject__name')
+    readonly_fields = ('created_at', 'updated_at')
