@@ -13,6 +13,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import Login from './Login';
 import StudentModal from './StudentModal';
 import BulkStudentModal from './BulkStudentModal';
+import { TableSkeleton, CardSkeleton, ChartSkeleton } from './Skeleton';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -340,8 +341,17 @@ const Dashboard = () => {
 
           {/* Loading State */}
           {loading ? (
-            <div className="flex items-center justify-center py-32">
-              <Loader2 className="animate-spin text-blue-500" size={40} />
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                <CardSkeleton /> <CardSkeleton /> <CardSkeleton /> <CardSkeleton />
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2"><ChartSkeleton /></div>
+                <div><ChartSkeleton /></div>
+              </div>
+              <div className="rounded-[2.5rem] border border-slate-200 dark:border-white/5 overflow-hidden">
+                <TableSkeleton rows={5} isDark={isDark} />
+              </div>
             </div>
           ) : (
             <>
@@ -529,7 +539,12 @@ const Dashboard = () => {
                           stroke="none"
                         >
                           {enrollmentDemographics.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'][index % 6]} />
+                            <Cell
+                              key={`cell-${index}`}
+                              className="cursor-pointer outline-none transition-all duration-300 hover:opacity-80"
+                              style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.3))' }}
+                              fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'][index % 6]}
+                            />
                           ))}
                         </Pie>
                         <RechartsTooltip

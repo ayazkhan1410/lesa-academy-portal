@@ -140,6 +140,22 @@ class FeePaymentSerializer(serializers.ModelSerializer):
         ]
 
 
+class StudentAttendanceSerializer(serializers.ModelSerializer):
+    student_id = serializers.CharField(
+        source='student.id', read_only=True
+    )
+    student_name = serializers.CharField(
+        source='student.name', read_only=True
+    )
+    student_image = serializers.ImageField(
+        source='student.student_image', read_only=True
+    )
+
+    class Meta:
+        model = StudentAttendance
+        exclude = ['student']
+
+
 class StudentDetailSerializer(serializers.ModelSerializer):
     guardian = GuardianDetailSerializer(read_only=True)
     guardian_name = serializers.CharField(
@@ -158,6 +174,7 @@ class StudentDetailSerializer(serializers.ModelSerializer):
         source='guardian.last_message_send', read_only=True
     )
     payments = FeePaymentSerializer(many=True, read_only=True)
+    attendance = StudentAttendanceSerializer(many=True, read_only=True)
     latest_fee_status = serializers.SerializerMethodField()
     total_fees_paid = serializers.SerializerMethodField()
     total_fees_pending = serializers.SerializerMethodField()
@@ -169,8 +186,9 @@ class StudentDetailSerializer(serializers.ModelSerializer):
             'id', 'name', 'age', 'grade', 'is_active', 'date_joined',
             'guardian', 'guardian_name', 'guardian_cnic',
             'guardian_phone', 'address', 'student_image',
-            'payments', 'latest_fee_status', 'last_message_send',
-            'total_fees_paid', 'total_fees_pending', 'payment_count'
+            'payments', 'attendance', 'latest_fee_status', 'last_message_send',
+            'total_fees_paid', 'total_fees_pending', 'payment_count',
+            'overall_attendance'
         ]
 
     def get_latest_fee_status(self, obj):
@@ -261,22 +279,6 @@ class ReadTestRecordsSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentTestRecords
         fields = '__all__'
-
-
-class StudentAttendanceSerializer(serializers.ModelSerializer):
-    student_id = serializers.CharField(
-        source='student.id', read_only=True
-    )
-    student_name = serializers.CharField(
-        source='student.name', read_only=True
-    )
-    student_image = serializers.ImageField(
-        source='student.student_image', read_only=True
-    )
-
-    class Meta:
-        model = StudentAttendance
-        exclude = ['student']
 
 
 class StudentAttendanceInputSerializer(serializers.Serializer):
@@ -431,4 +433,3 @@ class CreateTeacherSerializer(serializers.ModelSerializer):
                         teacher=instance, subject=sub
                     )
         return instance
-

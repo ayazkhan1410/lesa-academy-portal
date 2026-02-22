@@ -13,7 +13,72 @@ import { motion, AnimatePresence } from 'framer-motion';
 import PaymentModal from './PaymentModal';
 import MessageModal from './MessageModal';
 import TestRecordModal from './TestRecordModal';
+import Lightbox from './Lightbox';
 import toast from 'react-hot-toast';
+
+const AttendanceHeatmap = ({ attendance, overall }) => {
+    // We map real attendance records for the last 90 days
+    // If no record exists for a specific day, it shows as empty (slate-800)
+    const days = 90;
+    const today = new Date();
+
+    const grid = Array.from({ length: days }).map((_, i) => {
+        const date = new Date();
+        date.setDate(today.getDate() - (days - 1 - i));
+        const dateStr = date.toISOString().split('T')[0];
+
+        const record = attendance?.find(r => r.date === dateStr);
+        return {
+            date: dateStr,
+            status: record ? record.status : 'none'
+        };
+    });
+
+    return (
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-8 mt-8">
+            <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                    <Calendar className="text-amber-500" size={20} />
+                    <h3 className="text-lg font-black text-white italic tracking-tight uppercase">Presence Heatmap</h3>
+                </div>
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-sm bg-emerald-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Present</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-sm bg-amber-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Late/Leave</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                        <div className="w-2.5 h-2.5 rounded-sm bg-rose-500" />
+                        <span className="text-[9px] font-bold text-slate-500 uppercase">Absent</span>
+                    </div>
+                </div>
+            </div>
+
+            <div className="flex flex-wrap gap-1.5">
+                {grid.map((item, i) => (
+                    <motion.div
+                        key={i}
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ delay: i * 0.005 }}
+                        className={`w-3 h-3 rounded-sm ${item.status === 'present' ? 'bg-emerald-500/60' :
+                                (item.status === 'late' || item.status === 'leave') ? 'bg-amber-500/40' :
+                                    item.status === 'absent' ? 'bg-rose-500/60' :
+                                        'bg-slate-800'
+                            }`}
+                        title={`${item.date}: ${item.status}`}
+                    />
+                ))}
+            </div>
+            <p className="mt-6 text-[10px] text-slate-600 font-bold uppercase tracking-widest text-center">
+                {overall > 0 ? `Overall Presence: ${overall.toFixed(1)}%` : 'No attendance data recorded yet'}
+            </p>
+        </div>
+    );
+};
 
 const StudentDetail = () => {
     const { id } = useParams();
@@ -22,6 +87,10 @@ const StudentDetail = () => {
     const [academicData, setAcademicData] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview'); // overview, academic, fees
+
+    // Lightbox State
+    const [lightboxSrc, setLightboxSrc] = useState(null);
+    const [lightboxTitle, setLightboxTitle] = useState("");
 
     // Modals
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
@@ -198,7 +267,15 @@ const StudentDetail = () => {
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="bg-slate-900 border border-slate-800 rounded-[2.5rem] p-8 mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-2xl relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 blur-[100px] pointer-events-none rounded-full" />
                     <div className="flex items-center gap-6 relative z-10">
-                        <div className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-bold text-white shadow-xl shadow-blue-900/50 overflow-hidden shrink-0 border-4 border-slate-900">
+                        <div
+                            onClick={() => {
+                                if (student.student_image) {
+                                    setLightboxSrc(student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`);
+                                    setLightboxTitle(`${student.name} - Profile Image`);
+                                }
+                            }}
+                            className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-bold text-white shadow-xl shadow-blue-900/50 overflow-hidden shrink-0 border-4 border-slate-900 cursor-zoom-in"
+                        >
                             {student.student_image ? (
                                 <img src={student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`} alt={student.name} className="w-full h-full object-cover" />
                             ) : (
@@ -261,6 +338,10 @@ const StudentDetail = () => {
                                         </div>
                                     </div>
                                 </section>
+                                <AttendanceHeatmap
+                                    attendance={student.attendance || []}
+                                    overall={student.overall_attendance || 0}
+                                />
                             </div>
 
                             <div className="lg:col-span-1 space-y-8">
@@ -407,9 +488,15 @@ const StudentDetail = () => {
                                                     </div>
                                                     <div className="flex items-center gap-4">
                                                         {payment.screenshot && (
-                                                            <a href={`http://127.0.0.1:8000${payment.screenshot}`} target="_blank" rel="noopener noreferrer" className="p-3 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all" title="View Proof">
+                                                            <button
+                                                                onClick={() => {
+                                                                    setLightboxSrc(`http://127.0.0.1:8000${payment.screenshot}`);
+                                                                    setLightboxTitle(`Fee Proof - ${new Date(payment.month_paid_for).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
+                                                                }}
+                                                                className="p-3 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all" title="View Proof"
+                                                            >
                                                                 <ImageIcon size={18} />
-                                                            </a>
+                                                            </button>
                                                         )}
                                                         <span className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${payment.status === 'paid' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
                                                             {payment.status}
@@ -486,6 +573,16 @@ const StudentDetail = () => {
                     onSuccess={fetchAcademicSummary}
                 />
 
+                {/* Lightbox Rendering */}
+                <AnimatePresence>
+                    {lightboxSrc && (
+                        <Lightbox
+                            src={lightboxSrc}
+                            title={lightboxTitle}
+                            onClose={() => setLightboxSrc(null)}
+                        />
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

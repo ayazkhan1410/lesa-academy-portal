@@ -14,6 +14,7 @@ import DeleteModal from './DeleteModal';
 import StudentModal from './StudentModal';
 import MessageModal from './MessageModal';
 import { Sidebar } from './Dashboard';
+import { TableSkeleton } from './Skeleton';
 
 const CustomCheckbox = ({ checked, onChange, isDark }) => (
   <div
@@ -116,6 +117,19 @@ const StudentList = () => {
       setLoading(false);
     }
   }, [currentPage, searchTerm, selectedGrade]);
+
+  // Client-side instant filtering (Fuzzy Search)
+  const filteredStudents = React.useMemo(() => {
+    if (!searchTerm) return students;
+    const lowerSearch = searchTerm.toLowerCase();
+    return students.filter(s =>
+      s.name.toLowerCase().includes(lowerSearch) ||
+      (s.guardian_name && s.guardian_name.toLowerCase().includes(lowerSearch)) ||
+      (s.guardian_phone && s.guardian_phone.includes(lowerSearch)) ||
+      s.latest_fee_status.toLowerCase().includes(lowerSearch) ||
+      s.grade.toLowerCase().includes(lowerSearch)
+    );
+  }, [students, searchTerm]);
 
   useEffect(() => { fetchStudents(); }, [fetchStudents]);
 
@@ -485,8 +499,8 @@ const StudentList = () => {
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td colSpan="8" className="py-24 text-center">
-                          <Loader2 className="animate-spin mx-auto text-blue-500" size={36} />
+                        <td colSpan="8" className="p-0">
+                          <TableSkeleton rows={10} isDark={isDark} />
                         </td>
                       </tr>
                     ) : students.length === 0 ? (
@@ -496,7 +510,7 @@ const StudentList = () => {
                         </td>
                       </tr>
                     ) : (
-                      students.map((s, index) => {
+                      filteredStudents.map((s, index) => {
                         const statusConfig = getStatusConfig(s.latest_fee_status);
                         return (
                           <motion.tr
