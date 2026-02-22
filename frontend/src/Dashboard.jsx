@@ -324,10 +324,10 @@ const Dashboard = () => {
                 </div>
                 <div className="text-left">
                   <span className="block text-[10px] font-black uppercase tracking-[0.2em] text-blue-100/70 leading-none mb-1">
-                    New Admission
+                    {t('common.new_admission')}
                   </span>
                   <span className="block text-sm font-black text-white uppercase tracking-wider">
-                    Register Student
+                    {t('common.register_student')}
                   </span>
                 </div>
                 <div className="ml-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all">

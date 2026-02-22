@@ -11,7 +11,9 @@
         "search": "تلاش کریں",
         "delete": "حذف کریں",
         "edit": "ترمیم کریں",
-        "add": "نیا شامل کریں"
+        "add": "نیا شامل کریں",
+        "new_admission": "نیا داخلہ",
+        "register_student": "طالب علم رجسٹر کریں"
     },
     "sidebar": {
         "admin_portal": "ایڈمن پورٹل",

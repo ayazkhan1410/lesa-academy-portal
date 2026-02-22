@@ -11,7 +11,9 @@
         "search": "Search",
         "delete": "Delete",
         "edit": "Edit",
-        "add": "Add New"
+        "add": "Add New",
+        "new_admission": "New Admission",
+        "register_student": "Register Student"
     },
     "sidebar": {
         "admin_portal": "Admin Portal",
