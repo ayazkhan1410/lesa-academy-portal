@@ -22,7 +22,11 @@
         "digital_campus": "Digital Campus"
     },
     "dashboard": {
-        "welcome": "Welcome back, Admin!",
+        "welcome": "Welcome back!",
+        "good_morning": "Good Morning",
+        "good_afternoon": "Good Afternoon",
+        "good_evening": "Good Evening",
+        "good_night": "Good Night",
         "overview": "Here's what's happening at your academy today.",
         "total_students": "Total Students",
         "active_now": "Active Now",

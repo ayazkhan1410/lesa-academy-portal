@@ -261,7 +261,8 @@ const Dashboard = () => {
 
   // Get greeting based on time of day
   const hour = new Date().getHours();
-  const greeting = hour < 5 ? 'Good Night' : hour < 12 ? 'Good Morning' : hour < 17 ? 'Good Afternoon' : 'Good Evening';
+  const greeting = hour < 5 ? 'good_night' : hour < 12 ? 'good_morning' : hour < 17 ? 'good_afternoon' : 'good_evening';
+  const userName = localStorage.getItem('user_name') || 'Admin';
 
   return (
     <div className={`flex h-screen overflow-hidden font-sans transition-colors duration-500 ${isDark ? 'bg-[#0a0f1e] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
@@ -281,7 +282,9 @@ const Dashboard = () => {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{t(`dashboard.${greeting.toLowerCase().replace(' ', '_')}`)} 👋</p>
+              <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                {userName}, {t(`dashboard.${greeting}`)} 👋
+              </p>
               <h1 className={`text-3xl md:text-4xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 {t('common.dashboard')}
               </h1>

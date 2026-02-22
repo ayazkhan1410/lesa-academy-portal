@@ -41,6 +41,7 @@ const Login = ({ onLogin }) => {
 
             localStorage.setItem('access_token', response.data.access || response.data.token);
             if (response.data.refresh) localStorage.setItem('refresh_token', response.data.refresh);
+            if (response.data.username) localStorage.setItem('user_name', response.data.username);
 
             setLoading(false);
             if (onLogin) onLogin();

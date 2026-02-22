@@ -22,7 +22,11 @@
         "digital_campus": "ڈیجیٹل کیمپس"
     },
     "dashboard": {
-        "welcome": "خوش آمدید، ایڈمن!",
+        "welcome": "خوش آمدید!",
+        "good_morning": "صبح بخیر",
+        "good_afternoon": "سہ پہر بخیر",
+        "good_evening": "شام بخیر",
+        "good_night": "شب بخیر",
         "overview": "آج آپ کی اکیڈمی میں کیا ہو رہا ہے۔",
         "total_students": "کل طلباء",
         "active_now": "ابھی فعال",
