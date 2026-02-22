@@ -33,7 +33,7 @@ from drf_spectacular.types import OpenApiTypes
 from .models import (
     CustomUser, Student,
     Guardian, FeePayment, Expense, StudentTestRecords,
-    StudentAttendance
+    StudentAttendance, Teacher, SalaryPayment, Subject
 )
 
 from .manager import get_tokens_for_user
@@ -46,7 +46,11 @@ from .serializers import (
     FeePaymentSerializer, DashboardStatsSerializer,
     GuardianDetailSerializer, ReadExpenseSerializer,
     CreateExpenseSerializer, BulkTestRecordsSerializer,
-    ReadTestRecordsSerializer, BulkStudentAttendanceInputSerializer
+    ReadTestRecordsSerializer,
+    BulkStudentAttendanceInputSerializer,
+    SubjectSerializer, TeacherListSerializer, TeacherDetailSerializer,
+    CreateTeacherSerializer, SalaryPaymentSerializer,
+    CreateSalaryPaymentSerializer
 )
 
 
@@ -2300,5 +2304,272 @@ class BulkStudentAttendanceAPIView(APIView):
             traceback.print_exc()
             return Response(
                 {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+# ─── Teacher Module Views ──────────────────────────────────────────────────────
+
+class TeacherPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+
+class ListSubjectsAPIView(APIView):
+    @extend_schema(
+        summary="List / Create Subjects",
+        description="GET: All subjects list. POST: Create new subject.",
+        tags=['Teachers']
+    )
+    def get(self, request):
+        try:
+            subjects = Subject.objects.all().order_by('name')
+            serializer = SubjectSerializer(subjects, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    def post(self, request):
+        try:
+            serializer = SubjectSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(
+                    {'message': 'Subject created', 'data': serializer.data},
+                    status=status.HTTP_201_CREATED
+                )
+            return Response(
+                {'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class ListCreateTeacherAPIView(APIView):
+    @extend_schema(
+        summary="List Teachers",
+        description=(
+            "Paginated list of teachers with search and subject filter. "
+            "Returns summary: total_teachers, total_monthly_salary."
+        ),
+        parameters=[
+            OpenApiParameter(
+                'search', OpenApiTypes.STR, OpenApiParameter.QUERY,
+                description='Search by name or phone number'
+            ),
+            OpenApiParameter(
+                'subject_id', OpenApiTypes.INT, OpenApiParameter.QUERY,
+                description='Filter by subject ID'
+            ),
+            OpenApiParameter(
+                'page', OpenApiTypes.INT, OpenApiParameter.QUERY
+            ),
+        ],
+        tags=['Teachers']
+    )
+    def get(self, request):
+        try:
+            queryset = Teacher.objects.prefetch_related(
+                'teacher_subjects__subject', 'salary_payments'
+            ).all()
+
+            search = request.query_params.get('search')
+            if search:
+                queryset = queryset.filter(
+                    Q(name__icontains=search) |
+                    Q(phone_number__icontains=search)
+                )
+
+            subject_id = request.query_params.get('subject_id')
+            if subject_id:
+                queryset = queryset.filter(
+                    teacher_subjects__subject_id=subject_id
+                ).distinct()
+
+            queryset = queryset.order_by('-created_at')
+
+            paginator = TeacherPagination()
+            paginated = paginator.paginate_queryset(queryset, request)
+            serializer = TeacherListSerializer(paginated, many=True)
+
+            summary = {
+                'total_teachers': queryset.count(),
+                'total_monthly_salary': queryset.aggregate(
+                    total=Sum('salary')
+                )['total'] or 0,
+            }
+
+            resp = paginator.get_paginated_response(serializer.data)
+            resp.data['summary'] = summary
+            return resp
+
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Create Teacher",
+        description=(
+            "Create a new teacher. Pass subject_ids list to assign subjects."
+        ),
+        tags=['Teachers']
+    )
+    def post(self, request):
+        try:
+            serializer = CreateTeacherSerializer(data=request.data)
+            if serializer.is_valid():
+                teacher = serializer.save()
+                return Response({
+                    'message': 'Teacher created successfully',
+                    'data': TeacherDetailSerializer(teacher).data
+                }, status=status.HTTP_201_CREATED)
+            return Response(
+                {'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TeacherDetailAPIView(APIView):
+    def get_object(self, teacher_id):
+        return get_object_or_404(
+            Teacher.objects.prefetch_related(
+                'teacher_subjects__subject', 'salary_payments'
+            ),
+            id=teacher_id
+        )
+
+    @extend_schema(
+        summary="Get Teacher Detail",
+        tags=['Teachers']
+    )
+    def get(self, request, teacher_id):
+        try:
+            teacher = self.get_object(teacher_id)
+            serializer = TeacherDetailSerializer(teacher)
+            return Response(serializer.data)
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Update Teacher (Partial)",
+        tags=['Teachers']
+    )
+    def patch(self, request, teacher_id):
+        try:
+            teacher = self.get_object(teacher_id)
+            serializer = CreateTeacherSerializer(
+                teacher, data=request.data, partial=True
+            )
+            if serializer.is_valid():
+                teacher = serializer.save()
+                return Response({
+                    'message': 'Teacher updated successfully',
+                    'data': TeacherDetailSerializer(teacher).data
+                })
+            return Response(
+                {'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Delete Teacher",
+        tags=['Teachers']
+    )
+    def delete(self, request, teacher_id):
+        try:
+            teacher = self.get_object(teacher_id)
+            teacher.delete()
+            return Response(
+                {'message': 'Teacher deleted successfully'},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TeacherSalaryAPIView(APIView):
+    parser_classes = (MultiPartParser, FormParser, JSONParser)
+
+    @extend_schema(
+        summary="List Salary Payments for Teacher",
+        tags=['Teachers']
+    )
+    def get(self, request, teacher_id):
+        try:
+            teacher = get_object_or_404(Teacher, id=teacher_id)
+            payments = teacher.salary_payments.all().order_by('-paid_on')
+            serializer = SalaryPaymentSerializer(payments, many=True)
+            total = payments.aggregate(
+                total=Sum('amount')
+            )['total'] or 0
+            return Response({
+                'teacher_id': teacher_id,
+                'teacher_name': teacher.name,
+                'monthly_salary': teacher.salary,
+                'total_paid': total,
+                'payments': serializer.data
+            })
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    @extend_schema(
+        summary="Post Salary Payment for Teacher",
+        tags=['Teachers']
+    )
+    def post(self, request, teacher_id):
+        try:
+            teacher = get_object_or_404(Teacher, id=teacher_id)
+            serializer = CreateSalaryPaymentSerializer(data=request.data)
+            if serializer.is_valid():
+                payment = serializer.save(teacher=teacher)
+                return Response({
+                    'message': 'Salary posted successfully',
+                    'data': SalaryPaymentSerializer(payment).data
+                }, status=status.HTTP_201_CREATED)
+            return Response(
+                {'errors': serializer.errors},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

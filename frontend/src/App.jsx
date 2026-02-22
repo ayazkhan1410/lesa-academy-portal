@@ -8,6 +8,8 @@ import GuardianList from './GuardianList';
 import GuardianDetail from './GuardianDetail';
 import ExpenseList from './ExpenseList';
 import AttendanceDashboard from './AttendanceDashboard';
+import TeacherList from './TeacherList';
+import TeacherDetail from './TeacherDetail';
 
 const App = () => {
   return (
@@ -48,6 +50,8 @@ const App = () => {
         <Route path="/guardians/:id" element={<GuardianDetail />} />
         <Route path="/expenses" element={<ExpenseList />} />
         <Route path="/attendance" element={<AttendanceDashboard />} />
+        <Route path="/teachers" element={<TeacherList />} />
+        <Route path="/teachers/:id" element={<TeacherDetail />} />
       </Routes>
     </Router>
   );

@@ -7,7 +7,8 @@ from rest_framework import serializers
 
 from .models import (
     Student, Guardian, FeePayment, Expense, StudentTestRecords,
-    StudentAttendance, AttendanceStatus
+    StudentAttendance, AttendanceStatus,
+    Teacher, SalaryPayment, Subject, TeacherSubject
 )
 
 
@@ -287,3 +288,147 @@ class StudentAttendanceInputSerializer(serializers.Serializer):
 class BulkStudentAttendanceInputSerializer(serializers.Serializer):
     date = serializers.DateField()
     records = StudentAttendanceInputSerializer(many=True)
+
+
+# ─── Teacher Module Serializer
+
+class SubjectSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subject
+        fields = ['id', 'name']
+
+
+class SalaryPaymentSerializer(serializers.ModelSerializer):
+    salary_slip = serializers.FileField(use_url=True, required=False)
+
+    class Meta:
+        model = SalaryPayment
+        fields = ['id', 'amount', 'month', 'salary_slip', 'paid_on']
+
+
+class CreateSalaryPaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SalaryPayment
+        fields = ['amount', 'month', 'salary_slip']
+
+
+class TeacherListSerializer(serializers.ModelSerializer):
+    subjects = serializers.SerializerMethodField()
+    latest_salary_status = serializers.SerializerMethodField()
+    total_salary_paid = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Teacher
+        fields = [
+            'id', 'name', 'phone_number', 'salary',
+            'date_joined', 'subjects',
+            'latest_salary_status', 'total_salary_paid'
+        ]
+
+    def get_subjects(self, obj):
+        ts = obj.teacher_subjects.select_related('subject').all()
+        return [
+            {'id': t.subject.id, 'name': t.subject.name}
+            for t in ts if t.subject
+        ]
+
+    def get_latest_salary_status(self, obj):
+        latest = obj.salary_payments.order_by('-paid_on').first()
+        if not latest:
+            return 'no_payment'
+        from django.utils import timezone
+        today = timezone.now().date()
+        if latest.month and (
+            latest.month.year == today.year and
+            latest.month.month == today.month
+        ):
+            return 'paid'
+        return 'pending'
+
+    def get_total_salary_paid(self, obj):
+        result = obj.salary_payments.aggregate(
+            total=models.Sum('amount')
+        )
+        return result['total'] or 0
+
+
+class TeacherDetailSerializer(serializers.ModelSerializer):
+    subjects = serializers.SerializerMethodField()
+    salary_payments = SalaryPaymentSerializer(many=True, read_only=True)
+    total_salary_paid = serializers.SerializerMethodField()
+    latest_salary_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Teacher
+        fields = [
+            'id', 'name', 'phone_number', 'salary', 'date_joined',
+            'created_at', 'updated_at',
+            'subjects', 'salary_payments',
+            'total_salary_paid', 'latest_salary_status'
+        ]
+
+    def get_subjects(self, obj):
+        ts = obj.teacher_subjects.select_related('subject').all()
+        return [
+            {'id': t.subject.id, 'name': t.subject.name}
+            for t in ts if t.subject
+        ]
+
+    def get_total_salary_paid(self, obj):
+        result = obj.salary_payments.aggregate(
+            total=models.Sum('amount')
+        )
+        return result['total'] or 0
+
+    def get_latest_salary_status(self, obj):
+        latest = obj.salary_payments.order_by('-paid_on').first()
+        if not latest:
+            return 'no_payment'
+        from django.utils import timezone
+        today = timezone.now().date()
+        if latest.month and (
+            latest.month.year == today.year and
+            latest.month.month == today.month
+        ):
+            return 'paid'
+        return 'pending'
+
+
+class CreateTeacherSerializer(serializers.ModelSerializer):
+    subject_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False
+    )
+
+    class Meta:
+        model = Teacher
+        fields = [
+            'id', 'name', 'phone_number', 'salary', 'date_joined',
+            'subject_ids'
+        ]
+
+    def create(self, validated_data):
+        subject_ids = validated_data.pop('subject_ids', [])
+        teacher = Teacher.objects.create(**validated_data)
+        for sid in subject_ids:
+            sub = Subject.objects.filter(id=sid).first()
+            if sub:
+                TeacherSubject.objects.create(teacher=teacher, subject=sub)
+        return teacher
+
+    def update(self, instance, validated_data):
+        subject_ids = validated_data.pop('subject_ids', None)
+        for attr, val in validated_data.items():
+            setattr(instance, attr, val)
+        instance.save()
+        if subject_ids is not None:
+            instance.teacher_subjects.all().delete()
+            for sid in subject_ids:
+                sub = Subject.objects.filter(id=sid).first()
+                if sub:
+                    TeacherSubject.objects.create(
+                        teacher=instance, subject=sub
+                    )
+        return instance
+
