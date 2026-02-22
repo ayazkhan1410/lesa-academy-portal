@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    User, Phone, BookOpen, DollarSign,
+    User, Phone, BookOpen, Banknote,
     Calendar, Edit, Trash2, BadgeCheck, Clock, AlertCircle,
     Sun, Moon
 } from 'lucide-react';
@@ -11,6 +11,8 @@ import toast from 'react-hot-toast';
 import { Sidebar } from './Dashboard';
 import TeacherModal from './TeacherModal';
 import SalaryModal from './SalaryModal';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
@@ -25,6 +27,7 @@ const InfoField = ({ label, value, icon: Icon, isDark }) => (
 );
 
 const TeacherDetail = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
 
@@ -54,7 +57,7 @@ const TeacherDetail = () => {
             });
             setTeacher(r.data);
         } catch {
-            toast.error('Teacher data load nahi ho saka');
+            toast.error(t('teacher.loading_error') || 'Teacher data load nahi ho saka');
             navigate('/teachers');
         } finally {
             setLoading(false);
@@ -64,7 +67,7 @@ const TeacherDetail = () => {
     useEffect(() => { fetchTeacher(); }, [fetchTeacher]);
 
     const handleDelete = async () => {
-        if (!window.confirm(`"${teacher.name}" ko delete karna chahte hain?`)) return;
+        if (!window.confirm(t('teacher.delete_confirm', { name: teacher.name }) || `"${teacher.name}" ko delete karna chahte hain?`)) return;
         setDeleting(true);
         try {
             const token = localStorage.getItem('access_token');
@@ -85,7 +88,7 @@ const TeacherDetail = () => {
             <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
                 <Sidebar isDark={isDark} />
                 <div className="flex-1 flex items-center justify-center">
-                    <p className="text-slate-400 font-bold italic animate-pulse text-xl">Loading...</p>
+                    <p className="text-slate-400 font-bold italic animate-pulse text-xl">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -94,10 +97,10 @@ const TeacherDetail = () => {
 
     const salaryStatus = teacher.latest_salary_status;
     const statusBadge = salaryStatus === 'paid'
-        ? { bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', label: 'Paid This Month', icon: BadgeCheck }
+        ? { bg: 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400', label: t('teacher.paid_this_month'), icon: BadgeCheck }
         : salaryStatus === 'pending'
-            ? { bg: 'bg-amber-500/10 border-amber-500/20 text-amber-400', label: 'Salary Pending', icon: Clock }
-            : { bg: 'bg-slate-700/50 border-slate-700 text-slate-500', label: 'No Payment Yet', icon: AlertCircle };
+            ? { bg: 'bg-amber-500/10 border-amber-500/20 text-amber-400', label: t('teacher.salary_pending'), icon: Clock }
+            : { bg: 'bg-slate-700/50 border-slate-700 text-slate-500', label: t('teacher.no_payment_yet'), icon: AlertCircle };
 
     return (
         <div className={`flex h-screen overflow-hidden transition-colors duration-500 ${isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'}`}>
@@ -109,12 +112,15 @@ const TeacherDetail = () => {
                     <div className="flex items-center justify-between">
                         <button onClick={() => navigate('/teachers')}
                             className={`text-[10px] font-black uppercase tracking-widest flex items-center gap-2 transition-colors ${isDark ? 'text-slate-500 hover:text-white' : 'text-slate-400 hover:text-slate-800'}`}>
-                            ← Back to Teachers
+                            ← {t('teacher.back_to_list')}
                         </button>
-                        <button onClick={toggleTheme}
-                            className={`p-3 rounded-2xl border transition-all ${isDark ? 'border-white/10 bg-slate-900 text-yellow-400' : 'border-slate-200 bg-white text-slate-600 shadow-sm'}`}>
-                            {isDark ? <Sun size={18} /> : <Moon size={18} />}
-                        </button>
+                        <div className="flex items-center gap-3">
+                            <LanguageSwitcher isDark={isDark} />
+                            <button onClick={toggleTheme}
+                                className={`p-3 rounded-2xl border transition-all ${isDark ? 'border-white/10 bg-slate-900 text-yellow-400' : 'border-slate-200 bg-white text-slate-600 shadow-sm'}`}>
+                                {isDark ? <Sun size={18} /> : <Moon size={18} />}
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -167,10 +173,10 @@ const TeacherDetail = () => {
                         {['overview', 'salary'].map(tab => (
                             <button key={tab} onClick={() => setActiveTab(tab)}
                                 className={`flex-1 py-2.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === tab
-                                        ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20'
-                                        : isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-700'
+                                    ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/20'
+                                    : isDark ? 'text-slate-500 hover:text-slate-300' : 'text-slate-400 hover:text-slate-700'
                                     }`}>
-                                {tab === 'overview' ? '📋 Overview' : '💰 Salary'}
+                                {tab === 'overview' ? `📋 ${t('teacher.overview_tab')}` : `💰 ${t('teacher.salary_tab')}`}
                             </button>
                         ))}
                     </div>
@@ -185,9 +191,9 @@ const TeacherDetail = () => {
                                 {/* Stats */}
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {[
-                                        { label: 'Monthly Salary', value: `Rs. ${teacher.salary ? parseFloat(teacher.salary).toLocaleString() : '—'}`, icon: DollarSign, color: 'emerald' },
-                                        { label: 'Total Paid', value: `Rs. ${parseFloat(teacher.total_salary_paid || 0).toLocaleString()}`, icon: DollarSign, color: 'violet' },
-                                        { label: 'Subjects', value: (teacher.subjects || []).length, icon: BookOpen, color: 'blue' },
+                                        { label: t('teacher.salary'), value: `Rs. ${teacher.salary ? parseFloat(teacher.salary).toLocaleString() : '—'}`, icon: Banknote, color: 'emerald' },
+                                        { label: t('teacher.total_paid'), value: `Rs. ${parseFloat(teacher.total_salary_paid || 0).toLocaleString()}`, icon: Banknote, color: 'violet' },
+                                        { label: t('teacher.total_subjects'), value: (teacher.subjects || []).length, icon: BookOpen, color: 'blue' },
                                     ].map(c => (
                                         <div key={c.label} className={`${isDark ? `bg-${c.color}-600/5 border-${c.color}-500/10` : `bg-${c.color}-50 border-${c.color}-200`} border rounded-2xl p-6 flex items-center gap-4`}>
                                             <div className={`bg-${c.color}-600/20 p-3 rounded-2xl text-${c.color}-400`}><c.icon size={22} /></div>
@@ -201,12 +207,12 @@ const TeacherDetail = () => {
 
                                 {/* Details */}
                                 <section>
-                                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">Details</h2>
+                                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3">{t('common.details')}</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                        <InfoField label="Full Name" value={teacher.name} icon={User} isDark={isDark} />
-                                        <InfoField label="Phone" value={teacher.phone_number} icon={Phone} isDark={isDark} />
-                                        <InfoField label="Date Joined" value={teacher.date_joined} icon={Calendar} isDark={isDark} />
-                                        <InfoField label="Monthly Salary" value={teacher.salary ? `Rs. ${parseFloat(teacher.salary).toLocaleString()}` : '—'} icon={DollarSign} isDark={isDark} />
+                                        <InfoField label={t('teacher.name')} value={teacher.name} icon={User} isDark={isDark} />
+                                        <InfoField label={t('teacher.phone')} value={teacher.phone_number} icon={Phone} isDark={isDark} />
+                                        <InfoField label={t('teacher.hire_date')} value={teacher.date_joined} icon={Calendar} isDark={isDark} />
+                                        <InfoField label={t('teacher.salary')} value={teacher.salary ? `Rs. ${parseFloat(teacher.salary).toLocaleString()}` : '—'} icon={Banknote} isDark={isDark} />
                                     </div>
                                 </section>
 
@@ -232,22 +238,22 @@ const TeacherDetail = () => {
                                 className="space-y-5">
 
                                 <div className="flex items-center justify-between">
-                                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Salary Payment History</h2>
+                                    <h2 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{t('teacher.payment_history')}</h2>
                                     <button onClick={() => setIsSalaryModalOpen(true)}
                                         className="flex items-center gap-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-lg shadow-emerald-600/20 transition-all">
-                                        <DollarSign size={14} /> Post Salary
+                                        <Banknote size={14} /> {t('teacher.post_salary')}
                                     </button>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className={`border rounded-2xl p-5 text-center ${isDark ? 'bg-emerald-600/5 border-emerald-500/10' : 'bg-emerald-50 border-emerald-200'}`}>
-                                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">Total Paid</p>
+                                        <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">{t('teacher.total_paid')}</p>
                                         <p className={`text-2xl font-black italic ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                             Rs. {parseFloat(teacher.total_salary_paid || 0).toLocaleString()}
                                         </p>
                                     </div>
                                     <div className={`border rounded-2xl p-5 text-center ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
-                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Payments Count</p>
+                                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('teacher.payment_count')}</p>
                                         <p className={`text-2xl font-black italic ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                             {(teacher.salary_payments || []).length}
                                         </p>
@@ -262,10 +268,10 @@ const TeacherDetail = () => {
                                             <thead>
                                                 <tr className={`border-b text-[9px] font-black uppercase tracking-widest text-slate-500 ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-100 bg-slate-50'}`}>
                                                     <th className="text-left px-8 py-5">#</th>
-                                                    <th className="text-left px-8 py-5">Month</th>
-                                                    <th className="text-left px-8 py-5">Amount</th>
-                                                    <th className="text-left px-8 py-5">Paid On</th>
-                                                    <th className="text-right px-8 py-5">Slip</th>
+                                                    <th className="text-left px-8 py-5">{t('teacher.month')}</th>
+                                                    <th className="text-left px-8 py-5">{t('teacher.amount')}</th>
+                                                    <th className="text-left px-8 py-5">{t('teacher.paid_on')}</th>
+                                                    <th className="text-right px-8 py-5">{t('teacher.view_slip')}</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/5">
@@ -286,7 +292,7 @@ const TeacherDetail = () => {
                                                         <td className={`px-8 py-5 text-xs font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{p.paid_on || '—'}</td>
                                                         <td className="px-8 py-5 text-right">
                                                             {p.salary_slip ? (
-                                                                <a href={p.salary_slip} target="_blank" rel="noreferrer"
+                                                                <a href={p.salary_slip.startsWith('http') ? p.salary_slip : `${BASE_URL}${p.salary_slip}`} target="_blank" rel="noreferrer"
                                                                     className="text-violet-400 text-xs font-black uppercase tracking-widest hover:text-violet-300 underline">
                                                                     View
                                                                 </a>

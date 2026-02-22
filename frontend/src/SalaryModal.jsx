@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { X, DollarSign, Calendar, FileText } from 'lucide-react';
+import { X, Banknote, Calendar, FileText } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
 const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, onSuccess }) => {
+    const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
     const [form, setForm] = useState({
         amount: monthlySalary || '',
@@ -17,7 +19,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.amount || !form.month) {
-            toast.error('Amount aur Month required hain');
+            toast.error(t('teacher.amount_month_required') || 'Amount aur Month required hain');
             return;
         }
         setLoading(true);
@@ -34,7 +36,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                     'Content-Type': 'multipart/form-data',
                 }
             });
-            toast.success('Salary posted successfully!');
+            toast.success(t('teacher.salary_posted_success') || 'Salary posted successfully!');
             setForm({ amount: monthlySalary || '', month: '', salary_slip: null });
             onSuccess();
             onClose();
@@ -65,11 +67,11 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                         <div className="flex items-center justify-between p-6 border-b border-white/5">
                             <div className="flex items-center gap-3">
                                 <div className="bg-emerald-600/20 p-2.5 rounded-xl text-emerald-400">
-                                    <DollarSign size={20} />
+                                    <Banknote size={20} />
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-black text-white italic tracking-tight uppercase">
-                                        Post Salary
+                                        {t('teacher.post_salary')}
                                     </h2>
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
                                         {teacherName}
@@ -85,7 +87,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                         {/* Monthly salary badge */}
                         {monthlySalary && (
                             <div className="mx-6 mt-5 p-4 bg-emerald-600/5 border border-emerald-500/20 rounded-2xl flex justify-between items-center">
-                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Monthly Salary</span>
+                                <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{t('teacher.salary')}</span>
                                 <span className="text-xl font-black text-white italic">Rs. {monthlySalary}</span>
                             </div>
                         )}
@@ -95,7 +97,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                             {/* Amount */}
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                    <DollarSign size={10} className="inline mr-1" /> Amount (Rs.)
+                                    <Banknote size={10} className="inline mr-1" /> {t('teacher.amount')} (Rs.)
                                 </label>
                                 <input
                                     type="number" value={form.amount}
@@ -108,7 +110,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                             {/* Month */}
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                    <Calendar size={10} className="inline mr-1" /> Month (For which month)
+                                    <Calendar size={10} className="inline mr-1" /> {t('teacher.month')}
                                 </label>
                                 <input
                                     type="date" value={form.month}
@@ -116,14 +118,14 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                                     className="w-full bg-slate-800 border border-slate-700 text-white rounded-xl px-4 py-3 text-sm font-semibold focus:outline-none focus:border-emerald-500 transition-all"
                                 />
                                 <p className="text-[9px] text-slate-600 mt-1 font-bold">
-                                    Jis month ki salary ha uska pehla din select karen (e.g. 2024-02-01)
+                                    {t('teacher.date_hint') || 'Jis month ki salary ha uska pehla din select karen (e.g. 2024-02-01)'}
                                 </p>
                             </div>
 
                             {/* Salary Slip */}
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                    <FileText size={10} className="inline mr-1" /> Salary Slip (Optional)
+                                    <FileText size={10} className="inline mr-1" /> {t('teacher.view_slip')} (Optional)
                                 </label>
                                 <div className="relative">
                                     <input
@@ -144,11 +146,11 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                             <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={onClose}
                                     className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-black text-xs uppercase tracking-widest transition-all border border-white/5">
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button type="submit" disabled={loading}
                                     className="flex-1 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50">
-                                    {loading ? 'Posting...' : 'Post Salary'}
+                                    {loading ? t('common.loading') : t('teacher.post_salary')}
                                 </button>
                             </div>
                         </form>

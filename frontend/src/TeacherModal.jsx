@@ -1,12 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { X, User, Phone, DollarSign, Calendar, BookOpen } from 'lucide-react';
+import { X, User, Phone, Banknote, Calendar, BookOpen } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
+const COMMON_SUBJECTS = [
+    "Mathematics", "English", "Urdu", "Science", "Islamiyat",
+    "Physics", "Chemistry", "Biology", "Computer", "Pakistan Studies"
+];
+
 const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
+    const { t } = useTranslation();
     const isEdit = !!teacher;
     const [subjects, setSubjects] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -22,7 +29,10 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
         const token = localStorage.getItem('access_token');
         axios.get(`${BASE_URL}/api/subjects/`, {
             headers: { Authorization: `Bearer ${token}` }
-        }).then(r => setSubjects(r.data)).catch(() => { });
+        }).then(r => setSubjects(r.data)).catch((err) => {
+            console.error("Failed to fetch subjects:", err);
+            toast.error(t('teacher.subjects_load_error') || "Subjects load hone mein masla hua");
+        });
     }, []);
 
     useEffect(() => {
@@ -39,7 +49,26 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
         }
     }, [teacher, isOpen]);
 
-    const toggleSubject = (id) => {
+    const toggleSubject = async (subName) => {
+        // Find if subject already exists in fetched list
+        let subject = subjects.find(s => s.name.toLowerCase() === subName.toLowerCase());
+
+        if (!subject) {
+            // Create the subject on the fly
+            try {
+                const token = localStorage.getItem('access_token');
+                const resp = await axios.post(`${BASE_URL}/api/subjects/`, { name: subName }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                subject = resp.data.data;
+                setSubjects(prev => [...prev, subject]);
+            } catch (err) {
+                toast.error(`Could not create subject: ${subName}`);
+                return;
+            }
+        }
+
+        const id = subject.id;
         setForm(prev => ({
             ...prev,
             subject_ids: prev.subject_ids.includes(id)
@@ -50,6 +79,10 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (form.subject_ids.length === 0) {
+            toast.error(t('teacher.subject_required') || 'At least one subject is required');
+            return;
+        }
         setLoading(true);
         try {
             const token = localStorage.getItem('access_token');
@@ -58,12 +91,12 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                 await axios.patch(`${BASE_URL}/api/teachers/${teacher.id}/`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                toast.success('Teacher updated successfully!');
+                toast.success(t('teacher.updated_success') || 'Teacher updated successfully!');
             } else {
                 await axios.post(`${BASE_URL}/api/teachers/`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                toast.success('Teacher created successfully!');
+                toast.success(t('teacher.created_success') || 'Teacher created successfully!');
             }
             onSuccess();
             onClose();
@@ -99,10 +132,10 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                                 </div>
                                 <div>
                                     <h2 className="text-lg font-black text-white italic tracking-tight uppercase">
-                                        {isEdit ? 'Edit Teacher' : 'Add Teacher'}
+                                        {isEdit ? t('teacher.edit_teacher') || 'Edit Teacher' : t('teacher.add_teacher')}
                                     </h2>
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-                                        {isEdit ? 'Update teacher record' : 'Create new teacher'}
+                                        {isEdit ? t('teacher.update_record') || 'Update teacher record' : t('teacher.create_new') || 'Create new teacher'}
                                     </p>
                                 </div>
                             </div>
@@ -117,7 +150,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                             {/* Name */}
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                    <User size={10} className="inline mr-1" /> Full Name
+                                    <User size={10} className="inline mr-1" /> {t('teacher.name')}
                                 </label>
                                 <input
                                     type="text" value={form.name}
@@ -130,7 +163,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                             {/* Phone */}
                             <div>
                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                    <Phone size={10} className="inline mr-1" /> Phone Number
+                                    <Phone size={10} className="inline mr-1" /> {t('teacher.phone')}
                                 </label>
                                 <input
                                     type="text" value={form.phone_number}
@@ -144,7 +177,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                        <DollarSign size={10} className="inline mr-1" /> Monthly Salary
+                                        <Banknote size={10} className="inline mr-1" /> {t('teacher.salary')}
                                     </label>
                                     <input
                                         type="number" value={form.salary}
@@ -155,7 +188,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                        <Calendar size={10} className="inline mr-1" /> Date Joined
+                                        <Calendar size={10} className="inline mr-1" /> {t('teacher.hire_date')}
                                     </label>
                                     <input
                                         type="date" value={form.date_joined}
@@ -165,38 +198,67 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                                 </div>
                             </div>
 
-                            {/* Subjects */}
-                            {subjects.length > 0 && (
-                                <div>
-                                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                                        <BookOpen size={10} className="inline mr-1" /> Subjects
-                                    </label>
-                                    <div className="flex flex-wrap gap-2">
-                                        {subjects.map(sub => (
-                                            <button
-                                                key={sub.id} type="button"
-                                                onClick={() => toggleSubject(sub.id)}
-                                                className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all ${form.subject_ids.includes(sub.id)
-                                                        ? 'bg-violet-600/20 text-violet-300 border-violet-500/40'
-                                                        : 'bg-slate-800 text-slate-500 border-slate-700 hover:border-slate-500'
-                                                    }`}
-                                            >
-                                                {sub.name}
-                                            </button>
-                                        ))}
+                            <div>
+                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 flex justify-between">
+                                    <span><BookOpen size={10} className="inline mr-1" /> {t('teacher.subjects')}</span>
+                                    <span className="text-violet-500 text-[8px] font-black">* Required</span>
+                                </label>
+
+                                {/* Common Pakistani Subjects */}
+                                <div className="mb-4">
+                                    <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-2">{t('teacher.common_subjects') || 'Common Pakistani Subjects'}</p>
+                                    <div className="flex flex-wrap gap-1.5">
+                                        {COMMON_SUBJECTS.map(name => {
+                                            const isSelected = form.subject_ids.some(id =>
+                                                subjects.find(s => s.id === id)?.name.toLowerCase() === name.toLowerCase()
+                                            );
+                                            return (
+                                                <button
+                                                    key={name} type="button"
+                                                    onClick={() => toggleSubject(name)}
+                                                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${isSelected
+                                                        ? 'bg-emerald-600/20 text-emerald-300 border-emerald-500/40'
+                                                        : 'bg-slate-800/50 text-slate-500 border-slate-700 hover:border-slate-500'
+                                                        }`}
+                                                >
+                                                    {name}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
-                            )}
+
+                                {/* Dynamic/Other Subjects */}
+                                {subjects.filter(s => !COMMON_SUBJECTS.map(c => c.toLowerCase()).includes(s.name.toLowerCase())).length > 0 && (
+                                    <div>
+                                        <p className="text-[8px] text-slate-500 font-black uppercase tracking-widest mb-2">{t('teacher.other_subjects') || 'Other Subjects'}</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {subjects.filter(s => !COMMON_SUBJECTS.map(c => c.toLowerCase()).includes(s.name.toLowerCase())).map(sub => (
+                                                <button
+                                                    key={sub.id} type="button"
+                                                    onClick={() => toggleSubject(sub.name)}
+                                                    className={`px-2.5 py-1 rounded-lg text-[9px] font-black uppercase tracking-widest border transition-all ${form.subject_ids.includes(sub.id)
+                                                        ? 'bg-violet-600/20 text-violet-300 border-violet-500/40'
+                                                        : 'bg-slate-800/50 text-slate-500 border-slate-700 hover:border-slate-500'
+                                                        }`}
+                                                >
+                                                    {sub.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
 
                             {/* Actions */}
                             <div className="flex gap-3 pt-2">
                                 <button type="button" onClick={onClose}
                                     className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl font-black text-xs uppercase tracking-widest transition-all border border-white/5">
-                                    Cancel
+                                    {t('common.cancel')}
                                 </button>
                                 <button type="submit" disabled={loading}
                                     className="flex-1 py-3 bg-violet-600 hover:bg-violet-500 text-white rounded-xl font-black text-xs uppercase tracking-widest transition-all shadow-lg shadow-violet-600/20 disabled:opacity-50">
-                                    {loading ? 'Saving...' : isEdit ? 'Update Teacher' : 'Add Teacher'}
+                                    {loading ? t('common.loading') : isEdit ? t('common.save') : t('common.add')}
                                 </button>
                             </div>
                         </form>

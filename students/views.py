@@ -33,7 +33,7 @@ from drf_spectacular.types import OpenApiTypes
 from .models import (
     CustomUser, Student,
     Guardian, FeePayment, Expense, StudentTestRecords,
-    StudentAttendance, Teacher, SalaryPayment, Subject
+    StudentAttendance, Teacher, Subject
 )
 
 from .manager import get_tokens_for_user
@@ -2307,8 +2307,6 @@ class BulkStudentAttendanceAPIView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
-
-# ─── Teacher Module Views ──────────────────────────────────────────────────────
 
 class TeacherPagination(PageNumberPagination):
     page_size = 10

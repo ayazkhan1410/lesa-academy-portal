@@ -85,6 +85,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         <NavItem icon={<LayoutDashboard size={20} />} label={t('common.dashboard')} collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
         <NavItem icon={<UserCheck size={20} />} label={t('common.guardians')} collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
         <NavItem icon={<Users size={20} />} label={t('common.students')} collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
+        <NavItem icon={<GraduationCap size={20} />} label={t('common.teachers')} collapsed={isCollapsed} active={isActive('/teachers')} onClick={() => navigate('/teachers')} isDark={isDark} />
         <NavItem icon={<CalendarCheck size={20} />} label={t('common.attendance')} collapsed={isCollapsed} active={isActive('/attendance')} onClick={() => navigate('/attendance')} isDark={isDark} />
         <NavItem icon={<Wallet size={20} />} label={t('common.expenses')} collapsed={isCollapsed} active={isActive('/expenses')} onClick={() => navigate('/expenses')} isDark={isDark} />
       </nav>

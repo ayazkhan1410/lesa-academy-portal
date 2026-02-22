@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import {
-    Search, Plus, Phone, BookOpen, DollarSign,
+    Search, Plus, Phone, BookOpen, Banknote,
     Calendar, ChevronLeft, ChevronRight, GraduationCap,
     Sun, Moon, Loader2, SearchSlash
 } from 'lucide-react';
@@ -10,10 +10,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Sidebar } from './Dashboard';
 import TeacherModal from './TeacherModal';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
 const TeacherList = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
 
     const [isDark, setIsDark] = useState(() => {
@@ -65,7 +68,7 @@ const TeacherList = () => {
             setTotalCount(r.data.count || 0);
             setSummary(r.data.summary || {});
         } catch {
-            toast.error('Teachers load nahi ho sake');
+            toast.error(t('teacher.loading_error') || 'Teachers load nahi ho sake');
         } finally {
             setLoading(false);
         }
@@ -87,9 +90,9 @@ const TeacherList = () => {
         return 'bg-slate-700/50 text-slate-500 border-slate-700';
     };
     const getStatusLabel = (s) => {
-        if (s === 'paid') return 'Paid';
-        if (s === 'pending') return 'Pending';
-        return 'No Payment';
+        if (s === 'paid') return t('attendance.present'); // Present here acts as 'Paid/Present' or we can add specific ones
+        if (s === 'pending') return t('dashboard.attention_needed');
+        return t('attendance.reset');
     };
 
     return (
@@ -106,15 +109,16 @@ const TeacherList = () => {
                             </div>
                             <div>
                                 <h1 className="text-3xl font-black tracking-tighter italic uppercase underline decoration-violet-500 decoration-4 underline-offset-8">
-                                    Teachers
+                                    {t('common.teachers')}
                                 </h1>
                                 <p className={`text-[10px] font-black uppercase tracking-widest mt-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-                                    Managing {totalCount} teachers
+                                    {t('teacher.managing', { count: totalCount }) || `Managing ${totalCount} teachers`}
                                 </p>
                             </div>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-4">
+                            <LanguageSwitcher isDark={isDark} />
                             {/* Theme toggle */}
                             <button onClick={toggleTheme}
                                 className={`p-4 rounded-3xl border transition-all hover:scale-105 active:scale-95 ${isDark ? 'border-white/10 bg-slate-900 text-yellow-400' : 'border-slate-200 bg-white text-slate-600 shadow-sm'}`}>
@@ -124,7 +128,7 @@ const TeacherList = () => {
                             {/* Add Teacher */}
                             <button onClick={() => setIsModalOpen(true)}
                                 className="flex items-center gap-3 bg-violet-600 hover:bg-violet-500 text-white px-8 py-4 rounded-3xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-violet-500/40 transition-all hover:scale-105 active:scale-95 ring-4 ring-violet-600/10">
-                                <Plus size={16} strokeWidth={4} /> Add Teacher
+                                <Plus size={16} strokeWidth={4} /> {t('teacher.add_teacher')}
                             </button>
                         </div>
                     </div>
@@ -132,10 +136,10 @@ const TeacherList = () => {
                     {/* Summary pills */}
                     <div className="mt-6 flex flex-wrap gap-3">
                         <div className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest ${isDark ? 'bg-violet-600/10 border-violet-500/20 text-violet-400' : 'bg-violet-50 border-violet-200 text-violet-600'}`}>
-                            <GraduationCap size={14} /> {summary.total_teachers || 0} Teachers
+                            <GraduationCap size={14} /> {summary.total_teachers || 0} {t('common.teachers')}
                         </div>
                         <div className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl border text-xs font-black uppercase tracking-widest ${isDark ? 'bg-emerald-600/10 border-emerald-500/20 text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
-                            <DollarSign size={14} /> Rs. {(summary.total_monthly_salary || 0).toLocaleString()} Monthly Bill
+                            <Banknote size={14} /> Rs. {(summary.total_monthly_salary || 0).toLocaleString()} {t('teacher.monthly_bill')}
                         </div>
                     </div>
 
@@ -146,7 +150,7 @@ const TeacherList = () => {
                             <input
                                 type="text" value={search}
                                 onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-                                placeholder="Search by name or phone..."
+                                placeholder={t('teacher.search_placeholder')}
                                 className={`w-full pl-16 pr-8 py-5 rounded-[2rem] border text-sm font-bold transition-all outline-none ${isDark ? 'bg-slate-900/50 border-white/5 focus:border-violet-500/50 text-white placeholder:text-slate-700' : 'bg-white border-slate-200 focus:border-violet-500 text-slate-900 shadow-sm'}`}
                             />
                         </div>
@@ -155,7 +159,7 @@ const TeacherList = () => {
                             onChange={e => setSelectedSubject(e.target.value)}
                             className={`px-6 py-5 rounded-[2rem] border text-sm font-bold outline-none transition-all ${isDark ? 'bg-slate-900/50 border-white/5 text-slate-300' : 'bg-white border-slate-200 text-slate-700 shadow-sm'}`}
                         >
-                            <option value="">All Subjects</option>
+                            <option value="">{t('teacher.all_subjects')}</option>
                             {subjects.map(s => (
                                 <option key={s.id} value={s.id}>{s.name}</option>
                             ))}
@@ -170,14 +174,14 @@ const TeacherList = () => {
                             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                                 className="flex flex-col items-center justify-center py-48 gap-8">
                                 <Loader2 className="animate-spin text-violet-500" size={64} strokeWidth={3} />
-                                <p className={`text-[11px] font-black uppercase tracking-[0.4em] animate-pulse ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Loading teachers...</p>
+                                <p className={`text-[11px] font-black uppercase tracking-[0.4em] animate-pulse ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{t('teacher.loading')}</p>
                             </motion.div>
                         ) : teachers.length === 0 ? (
                             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}
                                 className={`flex flex-col items-center justify-center py-48 rounded-[3.5rem] border-2 border-dashed ${isDark ? 'border-white/5 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'}`}>
                                 <SearchSlash size={80} strokeWidth={1} className="text-slate-800 mb-8 opacity-20" />
-                                <h3 className="text-2xl font-black mb-2 italic tracking-tighter uppercase text-slate-500">No Teachers Found</h3>
-                                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Try adjusting your search or add a teacher</p>
+                                <h3 className="text-2xl font-black mb-2 italic tracking-tighter uppercase text-slate-500">{t('teacher.no_teachers')}</h3>
+                                <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{t('teacher.try_adjusting')}</p>
                             </motion.div>
                         ) : (
                             <div className="relative group">
@@ -189,7 +193,7 @@ const TeacherList = () => {
                                         <table className="w-full text-left border-collapse">
                                             <thead>
                                                 <tr className={`${isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
-                                                    {['#', 'Teacher', 'Phone', 'Subjects', 'Salary', 'Joined', 'Status'].map(h => (
+                                                    {[t('teacher.id'), t('common.teachers'), t('teacher.phone'), t('teacher.total_subjects'), t('teacher.salary'), t('teacher.hire_date'), 'Status'].map(h => (
                                                         <th key={h} className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">{h}</th>
                                                     ))}
                                                 </tr>
@@ -237,7 +241,7 @@ const TeacherList = () => {
                                                         </td>
                                                         <td className="px-10 py-7">
                                                             <div className="flex items-center gap-1.5 text-sm font-black">
-                                                                <DollarSign size={12} className="text-emerald-500" />
+                                                                <Banknote size={12} className="text-emerald-500" />
                                                                 Rs. {t.salary ? parseFloat(t.salary).toLocaleString() : '—'}
                                                             </div>
                                                         </td>
