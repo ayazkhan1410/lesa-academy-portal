@@ -12,9 +12,9 @@ const MessageModal = ({ isOpen, onClose, students = [], onSuccess }) => {
     const isBulk = students.length > 1 || sendToAll;
 
     const quickTemplates = [
-        { label: 'Fee Reminder', text: 'Dear Parent, this is a reminder that your child\'s monthly fee is pending. Please pay at your earliest convenience. — LESA Academy' },
-        { label: 'Fee Received', text: 'Dear Parent, we have received the fee payment for your child. Thank you for your timely payment. — LESA Academy' },
-        { label: 'General Notice', text: 'Dear Parent, this is an important notice from The Learning & Educational Science Academy, Bahawalnagar. ' },
+        { label: 'Fee Reminder', text: 'محترم والدین، آپ کو اطلاع دی جاتی ہے کہ آپ کے بچے کی ماہانہ فیس ابھی تک ادا نہیں ہوئی۔ براہ کرم جلد از جلد فیس جمع کروائیں۔ — The Learning & Educational Science Academy' },
+        { label: 'Fee Received', text: 'محترم والدین، آپ کے بچے کی فیس موصول ہو گئی ہے۔ وقت پر ادائیگی کا بہت شکریہ۔ — The Learning & Educational Science Academy' },
+        { label: 'General Notice', text: 'محترم والدین، یہ The Learning & Educational Science Academy، بہاولنگر کی جانب سے ایک اہم اطلاع ہے۔ ' },
     ];
 
     const handleSend = async () => {
