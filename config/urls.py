@@ -25,7 +25,11 @@ from students.views import (
     StudentAcademicSummaryAPIView,
     FinancialTrendsAPIView,
     AttendanceByClassAPIView,
-    BulkStudentAttendanceAPIView
+    BulkStudentAttendanceAPIView,
+    ListSubjectsAPIView,
+    ListCreateTeacherAPIView,
+    TeacherDetailAPIView,
+    TeacherSalaryAPIView,
 )
 
 
@@ -82,7 +86,19 @@ urlpatterns = [
     path(
         'api/attendance/bulk/',
         BulkStudentAttendanceAPIView.as_view()
-    )
+    ),
+
+    # Teacher Module
+    path('api/subjects/', ListSubjectsAPIView.as_view()),
+    path('api/teachers/', ListCreateTeacherAPIView.as_view()),
+    path(
+        'api/teachers/<int:teacher_id>/',
+        TeacherDetailAPIView.as_view()
+    ),
+    path(
+        'api/teachers/<int:teacher_id>/salary/',
+        TeacherSalaryAPIView.as_view()
+    ),
 ]
 
 if settings.DEBUG:
