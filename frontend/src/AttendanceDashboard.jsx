@@ -8,10 +8,13 @@ import {
     CheckCircle2, XCircle, Clock, AlertTriangle, UserX
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
 const AttendanceDashboard = () => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const [isDark, setIsDark] = useState(() => {
         const saved = localStorage.getItem('dashboardTheme');
@@ -143,6 +146,9 @@ const AttendanceDashboard = () => {
                 setStudents(prev => prev.map(s =>
                     s.student_id === individualStudent.student_id ? { ...s, initialStatus: s.status } : s
                 ));
+            } else if (studentsOverride) {
+                // For bulk saves, use the override data to sync initialStatus
+                setStudents(studentsOverride.map(s => ({ ...s, initialStatus: s.status })));
             } else {
                 setStudents(prev => prev.map(s => ({ ...s, initialStatus: s.status })));
             }
@@ -155,18 +161,18 @@ const AttendanceDashboard = () => {
     };
 
     const markAll = async (status) => {
-        const updatedStudents = students.map(s => ({
+        // Only mark students who haven't been marked yet (status is 'none')
+        const updatedStudents = students.map(s => (s.status === 'none' || status === 'none') ? {
             ...s,
             status,
-            remarks: status === 'none' ? '' : s.remarks
-        }));
+            remarks: (status === 'none' || status === 'present') ? '' : s.remarks
+        } : s);
 
         setStudents(updatedStudents);
 
         if (status !== 'none') {
             // Bulk save all students using the fresh data
             await saveAttendance(null, updatedStudents);
-            toast.success(`Marked everyone as ${status}`);
         } else {
             toast.success('Roster unmarked/reset');
         }
@@ -174,10 +180,18 @@ const AttendanceDashboard = () => {
 
     // Status mapping for beautiful UI elements
     const statusOptions = [
-        { value: 'present', label: 'Present', icon: CheckCircle2, color: 'text-emerald-500', bgDark: 'bg-emerald-500/10', bgLight: 'bg-emerald-100', border: 'border-emerald-500/30' },
-        { value: 'absent', label: 'Absent', icon: XCircle, color: 'text-rose-500', bgDark: 'bg-rose-500/10', bgLight: 'bg-rose-100', border: 'border-rose-500/30' },
-        { value: 'leave', label: 'Leave', icon: Clock, color: 'text-blue-500', bgDark: 'bg-blue-500/10', bgLight: 'bg-blue-100', border: 'border-blue-500/30' },
-        { value: 'late', label: 'Late', icon: AlertTriangle, color: 'text-amber-500', bgDark: 'bg-amber-500/10', bgLight: 'bg-amber-100', border: 'border-amber-500/30' }
+        { value: 'present', label: t('attendance.present'), icon: CheckCircle2, color: 'text-emerald-500', bgDark: 'bg-emerald-500/10', bgLight: 'bg-emerald-100', border: 'border-emerald-500/30' },
+        { value: 'absent', label: t('attendance.absent'), icon: XCircle, color: 'text-rose-500', bgDark: 'bg-rose-500/10', bgLight: 'bg-rose-100', border: 'border-rose-500/30' },
+        { value: 'leave', label: t('attendance.leave'), icon: Clock, color: 'text-blue-500', bgDark: 'bg-blue-500/10', bgLight: 'bg-blue-100', border: 'border-blue-500/30' },
+        { value: 'late', label: t('attendance.late'), icon: AlertTriangle, color: 'text-amber-500', bgDark: 'bg-amber-500/10', bgLight: 'bg-amber-100', border: 'border-amber-500/30' }
+    ];
+
+    const remarkOptions = [
+        "Sick",
+        "Family Emergency",
+        "Out of Station",
+        "No Information",
+        "Other"
     ];
 
     return (
@@ -193,14 +207,15 @@ const AttendanceDashboard = () => {
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
                         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
                             <h1 className={`text-3xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tight`}>
-                                Daily Roll Call
+                                {t('attendance.daily_roll_call')}
                             </h1>
                             <p className={`text-sm font-medium mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                                Record and monitor student attendance rapidly.
+                                {t('attendance.record_monitor')}
                             </p>
                         </motion.div>
 
                         <div className="flex items-center gap-3">
+                            <LanguageSwitcher isDark={isDark} />
                             <button
                                 onClick={toggleTheme}
                                 className={`p-3 rounded-2xl border transition-all ${isDark ? 'bg-slate-900/50 border-slate-800 text-yellow-400 hover:bg-slate-800' : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'}`}
@@ -214,7 +229,7 @@ const AttendanceDashboard = () => {
                                 className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-bold text-white transition-all shadow-lg hover:shadow-xl ${isSaving || students.length === 0 ? 'bg-blue-500/50 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 hover:-translate-y-0.5'}`}
                             >
                                 {isSaving ? <Loader2 size={20} className="animate-spin" /> : <Save size={20} />}
-                                {isSaving ? 'Saving...' : 'Save All Records'}
+                                {isSaving ? t('common.loading') : t('attendance.save_all')}
                             </button>
                         </div>
                     </div>
@@ -226,7 +241,7 @@ const AttendanceDashboard = () => {
                         className={`p-6 rounded-[2rem] border backdrop-blur-xl mb-8 flex flex-col sm:flex-row gap-6 items-end ${isDark ? 'bg-slate-900/40 border-slate-800/50 shadow-xl' : 'bg-white border-slate-200 shadow-xl shadow-slate-200/50'}`}
                     >
                         <div className="flex-1 w-full relative">
-                            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 pl-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Select Class</label>
+                            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 pl-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{t('attendance.select_class')}</label>
                             <select
                                 value={grade}
                                 onChange={(e) => setGrade(e.target.value)}
@@ -250,7 +265,7 @@ const AttendanceDashboard = () => {
                         </div>
 
                         <div className="flex-1 w-full relative">
-                            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 pl-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Attendance Date</label>
+                            <label className={`block text-xs font-bold uppercase tracking-wider mb-2 pl-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{t('attendance.attendance_date')}</label>
                             <input
                                 type="date"
                                 value={date}
@@ -266,7 +281,7 @@ const AttendanceDashboard = () => {
                                 onClick={fetchStudents}
                                 className={`w-full sm:w-auto px-8 py-4 rounded-2xl font-bold transition-all shadow-lg flex items-center justify-center gap-2 ${isDark ? 'bg-white text-slate-900 hover:bg-blue-50' : 'bg-slate-900 text-white hover:bg-blue-600'}`}
                             >
-                                <Search size={18} /> Load Roster
+                                <Search size={18} /> {t('attendance.load_roster')}
                             </button>
                         </div>
                     </motion.div>
@@ -274,12 +289,12 @@ const AttendanceDashboard = () => {
                     {/* Bulk Actions */}
                     {students.length > 0 && (
                         <div className={`flex items-center gap-2 mb-4 p-4 rounded-2xl border ${isDark ? 'bg-slate-900/30 border-slate-800/50' : 'bg-white border-slate-200 shadow-sm'}`}>
-                            <span className={`text-sm font-bold mr-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Mark Everyone As:</span>
-                            <button onClick={() => markAll('present')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>Present</button>
-                            <button onClick={() => markAll('absent')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-rose-100 text-rose-700 border-rose-200'}`}>Absent</button>
-                            <button onClick={() => markAll('leave')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>Leave</button>
-                            <button onClick={() => markAll('late')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>Late</button>
-                            <button onClick={() => markAll('none')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'} ml-2`}>Reset/Unmark</button>
+                            <span className={`text-sm font-bold mr-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{t('attendance.mark_everyone')}:</span>
+                            <button onClick={() => markAll('present')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{t('attendance.present')}</button>
+                            <button onClick={() => markAll('absent')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-rose-100 text-rose-700 border-rose-200'}`}>{t('attendance.absent')}</button>
+                            <button onClick={() => markAll('leave')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-100 text-blue-700 border-blue-200'}`}>{t('attendance.leave')}</button>
+                            <button onClick={() => markAll('late')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-amber-100 text-amber-700 border-amber-200'}`}>{t('attendance.late')}</button>
+                            <button onClick={() => markAll('none')} className={`text-xs px-3 py-1.5 rounded-lg font-bold border ${isDark ? 'bg-slate-800 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'} ml-2`}>{t('attendance.reset')}</button>
                         </div>
                     )}
 
@@ -292,8 +307,8 @@ const AttendanceDashboard = () => {
                     ) : students.length === 0 ? (
                         <div className={`flex flex-col items-center justify-center h-64 rounded-3xl border-2 border-dashed ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                             <UserX size={48} className={isDark ? 'text-slate-700 mb-4' : 'text-slate-300 mb-4'} />
-                            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>No Students Found</h3>
-                            <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'} max-w-sm text-center`}>No students are currently enrolled in this class. Try adjusting the search filters.</p>
+                            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{t('attendance.no_students')}</h3>
+                            <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'} max-w-sm text-center`}>{t('attendance.record_monitor')}</p>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -344,24 +359,53 @@ const AttendanceDashboard = () => {
                                             ))}
                                         </div>
 
-                                        {/* Remarks Input (Only highly prominent if not Present) */}
-                                        <div className={`transition-all duration-300 overflow-hidden ${student.status === 'present' || student.status === 'none' ? 'h-0 opacity-0' : 'h-12 opacity-100 mt-2'}`}>
-                                            <input
-                                                type="text"
-                                                placeholder="Add remarks (optional) - Press Enter to Save"
-                                                value={student.remarks || ''}
-                                                onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
-                                                onKeyDown={(e) => {
-                                                    if (e.key === 'Enter') {
-                                                        saveAttendance({
-                                                            student_id: student.student_id,
-                                                            status: student.status,
-                                                            remarks: student.remarks
-                                                        });
-                                                    }
-                                                }}
-                                                className={`w-full h-10 px-4 rounded-xl text-sm font-medium outline-none transition-colors border ${isDark ? 'bg-slate-950/50 border-slate-800 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
-                                            />
+                                        {/* Remarks Section */}
+                                        <div className={`transition-all duration-300 overflow-hidden ${student.status === 'present' || student.status === 'none' ? 'h-0 opacity-0' : 'opacity-100 mt-2 space-y-2'}`}>
+                                            <div className="flex flex-col gap-2">
+                                                <select
+                                                    value={remarkOptions.includes(student.remarks) ? student.remarks : (student.remarks ? "Other" : "")}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        if (val !== "Other") {
+                                                            handleRemarksChange(student.student_id, val);
+                                                            saveAttendance({
+                                                                student_id: student.student_id,
+                                                                status: student.status,
+                                                                remarks: val
+                                                            });
+                                                        } else if (val === "Other" && remarkOptions.includes(student.remarks)) {
+                                                            handleRemarksChange(student.student_id, "");
+                                                        } else if (val === "") {
+                                                            handleRemarksChange(student.student_id, "");
+                                                        }
+                                                    }}
+                                                    className={`w-full h-10 px-3 rounded-xl text-sm font-bold outline-none transition-colors border ${isDark ? 'bg-slate-950/50 border-slate-800 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
+                                                >
+                                                    <option value="">Select Reason...</option>
+                                                    {remarkOptions.map(opt => (
+                                                        <option key={opt} value={opt}>{opt}</option>
+                                                    ))}
+                                                </select>
+
+                                                {(!remarkOptions.slice(0, -1).includes(student.remarks) && student.remarks !== "" || (remarkOptions.includes(student.remarks) && student.remarks === "Other") || (!remarkOptions.includes(student.remarks) && student.remarks)) && (
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Type custom remark & press Enter"
+                                                        value={student.remarks === "Other" ? "" : (remarkOptions.slice(0, -1).includes(student.remarks) ? "" : student.remarks)}
+                                                        onChange={(e) => handleRemarksChange(student.student_id, e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                saveAttendance({
+                                                                    student_id: student.student_id,
+                                                                    status: student.status,
+                                                                    remarks: student.remarks
+                                                                });
+                                                            }
+                                                        }}
+                                                        className={`w-full h-10 px-4 rounded-xl text-xs font-bold outline-none transition-colors border ${isDark ? 'bg-slate-950/50 border-slate-800 text-slate-300 focus:border-blue-500' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
+                                                    />
+                                                )}
+                                            </div>
                                         </div>
 
                                     </motion.div>

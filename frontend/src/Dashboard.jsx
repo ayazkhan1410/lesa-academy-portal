@@ -17,9 +17,12 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 
 // --- SHARED SIDEBAR COMPONENT ---
 export const Sidebar = ({ isDark: isDarkProp }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -71,19 +74,19 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
           </div>
           {!isCollapsed && (
             <h1 className={`text-[11px] font-black uppercase leading-tight group-hover:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              The Learning &<br />Educational<br />Science Academy
+              {t('sidebar.admin_portal')}<br />
+              {t('sidebar.digital_campus')}
             </h1>
           )}
         </div>
       </div>
 
       <nav className="flex-1 px-4 space-y-3 mt-4">
-        <NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
-        <NavItem icon={<UserCheck size={20} />} label="Guardian List" collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
-        <NavItem icon={<Users size={20} />} label="Student List" collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
-        <NavItem icon={<CalendarCheck size={20} />} label="Attendance" collapsed={isCollapsed} active={isActive('/attendance')} onClick={() => navigate('/attendance')} isDark={isDark} />
-        <NavItem icon={<GraduationCap size={20} />} label="Teachers" collapsed={isCollapsed} active={isActive('/teachers')} onClick={() => navigate('/teachers')} isDark={isDark} />
-        <NavItem icon={<Wallet size={20} />} label="Expense List" collapsed={isCollapsed} active={isActive('/expenses')} onClick={() => navigate('/expenses')} isDark={isDark} />
+        <NavItem icon={<LayoutDashboard size={20} />} label={t('common.dashboard')} collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
+        <NavItem icon={<UserCheck size={20} />} label={t('common.guardians')} collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
+        <NavItem icon={<Users size={20} />} label={t('common.students')} collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
+        <NavItem icon={<CalendarCheck size={20} />} label={t('common.attendance')} collapsed={isCollapsed} active={isActive('/attendance')} onClick={() => navigate('/attendance')} isDark={isDark} />
+        <NavItem icon={<Wallet size={20} />} label={t('common.expenses')} collapsed={isCollapsed} active={isActive('/expenses')} onClick={() => navigate('/expenses')} isDark={isDark} />
       </nav>
 
       <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
@@ -170,6 +173,7 @@ const StatCard = ({ title, value, prefix = '', icon, gradient, delay, isDark, is
 
 // --- MAIN DASHBOARD COMPONENT ---
 const Dashboard = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => !!localStorage.getItem('access_token')
@@ -275,16 +279,19 @@ const Dashboard = () => {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{greeting} 👋</p>
+              <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{t(`dashboard.${greeting.toLowerCase().replace(' ', '_')}`)} 👋</p>
               <h1 className={`text-3xl md:text-4xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                Academy Dashboard
+                {t('common.dashboard')}
               </h1>
               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mt-2 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
-                Institutional Control Center
+                {t('dashboard.overview')}
               </p>
             </motion.div>
 
             <div className="flex items-center gap-3">
+              {/* Language Switcher */}
+              <LanguageSwitcher isDark={isDark} />
+
               {/* Theme Toggle */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
@@ -340,7 +347,7 @@ const Dashboard = () => {
               {/* Stats Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
                 <StatCard
-                  title="Total Students"
+                  title={t('dashboard.total_students')}
                   value={stats.total_students}
                   icon={<Users />}
                   gradient="bg-gradient-to-br from-blue-500 to-blue-700"
@@ -348,7 +355,7 @@ const Dashboard = () => {
                   isDark={isDark}
                 />
                 <StatCard
-                  title="Active Students"
+                  title={t('dashboard.active_now')}
                   value={stats.total_active_students}
                   icon={<UserCheck />}
                   gradient="bg-gradient-to-br from-emerald-500 to-teal-700"
@@ -356,7 +363,7 @@ const Dashboard = () => {
                   isDark={isDark}
                 />
                 <StatCard
-                  title="Pending Fees"
+                  title={t('dashboard.pending_fees')}
                   value={stats.pending_fees_amount}
                   prefix="Rs. "
                   icon={<AlertCircle />}
@@ -368,7 +375,7 @@ const Dashboard = () => {
                   onToggleVisibility={() => setShowPendingFees(!showPendingFees)}
                 />
                 <StatCard
-                  title="Total Revenue"
+                  title={t('dashboard.monthly_revenue')}
                   value={stats.total_revenue}
                   prefix="Rs. "
                   icon={<Wallet />}
