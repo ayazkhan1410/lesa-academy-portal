@@ -1,0 +1,47 @@
+{
+    "common": {
+        "dashboard": "ڈیش بورڈ",
+        "students": "طلباء",
+        "guardians": "سرپرست",
+        "expenses": "اخراجات",
+        "attendance": "حاضری",
+        "save": "محفوظ کریں",
+        "cancel": "منسوخ کریں",
+        "loading": "لوڈنگ...",
+        "search": "تلاش کریں",
+        "delete": "حذف کریں",
+        "edit": "ترمیم کریں",
+        "add": "نیا شامل کریں"
+    },
+    "sidebar": {
+        "admin_portal": "ایڈمن پورٹل",
+        "digital_campus": "ڈیجیٹل کیمپس"
+    },
+    "dashboard": {
+        "welcome": "خوش آمدید، ایڈمن!",
+        "overview": "آج آپ کی اکیڈمی میں کیا ہو رہا ہے۔",
+        "total_students": "کل طلباء",
+        "active_now": "ابھی فعال",
+        "monthly_revenue": "ماہانہ آمدنی",
+        "collected": "جمع شدہ",
+        "pending_fees": "واجب الادا فیس",
+        "attention_needed": "توجہ طلب",
+        "total_expenses": "کل اخراجات",
+        "this_month": "اس مہینے"
+    },
+    "attendance": {
+        "daily_roll_call": "روزانہ حاضری",
+        "record_monitor": "طلباء کی حاضری کو تیزی سے ریکارڈ اور مانیٹر کریں۔",
+        "select_class": "کلاس منتخب کریں",
+        "attendance_date": "حاضری کی تاریخ",
+        "load_roster": "روسٹر لوڈ کریں",
+        "save_all": "تمام ریکارڈ محفوظ کریں",
+        "mark_everyone": "سب کو نشان زد کریں بطور",
+        "present": "حاضر",
+        "absent": "غیر حاضر",
+        "leave": "رخصت",
+        "late": "تاخیر",
+        "reset": "دوبارہ ترتیب دیں",
+        "no_students": "کوئی طالب علم نہیں ملا"
+    }
+}

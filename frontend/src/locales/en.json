@@ -1,0 +1,47 @@
+{
+    "common": {
+        "dashboard": "Dashboard",
+        "students": "Students",
+        "guardians": "Guardians",
+        "expenses": "Expenses",
+        "attendance": "Attendance",
+        "save": "Save",
+        "cancel": "Cancel",
+        "loading": "Loading...",
+        "search": "Search",
+        "delete": "Delete",
+        "edit": "Edit",
+        "add": "Add New"
+    },
+    "sidebar": {
+        "admin_portal": "Admin Portal",
+        "digital_campus": "Digital Campus"
+    },
+    "dashboard": {
+        "welcome": "Welcome back, Admin!",
+        "overview": "Here's what's happening at your academy today.",
+        "total_students": "Total Students",
+        "active_now": "Active Now",
+        "monthly_revenue": "Monthly Revenue",
+        "collected": "Collected",
+        "pending_fees": "Pending Fees",
+        "attention_needed": "Attention Needed",
+        "total_expenses": "Total Expenses",
+        "this_month": "This Month"
+    },
+    "attendance": {
+        "daily_roll_call": "Daily Roll Call",
+        "record_monitor": "Record and monitor student attendance rapidly.",
+        "select_class": "Select Class",
+        "attendance_date": "Attendance Date",
+        "load_roster": "Load Roster",
+        "save_all": "Save All Records",
+        "mark_everyone": "Mark Everyone As",
+        "present": "Present",
+        "absent": "Absent",
+        "leave": "Leave",
+        "late": "Late",
+        "reset": "Reset/Unmark",
+        "no_students": "No Students Found"
+    }
+}
