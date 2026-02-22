@@ -8,6 +8,7 @@ This is the modern, high-fidelity frontend application for the **Learning & Educ
 - **Micro-Interactions**: Smooth animations powered by **Framer Motion** for tactical feedback.
 - **Institutional Clarity**: High-contrast, accessibility-focused typography and professional color palettes.
 - **Static Zoom Stability**: Engineered to maintain layout integrity across all browser zoom levels (75% to 200%).
+- **Multi-lingual (RTL)**: Native English and Urdu support with direction-aware layout switching.
 
 ## 🛠️ Tech Stack
 
@@ -17,6 +18,7 @@ This is the modern, high-fidelity frontend application for the **Learning & Educ
 - **Recharts**: High-fidelity, animated data visualization.
 - **Lucide React**: Premium, consistent iconography.
 - **React Hot Toast**: Dynamic notifications for system status.
+- **React i18next**: Advanced i18n & RTL translation framework.
 - **Axios**: Intelligent HTTP client for API synchronization.
 
 ## 📁 Key Modules
@@ -40,10 +42,16 @@ This is the modern, high-fidelity frontend application for the **Learning & Educ
 - Direct SMS messaging integration for automated parent alerts.
 - Bulk multi-select actions for group management.
 
-### 4. Smart Attendance System
+### 4. Faculty & Staff Management
 
-- **Rapid Roll-Call**: Optimized interface for daily attendance marking.
-- **Full Auto-Save Engine**: Sequential, multi-threaded saving on every status toggle—no manual "Save" button operations required.
+- **Teacher Profiles**: Integrated management of faculty details and contact info.
+- **Subject Specialization**: Dynamic subject assignment with support for Pakistani "Common Subjects".
+- **Salary Center**: Posting and tracking salary payments with PDF/Image slip attachments.
+
+### 5. Smart Attendance System
+
+- **Premium UI**: Glassmorphic student cards with bold, institutional header designs.
+- **Silent Background Sync**: Sequential saving with per-student loading indicators—no intrusive global bars.
 - **Bulk Intelligence**: Single-click "Mark Everyone" actions with instant database synchronization.
 - **Temporal Tracking**: Interactive date selection with historical record discovery.
 - **Visual Feedback**: Real-time "Saved" indicators and micro-animation toasts.

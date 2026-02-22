@@ -20,6 +20,11 @@
   * **Fee History**: Track paid/pending status with screenshot proofs.
   * **Attendance Analytics**: Integrated presence tracking metrics within each profile.
   * **Promote/Demote**: Easily manage student progression through grades.
+* **Faculty & Teacher Management**:
+  * **Comprehensive Profiles**: Manage contact info, hired date, and monthly salary.
+  * **Subject Specialization**: Assign multiple subjects (including common Pakistani subjects like Urdu, Islamiyat, etc.).
+  * **Salary Tracking**: Post monthly salaries and view history with digitial slips.
+  * **Auto-Subject Creation**: Intelligent system that creates missing subjects on the fly.
 * **Smart Attendance System**:
   * **Rapid Roll-Call**: Optimized daily interface for institutional attendance marking.
   * **Zero-Click Auto-Save**: Instant, background synchronization of individual and bulk attendance records.
@@ -32,6 +37,10 @@
   * **Glassmorphism Design**: Sleek, dark-mode-first interface with blurred backdrops and vibrant gradients.
   * **Responsive**: Fully optimized for desktop, tablet, and mobile use.
   * **Fluid Animations**: Powered by Framer Motion for a premium feel.
+* **Multi-lingual & RTL Support**:
+  * **English & Urdu**: Built-in support for multiple languages.
+  * **RTL Layout**: Seamlessly switches UI direction for Urdu speakers.
+  * **Translation Engine**: Powered by `react-i18next` for instant localization.
 * **PDF Reports**: Generate professional student lists and fee reports on the fly.
 
 ## 🛠️ Technology Stack
@@ -42,6 +51,7 @@
 * **TailwindCSS** (Styling)
 * **Framer Motion** (Animations)
 * **Lucide React** (Icons)
+* **React i18next** (Localization)
 * **Axios** (API Communication)
 
 ### Backend
@@ -49,6 +59,7 @@
 * **Python Django** ( robust web framework)
 * **Django REST Framework (DRF)** (API)
 * **SimpleJWT** (Secure Authentication)
+* **Docker & Docker Compose** (Containerization)
 * **SQLite** (Default Database) / **PostgreSQL** (Production Ready)
 
 ## 📦 Installation Guide
