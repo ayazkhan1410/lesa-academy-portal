@@ -65,9 +65,9 @@ const AttendanceHeatmap = ({ attendance, overall }) => {
                         animate={{ scale: 1 }}
                         transition={{ delay: i * 0.005 }}
                         className={`w-3 h-3 rounded-sm ${item.status === 'present' ? 'bg-emerald-500/60' :
-                                (item.status === 'late' || item.status === 'leave') ? 'bg-amber-500/40' :
-                                    item.status === 'absent' ? 'bg-rose-500/60' :
-                                        'bg-slate-800'
+                            (item.status === 'late' || item.status === 'leave') ? 'bg-amber-500/40' :
+                                item.status === 'absent' ? 'bg-rose-500/60' :
+                                    'bg-slate-800'
                             }`}
                         title={`${item.date}: ${item.status}`}
                     />
@@ -247,7 +247,7 @@ const StudentDetail = () => {
                 {/* Navigation */}
                 <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
                     <div className="flex gap-4">
-                        <button onClick={() => navigate('/')} className="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white px-5 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider border border-white/5">
+                        <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2 bg-slate-800/50 hover:bg-slate-800 text-slate-400 hover:text-white px-5 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider border border-white/5">
                             <LayoutDashboard size={16} /> Dashboard
                         </button>
                         <button onClick={() => navigate('/students')} className="flex items-center gap-2 bg-blue-600/10 hover:bg-blue-600/20 text-blue-400 hover:text-blue-300 px-5 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider border border-blue-500/20">

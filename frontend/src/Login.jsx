@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, ArrowRight, Loader2, AlertCircle, Eye, EyeOff, Sun, Moon } from 'lucide-react';
 import academyLogo from './assets/academy_logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect } from 'react';
 
 const Login = ({ onLogin }) => {
     const navigate = useNavigate();
@@ -11,6 +12,12 @@ const Login = ({ onLogin }) => {
     const [error, setError] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [isDark, setIsDark] = useState(true);
+
+    useEffect(() => {
+        if (localStorage.getItem('access_token')) {
+            navigate('/dashboard');
+        }
+    }, [navigate]);
 
     const [formData, setFormData] = useState({
         email: '',
@@ -45,7 +52,7 @@ const Login = ({ onLogin }) => {
 
             setLoading(false);
             if (onLogin) onLogin();
-            else navigate('/');
+            else navigate('/dashboard');
 
         } catch (err) {
             console.error("Login Failed:", err);

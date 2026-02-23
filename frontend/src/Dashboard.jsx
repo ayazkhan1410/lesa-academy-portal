@@ -67,7 +67,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
 
       <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
         <div
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/dashboard')}
           className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 cursor-pointer group`}
         >
           <div className="rounded-2xl shadow-lg group-hover:scale-105 transition-transform overflow-hidden w-12 h-12 shrink-0">
@@ -83,7 +83,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
       </div>
 
       <nav className="flex-1 px-4 space-y-3 mt-4">
-        <NavItem icon={<LayoutDashboard size={20} />} label={t('common.dashboard')} collapsed={isCollapsed} active={isActive('/')} onClick={() => navigate('/')} isDark={isDark} />
+        <NavItem icon={<LayoutDashboard size={20} />} label={t('common.dashboard')} collapsed={isCollapsed} active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} isDark={isDark} />
         <NavItem icon={<UserCheck size={20} />} label={t('common.guardians')} collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
         <NavItem icon={<Users size={20} />} label={t('common.students')} collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
         <NavItem icon={<GraduationCap size={20} />} label={t('common.teachers')} collapsed={isCollapsed} active={isActive('/teachers')} onClick={() => navigate('/teachers')} isDark={isDark} />
@@ -257,7 +257,8 @@ const Dashboard = () => {
     }
   };
 
-  if (!isAuthenticated) return <Login onLogin={() => { setIsAuthenticated(true); fetchDashboardData(); }} />;
+  // No longer needed as ProtectedRoute handles authentication
+  // if (!isAuthenticated) return <Login onLogin={() => { setIsAuthenticated(true); fetchDashboardData(); }} />;
 
   // Get greeting based on time of day
   const hour = new Date().getHours();

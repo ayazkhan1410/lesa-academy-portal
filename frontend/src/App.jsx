@@ -13,6 +13,13 @@ import TeacherDetail from './TeacherDetail';
 import NotFound from './NotFound';
 
 import { useTranslation } from 'react-i18next';
+import Login from './Login';
+import { Navigate } from 'react-router-dom';
+
+const ProtectedRoute = ({ children }) => {
+  const isAuthenticated = !!localStorage.getItem('access_token');
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
+};
 
 const App = () => {
   const { i18n } = useTranslation();
@@ -51,15 +58,19 @@ const App = () => {
         />
 
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/students" element={<StudentList />} />
-          <Route path="/students/:id" element={<StudentDetail />} />
-          <Route path="/guardians" element={<GuardianList />} />
-          <Route path="/guardians/:id" element={<GuardianDetail />} />
-          <Route path="/expenses" element={<ExpenseList />} />
-          <Route path="/attendance" element={<AttendanceDashboard />} />
-          <Route path="/teachers" element={<TeacherList />} />
-          <Route path="/teachers/:id" element={<TeacherDetail />} />
+          <Route path="/login" element={<Login />} />
+
+          <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+          <Route path="/students" element={<ProtectedRoute><StudentList /></ProtectedRoute>} />
+          <Route path="/students/:id" element={<ProtectedRoute><StudentDetail /></ProtectedRoute>} />
+          <Route path="/guardians" element={<ProtectedRoute><GuardianList /></ProtectedRoute>} />
+          <Route path="/guardians/:id" element={<ProtectedRoute><GuardianDetail /></ProtectedRoute>} />
+          <Route path="/expenses" element={<ProtectedRoute><ExpenseList /></ProtectedRoute>} />
+          <Route path="/attendance" element={<ProtectedRoute><AttendanceDashboard /></ProtectedRoute>} />
+          <Route path="/teachers" element={<ProtectedRoute><TeacherList /></ProtectedRoute>} />
+          <Route path="/teachers/:id" element={<ProtectedRoute><TeacherDetail /></ProtectedRoute>} />
+
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>

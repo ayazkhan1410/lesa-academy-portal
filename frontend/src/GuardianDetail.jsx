@@ -126,7 +126,7 @@ const GuardianDetail = () => {
                     {/* Navigation */}
                     <div className="flex gap-4 mb-8">
                         <button
-                            onClick={() => navigate('/')}
+                            onClick={() => navigate('/dashboard')}
                             className={`flex items-center gap-2 px-5 py-3 rounded-xl transition-all font-bold text-xs uppercase tracking-wider border ${isDark ? 'bg-slate-900 border-white/5 text-slate-400 hover:text-white' : 'bg-white border-slate-200 text-slate-500 hover:text-slate-800 shadow-sm'}`}
                         >
                             <LayoutDashboard size={16} /> Dashboard
