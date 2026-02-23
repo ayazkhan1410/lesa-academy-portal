@@ -43,6 +43,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'students.middleware.Custom404MessageDisplayMiddleWare',
+    'students.middleware.RequestLoggingMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
