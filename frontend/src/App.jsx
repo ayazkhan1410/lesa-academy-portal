@@ -10,6 +10,7 @@ import ExpenseList from './ExpenseList';
 import AttendanceDashboard from './AttendanceDashboard';
 import TeacherList from './TeacherList';
 import TeacherDetail from './TeacherDetail';
+import NotFound from './NotFound';
 
 import { useTranslation } from 'react-i18next';
 
@@ -59,6 +60,7 @@ const App = () => {
           <Route path="/attendance" element={<AttendanceDashboard />} />
           <Route path="/teachers" element={<TeacherList />} />
           <Route path="/teachers/:id" element={<TeacherDetail />} />
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
     </div>

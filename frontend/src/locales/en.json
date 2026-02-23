@@ -15,7 +15,9 @@
         "edit": "Edit",
         "add": "Add New",
         "new_admission": "New Admission",
-        "register_student": "Register Student"
+        "register_student": "Register Student",
+        "page_not_found": "Lost in Space?",
+        "page_not_found_desc": "The page you're looking for doesn't exist or has been moved. Don't worry, even the best students get lost sometimes!"
     },
     "sidebar": {
         "admin_portal": "Admin Portal",
