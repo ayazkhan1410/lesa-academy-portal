@@ -283,7 +283,9 @@ class ReadTestRecordsSerializer(serializers.ModelSerializer):
 
 class StudentAttendanceInputSerializer(serializers.Serializer):
     student_id = serializers.IntegerField(write_only=True)
-    status = serializers.ChoiceField(choices=AttendanceStatus.choices)
+    status = serializers.ChoiceField(
+        choices=list(AttendanceStatus.choices) + [('none', 'None')]
+    )
     remarks = serializers.CharField(required=False, allow_blank=True)
 
 

@@ -141,6 +141,8 @@
         "mark_all_read": "سب کو پڑھا ہوا نشان زد کریں",
         "clear_all": "سب کچھ ختم کریں",
         "unread_count": "{{count}} غیر پڑھا ہوا",
+        "active": "فعال",
+        "inactive": "غیر فعال",
         "just_now": "ابھی ابھی",
         "minute_ago": "{{count}} منٹ پہلے",
         "hour_ago": "{{count}} گھنٹے پہلے",

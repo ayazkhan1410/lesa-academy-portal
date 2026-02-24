@@ -179,10 +179,13 @@ const AttendanceDashboard = () => {
         setStudents(updatedStudents);
 
         // Sync with backend (including 'none' status which will now delete records)
-        await saveAttendance(null, updatedStudents);
+        await saveAttendance(null, updatedStudents, true);
 
         if (status === 'none') {
             toast.success('Roster unmarked/reset successfully');
+        } else {
+            const statusLabel = statusOptions.find(opt => opt.value === status)?.label || status;
+            toast.success(`All students marked as ${statusLabel}`);
         }
     };
 
@@ -383,7 +386,7 @@ const AttendanceDashboard = () => {
                                                             }, null, true);
                                                         }
                                                     }}
-                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
+                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
                                                 >
                                                     <option value="">Select Reason...</option>
                                                     {remarkOptions.map(opt => (

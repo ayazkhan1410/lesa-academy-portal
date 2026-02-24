@@ -141,6 +141,8 @@
         "mark_all_read": "Mark all as read",
         "clear_all": "Clear all",
         "unread_count": "{{count}} unread",
+        "active": "Active",
+        "inactive": "Inactive",
         "just_now": "Just now",
         "minute_ago": "{{count}}m ago",
         "hour_ago": "{{count}}h ago",

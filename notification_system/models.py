@@ -1,8 +1,12 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.utils import timezone
 
-from students.models import Student, Teacher, StudentAttendance
+from students.models import (
+    Student, Teacher, StudentAttendance,
+    AttendanceStatus
+)
 
 
 class NotificationPriority(models.TextChoices):
@@ -89,7 +93,20 @@ class Notification(BaseClass):
 @receiver(post_save, sender=StudentAttendance)
 def attendance_shortage_notification(sender, instance, **kwargs):
     student = instance.student
-    has_low_attendance = student.overall_attendance < 80
+    attendance = getattr(student, 'overall_attendance', None)
+
+    if attendance is None or attendance == 0:
+        return
+
+    has_low_attendance = attendance < 80
+    has_three_consecutive_absences = StudentAttendance.objects.filter(
+        student=student,
+        status__in=[
+            AttendanceStatus.ABSENT, AttendanceStatus.LEAVE
+        ],
+    ).count() >= 3
+    print('HAS THREE CONSECUTIVE ABSENCES ===', has_three_consecutive_absences)
+
     if has_low_attendance:
         notifications_enabled = NotificationPreference.objects.filter(
             default_notification_type=NotificationType.STUDENT,
