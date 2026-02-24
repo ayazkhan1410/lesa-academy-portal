@@ -1,10 +1,26 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Trash2, CheckCircle2, Clock, Inbox } from 'lucide-react';
+import { Bell, X, Trash2, CheckCircle2, Clock, Inbox, ExternalLink } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 
 const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAllRead, onDelete, isDark, loading }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const handleNotificationClick = (notif) => {
+        if (!notif.is_read) {
+            onMarkRead(notif.id);
+        }
+
+        if (notif.student) {
+            navigate(`/students/${notif.student.id}`);
+            onClose();
+        } else if (notif.teacher) {
+            navigate(`/teachers/${notif.teacher.id}`);
+            onClose();
+        }
+    };
 
     const getPriorityStyles = (priority) => {
         switch (priority) {
@@ -83,24 +99,35 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                     <motion.div
                                         key={notif.id}
                                         layout
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        className={`relative group p-4 rounded-2xl border-l-[4px] transition-all border ${getPriorityStyles(notif.priority)
-                                            } ${notif.is_read ? 'opacity-60 border-transparent' : isDark ? 'border-white/5 bg-slate-900/40' : 'border-slate-100 bg-white'}`}
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        whileHover={{ scale: 1.02, x: -4 }}
+                                        onClick={() => handleNotificationClick(notif)}
+                                        className={`relative group p-4 rounded-2xl border-l-[4px] transition-all border cursor-pointer ${getPriorityStyles(notif.priority)
+                                            } ${notif.is_read ? 'opacity-60 border-transparent' : isDark ? 'border-white/5 bg-slate-900/40 shadow-lg shadow-blue-500/5' : 'border-slate-100 bg-white shadow-sm'}`}
                                     >
+                                        {!notif.is_read && (
+                                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)] z-20" />
+                                        )}
                                         <div className="flex justify-between items-start mb-1">
                                             <h3 className="font-bold text-sm line-clamp-1">{notif.title}</h3>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                                 {!notif.is_read && (
                                                     <button
-                                                        onClick={() => onMarkRead(notif.id)}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            onMarkRead(notif.id);
+                                                        }}
                                                         className="p-1 hover:text-blue-500 transition-colors"
                                                     >
                                                         <CheckCircle2 size={14} />
                                                     </button>
                                                 )}
                                                 <button
-                                                    onClick={() => onDelete(notif.id)}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onDelete(notif.id);
+                                                    }}
                                                     className="p-1 hover:text-rose-500 transition-colors"
                                                 >
                                                     <Trash2 size={14} />
