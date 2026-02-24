@@ -1,11 +1,15 @@
+import calendar
+
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+
 from django.utils import timezone
+from datetime import timedelta
 
 from students.models import (
     Student, Teacher, StudentAttendance,
-    AttendanceStatus
+    AttendanceStatus, FeePayment
 )
 
 
@@ -157,3 +161,46 @@ def attendance_shortage_notification(sender, instance, **kwargs):
                 notification_type=NotificationType.STUDENT,
                 is_active=True,
             )
+
+
+@receiver(post_save, sender=FeePayment)
+def send_fee_payment_notification(sender, instance, **kwargs):
+    student = instance.student
+
+    notifications_enabled = NotificationPreference.objects.filter(
+        default_notification_type=NotificationType.STUDENT,
+        is_active=True,
+    ).exists()
+    if not notifications_enabled:
+        return
+    is_pending = instance.status == 'pending'
+
+    today = timezone.now().date()
+    _, last_day_num = calendar.monthrange(today.year, today.month)
+    last_day_of_month = today.replace(day=last_day_num)
+    ten_days_before_end = last_day_of_month - timedelta(days=10)
+    is_within_date_window = ten_days_before_end <= today <= last_day_of_month
+
+    already_notified = Notification.objects.filter(
+        title="Fee Payment Alert",
+        student=student,
+        notification_type=NotificationType.STUDENT,
+        is_active=True,
+    ).exists()
+
+    if (
+        not already_notified and
+        is_within_date_window and
+        is_pending
+    ):
+        Notification.objects.create(
+            student=student,
+            title="Fee Payment Alert",
+            message=(
+                f"Student name {student.name} has "
+                f"Pending Fee Payment with amount of {instance.amount}"
+            ),
+            priority=NotificationPriority.HIGH,
+            notification_type=NotificationType.STUDENT,
+            is_active=True,
+        )
