@@ -30,17 +30,25 @@
   * **Zero-Click Auto-Save**: Instant, background synchronization of individual and bulk attendance records.
   * **Historical Audit**: Discover and review attendance history by grade and date.
   * **"Saved" Indicators**: Real-time visual confirmation for processed records.
-* **Smart Messaging System**:
+* **Automated Notification Engine**:
+  * **Signal-Driven Alerts**: Automated generation of "Attendance Shortage" and "Fee Payment Reminder" alerts using Django Signals.
+  * **Smart Logic**: Notifications are intelligently triggered based on attendance thresholds (<80% or 3 absences) and critical fee payment windows.
+  * **Customizable Preferences**: Admins can manage notification priority, retention periods (TTL), and active status per entity.
+* **Intelligent Message System**:
   * **Direct SMS Integration**: Send fee reminders, exam notices, and general announcements to parents via Android SMS server.
   * **Bulk Actions**: Message individual students, multi-select groups, or broadcast to all parents instantly.
 * **Modern UI/UX**:
+  * **Instant Refresh**: Custom event-driven architecture for zero-lag UI updates across the dashboard.
   * **Glassmorphism Design**: Sleek, dark-mode-first interface with blurred backdrops and vibrant gradients.
   * **Responsive**: Fully optimized for desktop, tablet, and mobile use.
   * **Fluid Animations**: Powered by Framer Motion for a premium feel.
 * **Multi-lingual & RTL Support**:
-  * **English & Urdu**: Built-in support for multiple languages.
+  * **English & Urdu**: Built-in support for multiple languages with a dedicated Urdu Localization Suite.
   * **RTL Layout**: Seamlessly switches UI direction for Urdu speakers.
-  * **Translation Engine**: Powered by `react-i18next` for instant localization.
+  * **Translation Engine**: Powered by `react-i18next` for instant, high-fidelity localization.
+* **Backend Robustness**:
+  * **Proactive Middleware**: Custom middleware for standardized 404 responses and detailed request/performance logging.
+  * **Secure Audit Trails**: Detailed audit logging for every institutional transaction.
 * **PDF Reports**: Generate professional student lists and fee reports on the fly.
 
 ## 🛠️ Technology Stack
@@ -51,13 +59,15 @@
 * **TailwindCSS** (Styling)
 * **Framer Motion** (Animations)
 * **Lucide React** (Icons)
-* **React i18next** (Localization)
+* **React i18next** (Localization Suite)
 * **Axios** (API Communication)
 
 ### Backend
 
-* **Python Django** ( robust web framework)
-* **Django REST Framework (DRF)** (API)
+* **Python Django** (Robust Web Framework)
+* **Django REST Framework (DRF)** (API Architecture)
+* **Django Signals** (In-app automation)
+* **Custom Middleware** (Logging & Error Formatting)
 * **SimpleJWT** (Secure Authentication)
 * **Docker & Docker Compose** (Containerization)
 * **SQLite** (Default Database) / **PostgreSQL** (Production Ready)
