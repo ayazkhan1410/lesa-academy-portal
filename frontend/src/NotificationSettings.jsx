@@ -21,6 +21,7 @@ const NotificationSettings = () => {
     const [formData, setFormData] = useState({
         priority: 'MEDIUM',
         retention_period: 10,
+        default_notification_type: 'STUDENT',
         is_active: true
     });
 
@@ -44,7 +45,6 @@ const NotificationSettings = () => {
             setPreferences(results);
 
             if (results.length > 0) {
-                // If idToSelect is provided, find it, otherwise default to the first one
                 const target = idToSelect ? results.find(r => r.id === idToSelect) : results[0];
                 const active = target || results[0];
 
@@ -52,6 +52,7 @@ const NotificationSettings = () => {
                 setFormData({
                     priority: active.priority,
                     retention_period: active.retention_period,
+                    default_notification_type: active.default_notification_type || 'STUDENT',
                     is_active: active.is_active
                 });
             } else {
@@ -69,6 +70,7 @@ const NotificationSettings = () => {
         setFormData({
             priority: pref.priority,
             retention_period: pref.retention_period,
+            default_notification_type: pref.default_notification_type || 'STUDENT',
             is_active: pref.is_active
         });
     };
@@ -94,10 +96,10 @@ const NotificationSettings = () => {
         setSaving(true);
         try {
             const token = localStorage.getItem('access_token');
-            // Create with defaults
             const defaults = {
                 priority: 'MEDIUM',
                 retention_period: 10,
+                default_notification_type: 'STUDENT',
                 is_active: true
             };
             const response = await axios.post('http://127.0.0.1:8000/api/notification-preference/', defaults, {
@@ -106,7 +108,6 @@ const NotificationSettings = () => {
 
             const newId = response.data.data.id;
             toast.success(t('notice.created_success'));
-            // Refresh list and select the new one
             await fetchPreferences(newId);
         } catch (error) {
             toast.error(t('common.save_error'));
@@ -153,7 +154,7 @@ const NotificationSettings = () => {
                             <div className="p-2.5 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl shadow-lg">
                                 <BellRing size={20} className="text-white" />
                             </div>
-                            <h1 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>{t('notice.configuration')}</h1>
+                            <h1 className={`text-2xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>{t('notice.management')}</h1>
                         </div>
 
                         <div className="flex gap-2">
@@ -163,7 +164,7 @@ const NotificationSettings = () => {
                                 className={`flex items-center gap-2 px-4 py-2 rounded-xl font-black uppercase tracking-widest text-[10px] border transition-all ${isDark ? 'bg-slate-900 border-white/5 text-slate-400 hover:bg-slate-800' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-50'}`}
                             >
                                 {saving ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
-                                {t('notice.new_setting')}
+                                {t('notice.create_setting')}
                             </button>
                             {selectedId && (
                                 <button
@@ -172,7 +173,7 @@ const NotificationSettings = () => {
                                     className="flex items-center gap-2 px-6 py-2 bg-blue-600 rounded-xl shadow-lg text-white font-black uppercase tracking-widest text-[10px] disabled:opacity-50"
                                 >
                                     {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
-                                    {t('notice.update')}
+                                    {t('common.save')}
                                 </button>
                             )}
                         </div>
@@ -187,7 +188,7 @@ const NotificationSettings = () => {
 
                             {/* Left Side: Setting List */}
                             <div className="lg:col-span-4 space-y-3">
-                                <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{t('notice.settings_list')}</h3>
+                                <h3 className={`text-[10px] font-black uppercase tracking-[0.2em] mb-4 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{t('notice.management')}</h3>
                                 {preferences.map((pref, index) => (
                                     <motion.div
                                         key={pref.id}
@@ -201,7 +202,12 @@ const NotificationSettings = () => {
                                             <span className={`text-[10px] font-black tracking-widest ${pref.priority === 'HIGH' ? 'text-rose-500' : pref.priority === 'MEDIUM' ? 'text-amber-500' : 'text-blue-500'}`}>
                                                 {t(`notice.${pref.priority.toLowerCase()}`)} {t('notice.priority')}
                                             </span>
-                                            {pref.is_active ? <ShieldCheck size={14} className="text-emerald-500" /> : <ShieldCheck size={14} className="text-slate-500 opacity-20" />}
+                                            <div className="flex items-center gap-2">
+                                                <span className={`text-[9px] font-black tracking-widest px-2 py-0.5 rounded-full ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                                                    {t(`notice.${(pref.default_notification_type || 'STUDENT').toLowerCase()}`)}
+                                                </span>
+                                                {pref.is_active ? <ShieldCheck size={14} className="text-emerald-500" /> : <ShieldCheck size={14} className="text-slate-500 opacity-20" />}
+                                            </div>
                                         </div>
                                         <div className="flex items-center justify-between">
                                             <h4 className="font-bold text-sm">{t('notice.setting')} #{index + 1}</h4>
@@ -272,12 +278,30 @@ const NotificationSettings = () => {
 
                                                 <div className="space-y-6">
                                                     <div>
+                                                        <label className={`block text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{t('notice.entity_type')}</label>
+                                                        <div className="flex gap-2">
+                                                            {['STUDENT', 'TEACHER'].map(type => (
+                                                                <button
+                                                                    key={type}
+                                                                    onClick={() => setFormData({ ...formData, default_notification_type: type })}
+                                                                    className={`flex-1 py-2 rounded-xl text-[9px] font-black uppercase border transition-all ${formData.default_notification_type === type
+                                                                        ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                                                                        : isDark ? 'bg-slate-950/30 border-white/5 text-slate-500 hover:border-white/10'
+                                                                            : 'bg-slate-50 border-slate-200 text-slate-400 hover:border-slate-300'}`}
+                                                                >
+                                                                    {t(`notice.${type.toLowerCase()}`)}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    </div>
+
+                                                    <div>
                                                         <label className={`block text-[9px] font-black uppercase tracking-widest mb-2 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{t('notice.status')}</label>
                                                         <div className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer ${formData.is_active ? 'bg-emerald-500/5 border border-emerald-500/20' : 'bg-rose-500/5 border border-rose-500/20'}`}
                                                             onClick={() => setFormData({ ...formData, is_active: !formData.is_active })}
                                                         >
                                                             <span className={`font-black uppercase tracking-widest text-[9px] ${formData.is_active ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                                                {formData.is_active ? t('notice.enabled') : t('notice.disabled')}
+                                                                {formData.is_active ? t('notice.active') : t('notice.inactive')}
                                                             </span>
                                                             <div className={`w-10 h-5 rounded-full relative transition-colors ${formData.is_active ? 'bg-emerald-500' : 'bg-slate-700'}`}>
                                                                 <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${formData.is_active ? 'right-1' : 'left-1'}`} />

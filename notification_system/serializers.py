@@ -10,6 +10,7 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
             'id',
             'priority',
             'retention_period',
+            'default_notification_type',
             'is_active',
             'created_at',
             'updated_at'

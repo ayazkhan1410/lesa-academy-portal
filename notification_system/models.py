@@ -38,6 +38,13 @@ class NotificationPreference(BaseClass):
         blank=True,
         null=True,
     )
+    default_notification_type = models.CharField(
+        max_length=10,
+        choices=NotificationType.choices,
+        default=NotificationType.STUDENT,
+        blank=True,
+        null=True,
+    )
     is_active = models.BooleanField(default=True)
 
 
@@ -82,23 +89,28 @@ class Notification(BaseClass):
 @receiver(post_save, sender=StudentAttendance)
 def attendance_shortage_notification(sender, instance, **kwargs):
     student = instance.student
+    has_low_attendance = student.overall_attendance < 80
+    if has_low_attendance:
+        notifications_enabled = NotificationPreference.objects.filter(
+            default_notification_type=NotificationType.STUDENT,
+            is_active=True,
+        ).exists()
 
-    if (
-        student.overall_attendance < 80 and
-        not Notification.objects.filter(
+        already_notified = Notification.objects.filter(
             student=student,
             notification_type=NotificationType.STUDENT,
             is_active=True,
         ).exists()
-    ):
-        Notification.objects.create(
-            student=student,
-            title="Attendance Alert",
-            message=(
-                f"Student name {student.name} has "
-                f"overall attendance of {student.overall_attendance:.2f}%"
-            ),
-            priority=NotificationPriority.HIGH,
-            notification_type=NotificationType.STUDENT,
-            is_active=True,
-        )
+
+        if notifications_enabled and not already_notified:
+            Notification.objects.create(
+                student=student,
+                title="Attendance Alert",
+                message=(
+                    f"Student name {student.name} has "
+                    f"overall attendance of {student.overall_attendance:.2f}%"
+                ),
+                priority=NotificationPriority.HIGH,
+                notification_type=NotificationType.STUDENT,
+                is_active=True,
+            )

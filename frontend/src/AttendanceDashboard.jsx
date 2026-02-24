@@ -178,11 +178,11 @@ const AttendanceDashboard = () => {
 
         setStudents(updatedStudents);
 
-        if (status !== 'none') {
-            // Bulk save all students using the fresh data
-            await saveAttendance(null, updatedStudents);
-        } else {
-            toast.success('Roster unmarked/reset');
+        // Sync with backend (including 'none' status which will now delete records)
+        await saveAttendance(null, updatedStudents);
+
+        if (status === 'none') {
+            toast.success('Roster unmarked/reset successfully');
         }
     };
 

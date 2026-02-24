@@ -144,6 +144,9 @@
         "just_now": "ابھی ابھی",
         "minute_ago": "{{count}} منٹ پہلے",
         "hour_ago": "{{count}} گھنٹے پہلے",
-        "day_ago": "{{count}} دن پہلے"
+        "day_ago": "{{count}} دن پہلے",
+        "entity_type": "ادارے کی قسم",
+        "student": "طالب علم",
+        "teacher": "استاد"
     }
 }

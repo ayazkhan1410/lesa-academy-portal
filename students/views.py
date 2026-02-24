@@ -2286,20 +2286,24 @@ class BulkStudentAttendanceAPIView(APIView):
 
             with transaction.atomic():
                 for record in records:
-                    StudentAttendance.objects.update_or_create(
-                        date=date,
-                        student_id=record['student_id'],
-                        defaults={
-                            'status': record['status'],
-                            'remarks': record.get('remarks', '')
-                        }
-                    )
+                    if record['status'] == 'none':
+                        StudentAttendance.objects.filter(
+                            date=date, student_id=record['student_id']
+                        ).delete()
+                    else:
+                        StudentAttendance.objects.update_or_create(
+                            date=date,
+                            student_id=record['student_id'],
+                            defaults={
+                                'status': record['status'],
+                                'remarks': record.get('remarks', '')
+                            }
+                        )
 
             return Response({
                 'message': 'Attendance records updated successfully',
                 'records': serializer.validated_data['records']
             })
-
         except Exception as e:
             traceback.print_exc()
             return Response(

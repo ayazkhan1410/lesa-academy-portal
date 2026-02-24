@@ -144,6 +144,9 @@
         "just_now": "Just now",
         "minute_ago": "{{count}}m ago",
         "hour_ago": "{{count}}h ago",
-        "day_ago": "{{count}}d ago"
+        "day_ago": "{{count}}d ago",
+        "entity_type": "Entity Type",
+        "student": "Student",
+        "teacher": "Teacher"
     }
 }
