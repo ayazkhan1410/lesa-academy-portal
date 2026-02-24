@@ -702,6 +702,22 @@ class BulkEnrollStudentAPIView(APIView):
                 fee_data = student_data.pop('initial_fee', None)
                 image_data = student_data.pop('student_image', None)
 
+                if Student.objects.filter(
+                    name=student_data['name'],
+                    guardian=guardian,
+                    grade=student_data['grade'],
+                    age=student_data['age']
+                ).exists():
+                    message = (
+                        f"Student with name {student_data['name']} age "
+                        f"{student_data['age']} and guardian is "
+                        f"{guardian.name} already exists"
+                    )
+                    return Response({
+                        'status': 'error',
+                        'message': message
+                    }, status=status.HTTP_400_BAD_REQUEST)
+
                 # Fix for age field error if it's passed as empty string
                 if student_data.get('age') == "":
                     student_data['age'] = None
