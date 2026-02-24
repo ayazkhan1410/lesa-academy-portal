@@ -31,9 +31,22 @@ const NotificationBell = ({ isDark }) => {
 
     useEffect(() => {
         fetchNotifications();
-        // Polling every 30 seconds
-        const interval = setInterval(fetchNotifications, 30000);
-        return () => clearInterval(interval);
+
+        // Listen for internal "refreshNotifications" events
+        const handleRefresh = () => {
+            console.log("🔔 Instant notification refresh triggered");
+            fetchNotifications();
+        };
+
+        window.addEventListener('refreshNotifications', handleRefresh);
+
+        // Polling every 20 seconds (reduced from 30 as fallback)
+        const interval = setInterval(fetchNotifications, 20000);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('refreshNotifications', handleRefresh);
+        };
     }, [fetchNotifications]);
 
     const handleMarkRead = async (id) => {
@@ -50,8 +63,6 @@ const NotificationBell = ({ isDark }) => {
     };
 
     const handleMarkAllRead = async () => {
-        // Since backend doesn't have mark_all_read yet, we loop through unread locally
-        // or just mark them one by one. But let's keep it simple for now.
         const unread = notifications.filter(n => !n.is_read);
         if (unread.length === 0) return;
 
@@ -89,8 +100,8 @@ const NotificationBell = ({ isDark }) => {
             <button
                 onClick={() => setIsOpen(true)}
                 className={`relative p-2.5 rounded-xl border transition-all ${isDark
-                        ? 'bg-slate-900/50 border-slate-800 text-slate-300 hover:bg-slate-800'
-                        : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
+                    ? 'bg-slate-900/50 border-slate-800 text-slate-300 hover:bg-slate-800'
+                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
                     }`}
             >
                 <Bell size={20} className={unreadCount > 0 ? "animate-swing" : ""} />
