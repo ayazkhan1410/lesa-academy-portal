@@ -112,5 +112,26 @@
         "other_subjects": "Other Registered Subjects",
         "total_subjects": "Total Subjects",
         "marked": "Marked"
+    },
+    "notice": {
+        "management": "Notice Management",
+        "configuration": "Notice Configuration",
+        "settings_list": "Configuration List",
+        "priority": "Priority",
+        "retention": "Retention Period",
+        "days": "Days",
+        "status": "Status Control",
+        "enabled": "Enabled",
+        "disabled": "Disabled",
+        "new_setting": "New Setting",
+        "save": "Save",
+        "update": "Update",
+        "setting": "Setting",
+        "low": "Low",
+        "medium": "Medium",
+        "high": "High",
+        "edit_setting": "Editing Setting",
+        "create_setting": "Create New Setting",
+        "description": "This setting dictates how notifications are prioritized and how long they persist in the system before automatic removal."
     }
 }

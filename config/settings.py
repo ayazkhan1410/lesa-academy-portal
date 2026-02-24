@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'students',
+    'notification_system',
     'rest_framework_simplejwt',
     'drf_spectacular',
 ]

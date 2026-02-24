@@ -10,6 +10,7 @@ import ExpenseList from './ExpenseList';
 import AttendanceDashboard from './AttendanceDashboard';
 import TeacherList from './TeacherList';
 import TeacherDetail from './TeacherDetail';
+import NotificationSettings from './NotificationSettings';
 import NotFound from './NotFound';
 
 import { useTranslation } from 'react-i18next';
@@ -69,6 +70,7 @@ const App = () => {
           <Route path="/attendance" element={<ProtectedRoute><AttendanceDashboard /></ProtectedRoute>} />
           <Route path="/teachers" element={<ProtectedRoute><TeacherList /></ProtectedRoute>} />
           <Route path="/teachers/:id" element={<ProtectedRoute><TeacherDetail /></ProtectedRoute>} />
+          <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
 
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<NotFound />} />

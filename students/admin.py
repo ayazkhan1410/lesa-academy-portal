@@ -3,7 +3,7 @@ from .models import (
     CustomUser, Guardian, Student,
     FeePayment, Teacher, SalaryPayment,
     Expense, StudentTestRecords, Subject,
-    TeacherSubject, StudentAttendance
+    TeacherSubject, StudentAttendance, TeacherAttendance
 )
 
 
@@ -153,3 +153,14 @@ class StudentAttendanceAdmin(admin.ModelAdmin):
     )
     list_filter = ('status', 'date')
     search_fields = ('student__name', 'remarks')
+
+
+@admin.register(TeacherAttendance)
+class TeacherAttendanceAdmin(admin.ModelAdmin):
+    list_display = (
+        'id', 'teacher', 'date', 'status', 'remarks',
+        'created_at', 'updated_at'
+    )
+    list_filter = ('status', 'date')
+    search_fields = ('teacher__name', 'remarks')
+    readonly_fields = ('created_at', 'updated_at')

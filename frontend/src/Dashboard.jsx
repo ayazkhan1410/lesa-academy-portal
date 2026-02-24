@@ -5,7 +5,7 @@ import {
   Users, LayoutDashboard, LogOut, Wallet, AlertCircle,
   ChevronLeft, ChevronRight, Sparkles,
   TrendingUp, UserCheck, Sun, Moon, ArrowUpRight, Loader2,
-  Eye, EyeOff, CalendarCheck, GraduationCap
+  Eye, EyeOff, CalendarCheck, GraduationCap, Settings
 } from 'lucide-react';
 import academyLogo from './assets/academy_logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -89,6 +89,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         <NavItem icon={<GraduationCap size={20} />} label={t('common.teachers')} collapsed={isCollapsed} active={isActive('/teachers')} onClick={() => navigate('/teachers')} isDark={isDark} />
         <NavItem icon={<CalendarCheck size={20} />} label={t('common.attendance')} collapsed={isCollapsed} active={isActive('/attendance')} onClick={() => navigate('/attendance')} isDark={isDark} />
         <NavItem icon={<Wallet size={20} />} label={t('common.expenses')} collapsed={isCollapsed} active={isActive('/expenses')} onClick={() => navigate('/expenses')} isDark={isDark} />
+        <NavItem icon={<Settings size={20} />} label={t('notice.management')} collapsed={isCollapsed} active={isActive('/notification-settings')} onClick={() => navigate('/notification-settings')} isDark={isDark} />
       </nav>
 
       <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>

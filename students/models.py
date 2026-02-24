@@ -284,6 +284,26 @@ class StudentAttendance(models.Model):
         unique_together = ('student', 'date')
 
 
+class TeacherAttendance(models.Model):
+    teacher = models.ForeignKey(
+        Teacher, on_delete=models.CASCADE,
+        related_name='attendance',
+        null=True, blank=True
+    )
+    date = models.DateField(default=timezone.now)
+    status = models.CharField(
+        max_length=10,
+        choices=AttendanceStatus.choices,
+        null=True, blank=True
+    )
+    remarks = models.TextField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('teacher', 'date')
+
+
 def recalc_overall_attendance(student):
     total = student.attendance.count()
     if total > 0:

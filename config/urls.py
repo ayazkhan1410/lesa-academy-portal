@@ -31,6 +31,10 @@ from students.views import (
     TeacherDetailAPIView,
     TeacherSalaryAPIView,
 )
+from notification_system.views import (
+    NotificationPreferenceAPIView,
+    NotificationPreferenceDetailAPIView
+)
 
 
 urlpatterns = [
@@ -99,6 +103,16 @@ urlpatterns = [
         'api/teachers/<int:teacher_id>/salary/',
         TeacherSalaryAPIView.as_view()
     ),
+
+    # Notification Module
+    path(
+        'api/notification-preference/',
+        NotificationPreferenceAPIView.as_view()
+    ),
+    path(
+        'api/notification-preference/<int:pk>/',
+        NotificationPreferenceDetailAPIView.as_view()
+    )
 ]
 
 if settings.DEBUG:
