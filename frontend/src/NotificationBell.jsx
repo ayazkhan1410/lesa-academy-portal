@@ -10,8 +10,9 @@ const NotificationBell = ({ isDark }) => {
     const [notifications, setNotifications] = useState([]);
     const [unreadCount, setUnreadCount] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [lastNotifiedId, setLastNotifiedId] = useState(null);
 
-    const fetchNotifications = useCallback(async () => {
+    const fetchNotifications = useCallback(async (isSilent = true) => {
         try {
             const token = localStorage.getItem('access_token');
             if (!token) return;
@@ -20,28 +21,62 @@ const NotificationBell = ({ isDark }) => {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
-            // API returns results in paginated format from user's implementation
             const data = response.data.results || [];
+            const unread = data.filter(n => !n.is_read);
+
             setNotifications(data);
-            setUnreadCount(data.filter(n => !n.is_read).length);
+            setUnreadCount(unread.length);
+
+            // Handle Real-time Toast Alert
+            if (isSilent && unread.length > 0) {
+                const latest = unread[0];
+                if (latest.id !== lastNotifiedId) {
+                    setLastNotifiedId(latest.id);
+                    // Only toast if tray is closed to avoid double visual
+                    if (!isOpen) {
+                        toast((t) => (
+                            <div className="flex items-start gap-4 cursor-pointer" onClick={() => { setIsOpen(true); toast.dismiss(t.id); }}>
+                                <div className="p-2 bg-blue-500/10 rounded-lg text-blue-500 shrink-0">
+                                    <Bell size={18} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-black text-slate-900 mb-0.5">{latest.title}</p>
+                                    <p className="text-xs text-slate-500 line-clamp-2">{latest.message}</p>
+                                </div>
+                            </div>
+                        ), {
+                            duration: 5000,
+                            position: 'bottom-right',
+                            style: {
+                                borderRadius: '1.2rem',
+                                background: isDark ? '#1e293b' : '#fff',
+                                color: isDark ? '#fff' : '#000',
+                                border: isDark ? '1px solid rgba(255,255,255,0.05)' : '1px solid rgba(0,0,0,0.05)',
+                                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)'
+                            }
+                        });
+                    }
+                }
+            } else if (!isSilent && unread.length > 0) {
+                // Initial load: just set the last ID so we don't toast historical items
+                setLastNotifiedId(unread[0].id);
+            }
         } catch (error) {
             console.error("Failed to fetch notifications", error);
         }
-    }, []);
+    }, [lastNotifiedId, isOpen, isDark]);
 
     useEffect(() => {
-        fetchNotifications();
+        // Initial fetch is non-silent (don't toast old stuff)
+        fetchNotifications(false);
 
-        // Listen for internal "refreshNotifications" events
         const handleRefresh = () => {
             console.log("🔔 Instant notification refresh triggered");
-            fetchNotifications();
+            fetchNotifications(true);
         };
 
         window.addEventListener('refreshNotifications', handleRefresh);
-
-        // Polling every 20 seconds (reduced from 30 as fallback)
-        const interval = setInterval(fetchNotifications, 20000);
+        const interval = setInterval(() => fetchNotifications(true), 15000);
 
         return () => {
             clearInterval(interval);
