@@ -10,7 +10,6 @@ import {
 import academyLogo from './assets/academy_logo.png';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
-import Login from './Login';
 import StudentModal from './StudentModal';
 import BulkStudentModal from './BulkStudentModal';
 import { TableSkeleton, CardSkeleton, ChartSkeleton } from './Skeleton';
@@ -214,6 +213,9 @@ const Dashboard = () => {
   const [showTotalRevenue, setShowTotalRevenue] = useState(false);
   const [showNetProfit, setShowNetProfit] = useState(false);
 
+  // Define COLORS for the pie chart
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
@@ -258,9 +260,6 @@ const Dashboard = () => {
       setLoading(false);
     }
   };
-
-  // No longer needed as ProtectedRoute handles authentication
-  // if (!isAuthenticated) return <Login onLogin={() => { setIsAuthenticated(true); fetchDashboardData(); }} />;
 
   // Get greeting based on time of day
   const hour = new Date().getHours();
@@ -491,7 +490,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="h-[300px] w-full">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <AreaChart data={financialTrends} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
@@ -528,7 +527,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="h-[300px] w-full flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                       <PieChart>
                         <Pie
                           data={enrollmentDemographics.map(d => ({
@@ -549,7 +548,7 @@ const Dashboard = () => {
                               key={`cell-${index}`}
                               className="cursor-pointer outline-none transition-all duration-300 hover:opacity-80"
                               style={{ filter: 'drop-shadow(0 0 8px rgba(0,0,0,0.3))' }}
-                              fill={['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'][index % 6]}
+                              fill={COLORS[index % COLORS.length]}
                             />
                           ))}
                         </Pie>

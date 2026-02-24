@@ -54,8 +54,13 @@ const TestRecordModal = ({ isOpen, onClose, studentId, studentName, onSuccess })
             });
 
             toast.success("Test records saved successfully!", { id: loadingToast });
+
+            // 🔔 Trigger instant notification refresh
+            window.dispatchEvent(new CustomEvent('refreshNotifications'));
+
             onSuccess();
             onClose();
+
             // Reset records
             setRecords([{ test_date: new Date().toISOString().slice(0, 10), test_name: '', subject: '', obtained_marks: '', total_marks: '', remarks: '' }]);
         } catch (error) {

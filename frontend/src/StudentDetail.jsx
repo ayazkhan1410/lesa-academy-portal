@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
@@ -86,7 +86,8 @@ const StudentDetail = () => {
     const [student, setStudent] = useState(null);
     const [academicData, setAcademicData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('overview'); // overview, academic, fees
+    const [searchParams] = useSearchParams();
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'overview'); // overview, academic, fees
 
     // Lightbox State
     const [lightboxSrc, setLightboxSrc] = useState(null);
@@ -135,6 +136,13 @@ const StudentDetail = () => {
         fetchStudent();
         fetchAcademicSummary();
     }, [id, fetchAcademicSummary]);
+
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && ['overview', 'academic', 'fees'].includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
 
     const handlePageChange = (newPage) => {
         setCurrentPage(newPage);

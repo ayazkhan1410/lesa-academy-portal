@@ -87,6 +87,10 @@ const PaymentModal = ({ isOpen, onClose, studentId, studentName, currentAmount, 
 
       // ✅ SUCCESS NOTIFICATION
       toast.success(response.data.message || "Record updated successfully!", { id: loadingToast });
+
+      // 🔔 Trigger instant notification refresh
+      window.dispatchEvent(new CustomEvent('refreshNotifications'));
+
       onSuccess();
       onClose();
     } catch (error) {

@@ -145,11 +145,15 @@ const AttendanceDashboard = () => {
             });
 
             if (!silent) {
+                const studentName = individualStudent ? (students.find(s => s.student_id === individualStudent.student_id)?.student_name || 'student') : '';
                 toast.success(individualStudent
-                    ? `Updated ${students.find(s => s.student_id === individualStudent.student_id)?.student_name}`
+                    ? `Updated ${studentName}`
                     : response.data.message || 'Attendance saved successfully!'
                 );
             }
+
+            // 🔔 Trigger instant notification refresh
+            window.dispatchEvent(new CustomEvent('refreshNotifications'));
 
             if (individualStudent) {
                 setStudents(prev => prev.map(s =>

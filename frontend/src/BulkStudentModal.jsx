@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 import { X, Loader2, Save, UserPlus, Trash2, CheckCircle, Search, Sparkles, ShieldCheck, Camera, Image as ImageIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { compressImage } from './utils/imageUtils';
@@ -147,14 +148,21 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                 }
             });
 
+            // ✅ Success notification
+            toast.success("Students enrolled successfully!");
+
+            // 🔔 Trigger instant notification refresh
+            window.dispatchEvent(new CustomEvent('refreshNotifications'));
+
             onSuccess();
             onClose();
+
             // Reset state
             setStudents([{ name: '', age: '', grade: '', date_joined: new Date().toISOString().split('T')[0], initial_fee: { amount: '', status: 'pending' }, student_image: null, imagePreview: null }]);
             setGuardian({ name: '', cnic: '', phone_number: '', address: '' });
         } catch (error) {
             console.error("Bulk upload failed:", error);
-            alert("Failed to enroll students.");
+            toast.error("Failed to enroll students.");
         } finally {
             setLoading(false);
         }

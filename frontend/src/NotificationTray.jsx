@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Trash2, CheckCircle2, Clock, Inbox, ExternalLink } from 'lucide-react';
+import { Bell, X, Trash2, CheckCircle2, Clock, Inbox, ExternalLink, CreditCard, CalendarCheck, Settings } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 
@@ -14,7 +14,12 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
         }
 
         if (notif.student) {
-            navigate(`/students/${notif.student.id}`);
+            const lowTitle = notif.title.toLowerCase();
+            let tab = '';
+            if (lowTitle.includes('fee')) tab = 'fees';
+            else if (lowTitle.includes('attendance') || lowTitle.includes('absence')) tab = 'overview';
+
+            navigate(`/students/${notif.student.id}${tab ? `?tab=${tab}` : ''}`);
             onClose();
         } else if (notif.teacher) {
             navigate(`/teachers/${notif.teacher.id}`);
@@ -28,6 +33,13 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
             case 'MEDIUM': return 'border-l-amber-500 bg-amber-500/[0.03]';
             default: return 'border-l-blue-500 bg-blue-500/[0.03]';
         }
+    };
+
+    const getEntryIcon = (title) => {
+        const t = title.toLowerCase();
+        if (t.includes('fee')) return <CreditCard size={14} className="text-emerald-500" />;
+        if (t.includes('attendance') || t.includes('absence')) return <CalendarCheck size={14} className="text-amber-500" />;
+        return <Bell size={14} className="text-blue-500" />;
     };
 
     const formatTime = (dateString) => {
@@ -73,6 +85,16 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                             </div>
                             <div className="flex items-center gap-2">
                                 <button
+                                    onClick={() => {
+                                        navigate('/notification-settings');
+                                        onClose();
+                                    }}
+                                    title={t('notice.settings') || 'Settings'}
+                                    className={`p-2 rounded-xl transition-all ${isDark ? 'hover:bg-white/5 text-slate-500 hover:text-blue-400' : 'hover:bg-slate-50 text-slate-400 hover:text-blue-500'}`}
+                                >
+                                    <Settings size={18} />
+                                </button>
+                                <button
                                     onClick={onMarkAllRead}
                                     title={t('notice.mark_all_read')}
                                     className={`p-2 rounded-xl transition-all ${isDark ? 'hover:bg-white/5 text-slate-500 hover:text-blue-400' : 'hover:bg-slate-50 text-slate-400 hover:text-blue-500'}`}
@@ -110,8 +132,14 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                             <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)] z-20" />
                                         )}
                                         <div className="flex justify-between items-start mb-1">
-                                            <h3 className="font-bold text-sm line-clamp-1">{notif.title}</h3>
+                                            <div className="flex items-center gap-2">
+                                                {getEntryIcon(notif.title)}
+                                                <h3 className="font-bold text-sm line-clamp-1">{notif.title}</h3>
+                                            </div>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <div className="flex items-center mr-2 text-[10px] text-blue-500 font-bold uppercase tracking-widest animate-pulse">
+                                                    <ExternalLink size={12} className="mr-1" /> View
+                                                </div>
                                                 {!notif.is_read && (
                                                     <button
                                                         onClick={(e) => {
