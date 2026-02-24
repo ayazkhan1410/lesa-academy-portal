@@ -121,24 +121,27 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                     <motion.div
                                         key={notif.id}
                                         layout
-                                        initial={{ opacity: 0, scale: 0.95 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        whileHover={{ scale: 1.02, x: -4 }}
+                                        initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
+                                        whileHover={{ scale: 1.01, x: -2 }}
                                         onClick={() => handleNotificationClick(notif)}
                                         className={`relative group p-4 rounded-2xl border-l-[4px] transition-all border cursor-pointer ${getPriorityStyles(notif.priority)
-                                            } ${notif.is_read ? 'opacity-60 border-transparent' : isDark ? 'border-white/5 bg-slate-900/40 shadow-lg shadow-blue-500/5' : 'border-slate-100 bg-white shadow-sm'}`}
+                                            } ${notif.is_read ? 'opacity-60 border-transparent shadow-none' : isDark ? 'border-white/5 bg-slate-900/40 shadow-[0_8px_30px_rgb(0,0,0,0.12)] shadow-blue-500/5 hover:border-blue-500/30' : 'border-slate-100 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-blue-200'}`}
                                     >
                                         {!notif.is_read && (
-                                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-blue-500 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.5)] z-20" />
+                                            <div className="absolute -left-1 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-blue-500 border-2 border-slate-950 shadow-[0_0_15px_rgba(59,130,246,0.6)] z-20" />
                                         )}
                                         <div className="flex justify-between items-start mb-1">
                                             <div className="flex items-center gap-2">
-                                                {getEntryIcon(notif.title)}
-                                                <h3 className="font-bold text-sm line-clamp-1">{notif.title}</h3>
+                                                <div className={`p-1.5 rounded-lg ${isDark ? 'bg-white/5' : 'bg-slate-50'}`}>
+                                                    {getEntryIcon(notif.title)}
+                                                </div>
+                                                <h3 className={`font-bold text-sm line-clamp-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>{notif.title}</h3>
                                             </div>
                                             <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <div className="flex items-center mr-2 text-[10px] text-blue-500 font-bold uppercase tracking-widest animate-pulse">
-                                                    <ExternalLink size={12} className="mr-1" /> View
+                                                <div className="flex items-center mr-2 text-[9px] text-blue-500 font-black uppercase tracking-widest">
+                                                    <ExternalLink size={10} className="mr-1" /> Open
                                                 </div>
                                                 {!notif.is_read && (
                                                     <button
@@ -146,7 +149,7 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                                             e.stopPropagation();
                                                             onMarkRead(notif.id);
                                                         }}
-                                                        className="p-1 hover:text-blue-500 transition-colors"
+                                                        className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-blue-500/20 text-blue-400' : 'hover:bg-blue-50 text-blue-600'}`}
                                                     >
                                                         <CheckCircle2 size={14} />
                                                     </button>
@@ -156,27 +159,27 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                                         e.stopPropagation();
                                                         onDelete(notif.id);
                                                     }}
-                                                    className="p-1 hover:text-rose-500 transition-colors"
+                                                    className={`p-1.5 rounded-lg transition-colors ${isDark ? 'hover:bg-rose-500/20 text-rose-400' : 'hover:bg-rose-50 text-rose-600'}`}
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
                                         </div>
-                                        <p className={`text-xs mb-3 leading-relaxed ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                                        <p className={`text-xs mb-3 leading-relaxed font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                                             {notif.message}
                                         </p>
-                                        <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                                        <div className="flex items-center gap-3 text-[9px] font-black uppercase tracking-[0.1em] text-slate-500">
                                             <span className="flex items-center gap-1">
-                                                <Clock size={10} />
+                                                <Clock size={10} className="opacity-50" />
                                                 {formatTime(notif.created_at)}
                                             </span>
                                             {notif.student && (
-                                                <span className="bg-blue-500/10 text-blue-500 px-2 py-0.5 rounded-full">
+                                                <span className={`px-2 py-0.5 rounded-md font-black ${isDark ? 'bg-blue-500/10 text-blue-400' : 'bg-blue-50 text-blue-600'}`}>
                                                     {notif.student.name}
                                                 </span>
                                             )}
                                             {notif.teacher && (
-                                                <span className="bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded-full">
+                                                <span className={`px-2 py-0.5 rounded-md font-black ${isDark ? 'bg-emerald-500/10 text-emerald-400' : 'bg-emerald-50 text-emerald-600'}`}>
                                                     {notif.teacher.name}
                                                 </span>
                                             )}
@@ -184,9 +187,19 @@ const NotificationTray = ({ isOpen, onClose, notifications, onMarkRead, onMarkAl
                                     </motion.div>
                                 ))
                             ) : (
-                                <div className="flex flex-col items-center justify-center h-full opacity-20 py-20 text-center">
-                                    <Inbox size={64} className="mb-4" />
-                                    <p className="font-black uppercase tracking-[0.2em] text-sm">{t('notice.no_notifications')}</p>
+                                <div className="flex flex-col items-center justify-center h-full py-20 text-center relative overflow-hidden">
+                                    <div className={`absolute inset-0 opacity-10 bg-gradient-to-b from-blue-500/20 to-transparent blur-3xl rounded-full`} />
+                                    <div className="relative z-10 flex flex-col items-center">
+                                        <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isDark ? 'bg-slate-900 border border-white/5' : 'bg-slate-50 border border-slate-100'}`}>
+                                            <Inbox size={40} className={isDark ? 'text-slate-700' : 'text-slate-300'} />
+                                        </div>
+                                        <h3 className={`font-black uppercase tracking-[0.2em] text-sm mb-2 ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                                            All caught up!
+                                        </h3>
+                                        <p className="text-[11px] text-slate-500 font-bold uppercase tracking-widest max-w-[200px] leading-relaxed">
+                                            {t('notice.no_notifications')}
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </div>
