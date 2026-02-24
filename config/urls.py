@@ -33,7 +33,9 @@ from students.views import (
 )
 from notification_system.views import (
     NotificationPreferenceAPIView,
-    NotificationPreferenceDetailAPIView
+    NotificationPreferenceDetailAPIView,
+    ListCreateNotificationAPIView,
+    NotificationDetailAPIView
 )
 
 
@@ -112,6 +114,14 @@ urlpatterns = [
     path(
         'api/notification-preference/<int:pk>/',
         NotificationPreferenceDetailAPIView.as_view()
+    ),
+    path(
+        'api/notification/',
+        ListCreateNotificationAPIView.as_view()
+    ),
+    path(
+        'api/notification/<int:pk>/',
+        NotificationDetailAPIView.as_view()
     )
 ]
 
