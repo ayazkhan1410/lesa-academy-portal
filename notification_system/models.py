@@ -98,28 +98,54 @@ def attendance_shortage_notification(sender, instance, **kwargs):
     if attendance is None or attendance == 0:
         return
 
+    notifications_enabled = NotificationPreference.objects.filter(
+        default_notification_type=NotificationType.STUDENT,
+        is_active=True,
+    ).exists()
+    if not notifications_enabled:
+        return
+
     has_low_attendance = attendance < 80
-    has_three_consecutive_absences = StudentAttendance.objects.filter(
+    today = timezone.now().date()
+
+    attendance_status = [AttendanceStatus.ABSENT, AttendanceStatus.LEAVE]
+    has_three_absences_this_month = StudentAttendance.objects.filter(
         student=student,
-        status__in=[
-            AttendanceStatus.ABSENT, AttendanceStatus.LEAVE
-        ],
+        status__in=attendance_status,
+        date__year=today.year,
+        date__month=today.month,
     ).count() >= 3
-    print('HAS THREE CONSECUTIVE ABSENCES ===', has_three_consecutive_absences)
 
-    if has_low_attendance:
-        notifications_enabled = NotificationPreference.objects.filter(
-            default_notification_type=NotificationType.STUDENT,
-            is_active=True,
-        ).exists()
-
+    if has_three_absences_this_month:
         already_notified = Notification.objects.filter(
+            title="Monthly Absences Alert",
             student=student,
             notification_type=NotificationType.STUDENT,
             is_active=True,
         ).exists()
 
-        if notifications_enabled and not already_notified:
+        if not already_notified:
+            Notification.objects.create(
+                student=student,
+                title="Monthly Absences Alert",
+                message=(
+                    f"Student name {student.name} has "
+                    f"3 absences this month"
+                ),
+                priority=NotificationPriority.HIGH,
+                notification_type=NotificationType.STUDENT,
+                is_active=True,
+            )
+
+    if has_low_attendance:
+        already_notified = Notification.objects.filter(
+            title="Attendance Alert",
+            student=student,
+            notification_type=NotificationType.STUDENT,
+            is_active=True,
+        ).exists()
+
+        if not already_notified:
             Notification.objects.create(
                 student=student,
                 title="Attendance Alert",
