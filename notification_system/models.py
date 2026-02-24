@@ -1,6 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
-from students.models import Student, Teacher
+from students.models import Student, Teacher, StudentAttendance
 
 
 class NotificationPriority(models.TextChoices):
@@ -75,3 +77,28 @@ class Notification(BaseClass):
     expires_at = models.DateTimeField(null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+
+
+@receiver(post_save, sender=StudentAttendance)
+def attendance_shortage_notification(sender, instance, **kwargs):
+    student = instance.student
+
+    if (
+        student.overall_attendance < 80 and
+        not Notification.objects.filter(
+            student=student,
+            notification_type=NotificationType.STUDENT,
+            is_active=True,
+        ).exists()
+    ):
+        Notification.objects.create(
+            student=student,
+            title="Attendance Alert",
+            message=(
+                f"Student name {student.name} has "
+                f"overall attendance of {student.overall_attendance:.2f}%"
+            ),
+            priority=NotificationPriority.HIGH,
+            notification_type=NotificationType.STUDENT,
+            is_active=True,
+        )

@@ -135,6 +135,15 @@
         "updated_success": "Notice configuration updated",
         "created_success": "New notice configuration created",
         "delete_success": "Notice configuration deleted",
-        "description": "This setting dictates how notifications are prioritized and how long they persist in the system before automatic removal."
+        "description": "This setting dictates how notifications are prioritized and how long they persist in the system before automatic removal.",
+        "notifications": "Notifications",
+        "no_notifications": "No notifications yet",
+        "mark_all_read": "Mark all as read",
+        "clear_all": "Clear all",
+        "unread_count": "{{count}} unread",
+        "just_now": "Just now",
+        "minute_ago": "{{count}}m ago",
+        "hour_ago": "{{count}}h ago",
+        "day_ago": "{{count}}d ago"
     }
 }

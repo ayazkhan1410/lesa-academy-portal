@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import {
   Users, LayoutDashboard, LogOut, Wallet, AlertCircle,
-  ChevronLeft, ChevronRight, Sparkles,
+  ChevronLeft, ChevronRight, Sparkles, Plus,
   TrendingUp, UserCheck, Sun, Moon, ArrowUpRight, Loader2,
   Eye, EyeOff, CalendarCheck, GraduationCap, Settings
 } from 'lucide-react';
@@ -20,6 +20,7 @@ import {
 } from 'recharts';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
+import NotificationBell from './NotificationBell';
 
 // --- SHARED SIDEBAR COMPONENT ---
 export const Sidebar = ({ isDark: isDarkProp }) => {
@@ -296,7 +297,7 @@ const Dashboard = () => {
             </motion.div>
 
             <div className="flex items-center gap-3">
-              {/* Language Switcher */}
+              <NotificationBell isDark={isDark} />
               <LanguageSwitcher isDark={isDark} />
 
               {/* Theme Toggle */}
