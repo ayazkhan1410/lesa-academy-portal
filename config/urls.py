@@ -30,6 +30,8 @@ from students.views import (
     ListCreateTeacherAPIView,
     TeacherDetailAPIView,
     TeacherSalaryAPIView,
+    TeacherAttendanceByDateAPIView,
+    BulkTeacherAttendanceAPIView,
 )
 from notification_system.views import (
     NotificationPreferenceAPIView,
@@ -104,6 +106,14 @@ urlpatterns = [
     path(
         'api/teachers/<int:teacher_id>/salary/',
         TeacherSalaryAPIView.as_view()
+    ),
+    path(
+        'api/teacher-attendance/',
+        TeacherAttendanceByDateAPIView.as_view()
+    ),
+    path(
+        'api/teacher-attendance/bulk/',
+        BulkTeacherAttendanceAPIView.as_view()
     ),
 
     # Notification Module

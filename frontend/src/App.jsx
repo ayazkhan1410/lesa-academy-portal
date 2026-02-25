@@ -8,6 +8,7 @@ import GuardianList from './GuardianList';
 import GuardianDetail from './GuardianDetail';
 import ExpenseList from './ExpenseList';
 import AttendanceDashboard from './AttendanceDashboard';
+import TeacherAttendanceDashboard from './TeacherAttendanceDashboard';
 import TeacherList from './TeacherList';
 import TeacherDetail from './TeacherDetail';
 import NotificationSettings from './NotificationSettings';
@@ -68,6 +69,7 @@ const App = () => {
           <Route path="/guardians/:id" element={<ProtectedRoute><GuardianDetail /></ProtectedRoute>} />
           <Route path="/expenses" element={<ProtectedRoute><ExpenseList /></ProtectedRoute>} />
           <Route path="/attendance" element={<ProtectedRoute><AttendanceDashboard /></ProtectedRoute>} />
+          <Route path="/teacher-attendance" element={<ProtectedRoute><TeacherAttendanceDashboard /></ProtectedRoute>} />
           <Route path="/teachers" element={<ProtectedRoute><TeacherList /></ProtectedRoute>} />
           <Route path="/teachers/:id" element={<ProtectedRoute><TeacherDetail /></ProtectedRoute>} />
           <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />

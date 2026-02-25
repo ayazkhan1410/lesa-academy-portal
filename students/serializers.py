@@ -294,6 +294,19 @@ class BulkStudentAttendanceInputSerializer(serializers.Serializer):
     records = StudentAttendanceInputSerializer(many=True)
 
 
+class TeacherAttendanceInputSerializer(serializers.Serializer):
+    teacher_id = serializers.IntegerField(write_only=True)
+    status = serializers.ChoiceField(
+        choices=list(AttendanceStatus.choices) + [('none', 'None')]
+    )
+    remarks = serializers.CharField(required=False, allow_blank=True)
+
+
+class BulkTeacherAttendanceInputSerializer(serializers.Serializer):
+    date = serializers.DateField()
+    records = TeacherAttendanceInputSerializer(many=True)
+
+
 # ─── Teacher Module Serializer
 
 class SubjectSerializer(serializers.ModelSerializer):
