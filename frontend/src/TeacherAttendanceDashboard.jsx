@@ -1,0 +1,419 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Sidebar } from './Dashboard';
+import {
+    Sun, Moon, Search, Loader2, Save,
+    CheckCircle2, XCircle, Clock, AlertTriangle, UserX
+} from 'lucide-react';
+import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
+
+const BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = `${BASE_URL}/api`;
+
+const TeacherAttendanceDashboard = () => {
+    const { t } = useTranslation();
+    const navigate = useNavigate();
+    const [isDark, setIsDark] = useState(() => {
+        const saved = localStorage.getItem('dashboardTheme');
+        return saved !== 'light';
+    });
+
+    const toggleTheme = () => {
+        const newState = !isDark;
+        setIsDark(newState);
+        localStorage.setItem('dashboardTheme', newState ? 'dark' : 'light');
+        document.documentElement.classList.toggle('dark', newState);
+    };
+
+    useEffect(() => {
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [isDark]);
+
+    const [date, setDate] = useState(() => new Date().toISOString().split('T')[0]);
+    const [teachers, setTeachers] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
+    const [savingIds, setSavingIds] = useState(new Set());
+
+    useEffect(() => {
+        fetchTeachers();
+    }, [date]);
+
+    const fetchTeachers = async () => {
+        setIsLoading(true);
+        try {
+            const token = localStorage.getItem('access_token');
+            const response = await axios.get(`${API_BASE_URL}/teacher-attendance/`, {
+                params: { date },
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (response.data && response.data.teachers) {
+                const teachersWithInitial = response.data.teachers.map(t => ({
+                    ...t,
+                    initialStatus: t.status
+                }));
+                setTeachers(teachersWithInitial);
+            } else {
+                setTeachers([]);
+            }
+        } catch (error) {
+            console.error('Error fetching teachers:', error);
+            const status = error.response?.status;
+            const msg = error.response?.data?.error
+                || error.response?.data?.message
+                || error.response?.data?.detail
+                || error.message
+                || 'Unknown error';
+            toast.error(`[${status || 'Network Error'}] ${msg}`);
+            setTeachers([]);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleStatusChange = async (teacherId, newStatus) => {
+        const teacher = teachers.find(t => t.teacher_id === teacherId);
+        if (!teacher || teacher.status === newStatus) return;
+
+        setTeachers(prev => prev.map(t =>
+            t.teacher_id === teacherId ? { ...t, status: newStatus } : t
+        ));
+
+        setSavingIds(prev => new Set(prev).add(teacherId));
+
+        try {
+            await saveAttendance({
+                teacher_id: teacherId,
+                status: newStatus,
+                remarks: teacher.remarks || ''
+            }, null, true);
+        } finally {
+            setSavingIds(prev => {
+                const next = new Set(prev);
+                next.delete(teacherId);
+                return next;
+            });
+        }
+    };
+
+    const handleRemarksChange = (teacherId, remarks) => {
+        setTeachers(prev => prev.map(teacher =>
+            teacher.teacher_id === teacherId
+                ? { ...teacher, remarks }
+                : teacher
+        ));
+    };
+
+    const saveAttendance = async (individualTeacher = null, teachersOverride = null, silent = false) => {
+        if (!silent) setIsSaving(true);
+        try {
+            const token = localStorage.getItem('access_token');
+
+            let recordsToSave;
+            if (individualTeacher) {
+                recordsToSave = [individualTeacher];
+            } else if (teachersOverride) {
+                recordsToSave = teachersOverride.map(t => ({
+                    teacher_id: t.teacher_id,
+                    status: t.status,
+                    remarks: t.remarks || ''
+                }));
+            } else {
+                recordsToSave = teachers.map(t => ({
+                    teacher_id: t.teacher_id,
+                    status: t.status,
+                    remarks: t.remarks || ''
+                }));
+            }
+
+            if (recordsToSave.length === 0) {
+                if (!silent) setIsSaving(false);
+                return;
+            }
+
+            const payload = { date, records: recordsToSave };
+            const response = await axios.post(`${API_BASE_URL}/teacher-attendance/bulk/`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (!silent) {
+                const teacherName = individualTeacher
+                    ? (teachers.find(t => t.teacher_id === individualTeacher.teacher_id)?.teacher_name || 'teacher')
+                    : '';
+                toast.success(individualTeacher
+                    ? `Updated ${teacherName}`
+                    : response.data.message || 'Attendance saved successfully!'
+                );
+            }
+
+            if (individualTeacher) {
+                setTeachers(prev => prev.map(t =>
+                    t.teacher_id === individualTeacher.teacher_id ? { ...t, initialStatus: t.status } : t
+                ));
+            } else if (teachersOverride) {
+                setTeachers(teachersOverride.map(t => ({ ...t, initialStatus: t.status })));
+            } else {
+                setTeachers(prev => prev.map(t => ({ ...t, initialStatus: t.status })));
+            }
+        } catch (error) {
+            console.error('Error saving attendance:', error);
+            if (!silent) toast.error('Failed to save attendance. ' + (error.response?.data?.error || ''));
+        } finally {
+            if (!silent) setIsSaving(false);
+        }
+    };
+
+    const markAll = async (status) => {
+        const updatedTeachers = teachers.map(t => (t.status === 'none' || status === 'none') ? {
+            ...t,
+            status,
+            remarks: (status === 'none' || status === 'present') ? '' : t.remarks
+        } : t);
+
+        setTeachers(updatedTeachers);
+        await saveAttendance(null, updatedTeachers, true);
+
+        if (status === 'none') {
+            toast.success('Roster unmarked/reset successfully');
+        } else {
+            const statusLabel = statusOptions.find(opt => opt.value === status)?.label || status;
+            toast.success(`All teachers marked as ${statusLabel}`);
+        }
+    };
+
+    const statusOptions = [
+        { value: 'present', label: t('teacher_attendance.present'), icon: CheckCircle2, color: 'text-emerald-500', bgDark: 'bg-emerald-500/10', bgLight: 'bg-emerald-100', border: 'border-emerald-500/30' },
+        { value: 'absent', label: t('teacher_attendance.absent'), icon: XCircle, color: 'text-rose-500', bgDark: 'bg-rose-500/10', bgLight: 'bg-rose-100', border: 'border-rose-500/30' },
+        { value: 'leave', label: t('teacher_attendance.leave'), icon: Clock, color: 'text-blue-500', bgDark: 'bg-blue-500/10', bgLight: 'bg-blue-100', border: 'border-blue-500/30' },
+        { value: 'late', label: t('teacher_attendance.late'), icon: AlertTriangle, color: 'text-amber-500', bgDark: 'bg-amber-500/10', bgLight: 'bg-amber-100', border: 'border-amber-500/30' }
+    ];
+
+    const remarkOptions = [
+        "Sick",
+        "Family Emergency",
+        "Out of Station",
+        "No Information",
+        "Other"
+    ];
+
+    return (
+        <div className={`flex h-screen overflow-hidden transition-colors duration-500 ${isDark ? 'bg-slate-950 text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+            <Sidebar isDark={isDark} />
+
+            <main className="flex-1 h-screen overflow-y-auto overflow-x-hidden relative">
+                <div className="absolute inset-x-0 top-0 h-64 bg-gradient-to-b from-purple-600/20 to-transparent pointer-events-none" />
+
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+
+                    {/* Header */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+                        <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
+                            <h1 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tighter italic uppercase underline decoration-purple-500 decoration-4 underline-offset-8`}>
+                                {t('teacher_attendance.daily_roll_call')}
+                            </h1>
+                            <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                                {t('teacher_attendance.record_monitor')}
+                            </p>
+                        </motion.div>
+
+                        <div className="flex flex-wrap items-center gap-4">
+                            <LanguageSwitcher isDark={isDark} />
+                            <button
+                                onClick={toggleTheme}
+                                className={`p-4 rounded-3xl border transition-all hover:scale-105 active:scale-95 ${isDark ? 'bg-slate-900/50 border-white/10 text-yellow-400' : 'bg-white border-slate-200 text-slate-600 shadow-sm'}`}
+                            >
+                                {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                            </button>
+
+                            <button
+                                onClick={() => saveAttendance()}
+                                disabled={isSaving || teachers.length === 0}
+                                className={`flex items-center gap-3 px-8 py-4 rounded-3xl font-black text-[10px] uppercase tracking-widest text-white transition-all shadow-xl shadow-purple-500/20 hover:scale-105 active:scale-95 ${isSaving || teachers.length === 0 ? 'bg-purple-600/50 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-500 ring-4 ring-purple-600/10'}`}
+                            >
+                                {isSaving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} strokeWidth={3} />}
+                                {isSaving ? t('common.loading') : t('teacher_attendance.save_all')}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Date Picker */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`p-8 rounded-[3rem] border backdrop-blur-xl mb-10 flex flex-col md:flex-row gap-6 items-end transition-all ${isDark ? 'bg-slate-900/30 border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}
+                    >
+                        <div className="flex-1 w-full relative group">
+                            <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 ml-4 ${isDark ? 'text-slate-500 group-focus-within:text-purple-400' : 'text-slate-400 group-focus-within:text-purple-600'}`}>
+                                <Clock size={12} className="inline mr-2" /> {t('teacher_attendance.attendance_date')}
+                            </label>
+                            <input
+                                type="date"
+                                value={date}
+                                max={new Date().toISOString().split('T')[0]}
+                                onChange={(e) => setDate(e.target.value)}
+                                style={{ colorScheme: isDark ? 'dark' : 'light' }}
+                                className={`w-full pl-6 pr-4 py-5 rounded-2xl transition-all outline-none font-black text-sm ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-purple-500/50 focus:bg-slate-900 border' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-purple-500 focus:bg-white border'}`}
+                            />
+                        </div>
+
+                        <div className="w-full md:w-auto">
+                            <button
+                                onClick={fetchTeachers}
+                                className={`w-full md:w-auto px-10 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 ${isDark ? 'bg-white text-slate-900 hover:bg-purple-50' : 'bg-slate-900 text-white hover:bg-purple-600'}`}
+                            >
+                                <Search size={16} strokeWidth={3} /> {t('teacher_attendance.load_roster')}
+                            </button>
+                        </div>
+                    </motion.div>
+
+                    {/* Bulk Actions */}
+                    {teachers.length > 0 && (
+                        <div className={`flex items-center gap-3 mb-6 p-4 rounded-3xl border ${isDark ? 'bg-slate-900/20 border-white/5' : 'bg-white border-slate-100 shadow-sm'}`}>
+                            <span className={`text-[10px] font-black uppercase tracking-widest mr-4 ml-2 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>{t('teacher_attendance.mark_everyone')}:</span>
+                            <div className="flex flex-wrap gap-2">
+                                <button onClick={() => markAll('present')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border ${isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20' : 'bg-emerald-50 text-emerald-600 border-emerald-200'}`}>{t('teacher_attendance.present')}</button>
+                                <button onClick={() => markAll('absent')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border ${isDark ? 'bg-rose-500/10 text-rose-400 border-rose-500/20 hover:bg-rose-500/20' : 'bg-rose-50 text-rose-600 border-rose-200'}`}>{t('teacher_attendance.absent')}</button>
+                                <button onClick={() => markAll('leave')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border ${isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20 hover:bg-blue-500/20' : 'bg-blue-50 text-blue-600 border-blue-200'}`}>{t('teacher_attendance.leave')}</button>
+                                <button onClick={() => markAll('late')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border ${isDark ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20' : 'bg-amber-50 text-amber-600 border-amber-200'}`}>{t('teacher_attendance.late')}</button>
+                                <button onClick={() => markAll('none')} className={`text-[9px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all hover:scale-105 active:scale-95 border ${isDark ? 'bg-slate-800 text-slate-500 border-slate-700 hover:text-slate-300' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'}`}>{t('teacher_attendance.reset')}</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Teacher Grid */}
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-64">
+                            <Loader2 className="w-12 h-12 text-purple-500 animate-spin mb-4" />
+                            <p className={`font-medium ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Loading teacher roster...</p>
+                        </div>
+                    ) : teachers.length === 0 ? (
+                        <div className={`flex flex-col items-center justify-center h-64 rounded-3xl border-2 border-dashed ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                            <UserX size={48} className={isDark ? 'text-slate-700 mb-4' : 'text-slate-300 mb-4'} />
+                            <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>{t('teacher_attendance.no_teachers')}</h3>
+                            <p className={`text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'} max-w-sm text-center`}>{t('teacher_attendance.record_monitor')}</p>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            <AnimatePresence>
+                                {teachers.map((teacher, idx) => (
+                                    <motion.div
+                                        key={teacher.teacher_id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, scale: 0.95 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        className={`p-6 rounded-[2.5rem] border flex flex-col gap-6 transition-all duration-300 relative overflow-hidden group/card ${isDark ? 'bg-slate-900/30 border-white/5 hover:bg-slate-900/50 shadow-2xl' : 'bg-white border-slate-100 hover:shadow-2xl shadow-slate-200/40'}`}
+                                    >
+                                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-purple-600/5 rounded-full blur-3xl pointer-events-none transition-all group-hover/card:bg-purple-600/10" />
+
+                                        {/* Teacher Info */}
+                                        <div className="flex items-center gap-5 relative z-10">
+                                            <div className={`w-16 h-16 rounded-[1.5rem] overflow-hidden shrink-0 flex items-center justify-center text-2xl font-black border-2 shadow-lg ${isDark ? 'bg-slate-800 border-white/10 text-purple-400' : 'bg-slate-100 border-slate-200 text-purple-600'}`}>
+                                                <span className="italic uppercase tracking-tighter">
+                                                    {teacher.teacher_name ? teacher.teacher_name.charAt(0) : '?'}
+                                                </span>
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className={`font-black text-lg italic tracking-tight uppercase truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                        {teacher.teacher_name}
+                                                    </h3>
+                                                    {savingIds.has(teacher.teacher_id) ? (
+                                                        <div className="flex items-center gap-1.5 bg-purple-500/10 text-purple-400 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-purple-500/20">
+                                                            <Loader2 size={10} className="animate-spin" /> {t('common.loading')}
+                                                        </div>
+                                                    ) : teacher.initialStatus !== 'none' && (
+                                                        <div className="flex items-center gap-1.5 bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-emerald-500/20">
+                                                            <CheckCircle2 size={10} /> {t('teacher_attendance.marked')}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className={`text-[9px] font-black uppercase tracking-[0.2em] mt-1 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
+                                                    ID: {teacher.teacher_id?.toString().padStart(4, '0')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Status Buttons */}
+                                        <div className="grid grid-cols-4 gap-2 w-full relative z-10">
+                                            {statusOptions.map(option => (
+                                                <button
+                                                    key={option.value}
+                                                    onClick={() => handleStatusChange(teacher.teacher_id, option.value)}
+                                                    className={`flex flex-col items-center justify-center py-3 px-1 rounded-2xl border transition-all hover:scale-105 active:scale-95 ${teacher.status === option.value
+                                                        ? `${isDark ? option.bgDark : option.bgLight} ${option.border} ${option.color} ring-4 ring-current/10 font-black`
+                                                        : `${isDark ? 'bg-slate-800/40 border-slate-700/30 text-slate-600 hover:text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-400 hover:bg-slate-100'}`
+                                                        }`}
+                                                >
+                                                    <option.icon size={20} className="mb-2" />
+                                                    <span className="text-[9px] font-black uppercase tracking-widest">{option.label}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Remarks */}
+                                        <div className={`transition-all duration-500 relative z-10 ${teacher.status === 'present' || teacher.status === 'none' ? 'h-0 opacity-0 pointer-events-none' : 'opacity-100 mt-2'}`}>
+                                            <div className="flex flex-col gap-3">
+                                                <div className="h-px bg-gradient-to-r from-transparent via-slate-700/30 to-transparent mb-1" />
+                                                <select
+                                                    value={remarkOptions.includes(teacher.remarks) ? teacher.remarks : (teacher.remarks ? 'Other' : '')}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        handleRemarksChange(teacher.teacher_id, val === 'Other' ? '' : val);
+                                                        if (val !== 'Other') {
+                                                            saveAttendance({
+                                                                teacher_id: teacher.teacher_id,
+                                                                status: teacher.status,
+                                                                remarks: val
+                                                            }, null, true);
+                                                        }
+                                                    }}
+                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
+                                                >
+                                                    <option value="">Select Reason...</option>
+                                                    {remarkOptions.map(opt => (
+                                                        <option key={opt} value={opt}>{opt}</option>
+                                                    ))}
+                                                </select>
+
+                                                {(teacher.remarks === 'Other' || (!remarkOptions.includes(teacher.remarks) && teacher.remarks)) && (
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Custom remark..."
+                                                        value={teacher.remarks}
+                                                        onChange={(e) => handleRemarksChange(teacher.teacher_id, e.target.value)}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                saveAttendance({
+                                                                    teacher_id: teacher.teacher_id,
+                                                                    status: teacher.status,
+                                                                    remarks: teacher.remarks
+                                                                }, null, true);
+                                                            }
+                                                        }}
+                                                        className={`w-full h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
+                                                    />
+                                                )}
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    )}
+
+                </div>
+            </main>
+        </div>
+    );
+};
+
+export default TeacherAttendanceDashboard;

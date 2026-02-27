@@ -150,5 +150,21 @@
         "entity_type": "ادارے کی قسم",
         "student": "طالب علم",
         "teacher": "استاد"
+    },
+    "teacher_attendance": {
+        "daily_roll_call": "اساتذہ کی روزانہ حاضری",
+        "record_monitor": "اساتذہ کی حاضری روزانہ ریکارڈ اور مانیٹر کریں۔",
+        "attendance_date": "حاضری کی تاریخ",
+        "load_roster": "روسٹر لوڈ کریں",
+        "save_all": "تمام ریکارڈ محفوظ کریں",
+        "mark_everyone": "سب کو نشان زد کریں بطور",
+        "present": "حاضر",
+        "absent": "غیر حاضر",
+        "leave": "رخصت",
+        "late": "تاخیر",
+        "reset": "دوبارہ ترتیب دیں",
+        "no_teachers": "کوئی استاد نہیں ملا",
+        "marked": "نشان زد",
+        "nav_label": "اساتذہ کی حاضری"
     }
 }

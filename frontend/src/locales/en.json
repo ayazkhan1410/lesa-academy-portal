@@ -150,5 +150,21 @@
         "entity_type": "Entity Type",
         "student": "Student",
         "teacher": "Teacher"
+    },
+    "teacher_attendance": {
+        "daily_roll_call": "Teacher Daily Roll Call",
+        "record_monitor": "Record and monitor teacher attendance daily.",
+        "attendance_date": "Attendance Date",
+        "load_roster": "Load Roster",
+        "save_all": "Save All Records",
+        "mark_everyone": "Mark Everyone As",
+        "present": "Present",
+        "absent": "Absent",
+        "leave": "Leave",
+        "late": "Late",
+        "reset": "Reset/Unmark",
+        "no_teachers": "No Teachers Found",
+        "marked": "Marked",
+        "nav_label": "Teacher Attendance"
     }
 }
