@@ -33,7 +33,7 @@ from drf_spectacular.types import OpenApiTypes
 from .models import (
     CustomUser, Student,
     Guardian, FeePayment, Expense, StudentTestRecords,
-    StudentAttendance, Teacher, Subject
+    StudentAttendance, TeacherAttendance, Teacher, Subject
 )
 
 from .manager import get_tokens_for_user
@@ -48,6 +48,7 @@ from .serializers import (
     CreateExpenseSerializer, BulkTestRecordsSerializer,
     ReadTestRecordsSerializer,
     BulkStudentAttendanceInputSerializer,
+    BulkTeacherAttendanceInputSerializer,
     SubjectSerializer, TeacherListSerializer, TeacherDetailSerializer,
     CreateTeacherSerializer, SalaryPaymentSerializer,
     CreateSalaryPaymentSerializer
@@ -2588,6 +2589,112 @@ class TeacherSalaryAPIView(APIView):
                 {'errors': serializer.errors},
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class TeacherAttendanceByDateAPIView(APIView):
+    @extend_schema(
+        summary="Get All Teachers with Attendance Status for a Date",
+        parameters=[
+            OpenApiParameter('date', OpenApiTypes.DATE, required=True,
+                             description='Date in YYYY-MM-DD format'),
+        ],
+        tags=['Teacher Attendance']
+    )
+    def get(self, request):
+        try:
+            date = request.query_params.get('date', '')
+            if not date:
+                return Response(
+                    {'message': 'Date parameter is required'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            teachers = Teacher.objects.all().order_by('name')
+            if not teachers.exists():
+                return Response({
+                    'message': 'No teachers found',
+                    'teachers': [],
+                    'date': date
+                }, status=status.HTTP_200_OK)
+
+            teacher_list = []
+            for teacher in teachers:
+                record = TeacherAttendance.objects.filter(
+                    teacher=teacher, date=date
+                ).first()
+
+                teacher_data = {
+                    'id': record.id if record else None,
+                    'teacher_id': teacher.id,
+                    'teacher_name': teacher.name,
+                    'date': date,
+                    'status': record.status if record else 'none',
+                    'remarks': record.remarks if record else '',
+                    'created_at': record.created_at if record else None,
+                    'updated_at': record.updated_at if record else None,
+                }
+                teacher_list.append(teacher_data)
+
+            return Response({
+                'message': 'Teachers fetched successfully',
+                'teachers': teacher_list,
+                'date': date
+            })
+        except Exception as e:
+            traceback.print_exc()
+            return Response(
+                {'error': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BulkTeacherAttendanceAPIView(APIView):
+    @extend_schema(
+        summary="Bulk Save Teacher Attendance",
+        description='Bulk save teacher attendance. Status none deletes.',
+        tags=['Teacher Attendance']
+    )
+    def post(self, request):
+        try:
+            serializer = BulkTeacherAttendanceInputSerializer(
+                data=request.data
+            )
+
+            if not serializer.is_valid():
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            date = serializer.validated_data['date']
+            records = serializer.validated_data['records']
+
+            with transaction.atomic():
+                for record in records:
+                    if record['status'] == 'none':
+                        TeacherAttendance.objects.filter(
+                            date=date, teacher_id=record['teacher_id']
+                        ).delete()
+                    else:
+                        TeacherAttendance.objects.update_or_create(
+                            date=date,
+                            teacher_id=record['teacher_id'],
+                            defaults={
+                                'status': record['status'],
+                                'remarks': record.get('remarks', '')
+                            }
+                        )
+
+            return Response({
+                'message': 'Teacher attendance updated successfully',
+                'count': len(records)
+            })
         except Exception as e:
             traceback.print_exc()
             return Response(
