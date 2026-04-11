@@ -2010,18 +2010,21 @@ class MonthlyFinanceSummaryAPIView(APIView):
         try:
             now = timezone.now()
             current_month_name = f"{now.strftime('%b')}-{now.year}"
+            print("CURRENT MONTH NAME ==", current_month_name)
 
             # Total revenue for this month
             total_revenue = FeePayment.objects.filter(
                 month_paid_for__month=now.month,
                 month_paid_for__year=now.year,
             ).aggregate(Sum('amount'))['amount__sum'] or 0
+            print('TOTAL REVENUE ==', total_revenue)
 
             # Total expenses for this month
             total_expenses = Expense.objects.filter(
                 expense_date__month=now.month,
                 expense_date__year=now.year,
             ).aggregate(Sum('amount'))['amount__sum'] or 0
+            print('TOTAL EXPENSES ==', total_expenses)
 
             # Expenses by category
             categories = ["salary", "rent", "utilities", "other"]

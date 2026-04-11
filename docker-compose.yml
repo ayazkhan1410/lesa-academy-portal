@@ -1,4 +1,8 @@
 services:
+
+  # ================================
+  # Database
+  # ================================
   db:
     image: postgres:15
     volumes:
@@ -10,11 +14,17 @@ services:
     ports:
       - "5432:5432"
 
+  # ================================
+  # Redis
+  # ================================
   redis:
     image: redis:8.6-alpine
     ports:
       - "6379:6379"
 
+  # ================================
+  # Backend
+  # ================================
   backend:
     build: .
     volumes:
@@ -27,6 +37,9 @@ services:
       - db
       - redis
 
+  # ================================
+  # Celery Worker
+  # ================================
   celery_worker:
     build: .
     volumes:
@@ -38,6 +51,9 @@ services:
       - redis
     command: celery -A config.celery_app worker --loglevel=info
 
+  # ================================
+  # Flower
+  # ================================
   flower:
     build: .
     volumes:
@@ -51,6 +67,9 @@ services:
       - celery_worker
     command: celery -A config.celery_app flower --port=5555
 
+  # ================================
+  # Frontend
+  # ================================
   frontend:
     build: ./frontend
     volumes:
@@ -63,5 +82,8 @@ services:
     depends_on:
       - backend
 
+  # ================================
+  # Volumes
+  # ================================
 volumes:
   postgres_data:
