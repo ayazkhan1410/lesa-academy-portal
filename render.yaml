@@ -1,0 +1,80 @@
+# Render Blueprint — LESA Academy Portal backend
+# Docs: docs/DEPLOYMENT.md
+
+databases:
+  - name: lesa-db
+    plan: free
+    databaseName: lesa_db
+    user: lesa
+
+services:
+  - type: redis
+    name: lesa-redis
+    plan: free
+    maxmemoryPolicy: allkeys-lru
+    ipAllowList: []
+
+  - type: web
+    name: lesa-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    healthCheckPath: /api/health-check/
+    releaseCommand: python manage.py migrate --noinput && python manage.py collectstatic --noinput
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lesa-db
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: lesa-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: lesa-redis
+          property: connectionString
+      - key: MOBILE_GATEWAY_URL
+        sync: false
+
+  - type: worker
+    name: lesa-celery
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerCommand: celery -A config.celery_app worker --loglevel=info
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        fromService:
+          type: web
+          name: lesa-api
+          envVarKey: SECRET_KEY
+      - key: DATABASE_URL
+        fromDatabase:
+          name: lesa-db
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: lesa-redis
+          property: connectionString
+      - key: CELERY_RESULT_BACKEND
+        fromService:
+          type: redis
+          name: lesa-redis
+          property: connectionString
+      - key: MOBILE_GATEWAY_URL
+        sync: false
