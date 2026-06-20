@@ -7,6 +7,25 @@ from dotenv import load_dotenv
 BASE_DIR = Path(__file__).resolve().parent.parent
 load_dotenv()
 
+
+def _normalize_host(value):
+    """Strip scheme/trailing slash so ALLOWED_HOSTS gets hostnames only."""
+    host = value.strip()
+    if not host:
+        return ''
+    host = host.removeprefix('https://').removeprefix('http://')
+    return host.rstrip('/').split('/')[0]
+
+
+def _hosts_from_env(env_name, default):
+    hosts = []
+    for part in os.getenv(env_name, default).split(','):
+        normalized = _normalize_host(part)
+        if normalized and normalized not in hosts:
+            hosts.append(normalized)
+    return hosts
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = (
     'django-insecure-+_u(#95%cjviy0fhw75!'
@@ -16,13 +35,10 @@ SECRET_KEY = (
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    host.strip() for host in os.getenv(
-        'ALLOWED_HOSTS',
-        'localhost,127.0.0.1,https://lesa-academy-portal.vercel.app/'
-    ).split(',')
-    if host.strip()
-]
+ALLOWED_HOSTS = _hosts_from_env(
+    'ALLOWED_HOSTS',
+    'localhost,127.0.0.1,lesa-academy-portal.vercel.app,.vercel.app',
+)
 
 # CORS — local dev + optional production frontend (e.g. Vercel)
 CORS_ALLOWED_ORIGINS = [
