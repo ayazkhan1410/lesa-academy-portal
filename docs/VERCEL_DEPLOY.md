@@ -15,12 +15,17 @@
 
 ## 1. Deploy frontend to Vercel
 
-1. Push branch `feature/vercel-deployment` to GitHub.
+> **Important:** `lesa-academy-portal.vercel.app` must serve the **React app**, not Django.  
+> If you see JSON like `"error": "Page Not Found"` at `/`, Vercel is running the Django backend instead of the frontend.
+
+1. Push branch to GitHub.
 2. In [Vercel](https://vercel.com) → **Add New Project** → import repo.
-3. Set **Root Directory** to `frontend`.
-4. Framework: **Vite** (auto-detected).
-5. Build command: `npm run build`
-6. Output directory: `dist`
+3. **Do NOT use Python/Django preset.** Use **Vite** or Other.
+4. Either:
+   - **Option A (recommended):** Set **Root Directory** to `frontend`, **OR**
+   - **Option B:** Keep repo root — root `vercel.json` builds `frontend/` automatically.
+5. Build command: `npm run build` (if root dir is `frontend`)
+6. Output directory: `dist` (if root dir is `frontend`)
 
 ### Environment variables (Vercel → Settings → Environment Variables)
 
