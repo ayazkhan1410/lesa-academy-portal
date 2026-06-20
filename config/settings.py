@@ -26,6 +26,11 @@ def _hosts_from_env(env_name, default):
     return hosts
 
 
+_DEFAULT_ALLOWED_HOSTS = (
+    'localhost,127.0.0.1,lesa-academy-portal.vercel.app,.vercel.app'
+)
+
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = (
     'django-insecure-+_u(#95%cjviy0fhw75!'
@@ -35,10 +40,7 @@ SECRET_KEY = (
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = _hosts_from_env(
-    'ALLOWED_HOSTS',
-    'localhost,127.0.0.1,lesa-academy-portal.vercel.app,.vercel.app',
-)
+ALLOWED_HOSTS = _hosts_from_env('ALLOWED_HOSTS', _DEFAULT_ALLOWED_HOSTS)
 
 # CORS — local dev + optional production frontend (e.g. Vercel)
 CORS_ALLOWED_ORIGINS = [
