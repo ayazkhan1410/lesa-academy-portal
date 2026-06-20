@@ -20,12 +20,10 @@
 
 1. Push branch to GitHub.
 2. In [Vercel](https://vercel.com) → **Add New Project** → import repo.
-3. **Do NOT use Python/Django preset.** Use **Vite** or Other.
-4. Either:
-   - **Option A (recommended):** Set **Root Directory** to `frontend`, Framework = **Vite**
-   - **Option B:** Keep repo root — root `vercel.json` uses `@vercel/static-build` for `frontend/` only
-5. **Do not leave Root Directory blank with Django files at repo root** — Vercel auto-detects `manage.py` and tries to deploy Django after the Vite build (causes `No module named 'django'`).
-6. If using Option A: Build = `npm run build`, Output = `dist`
+3. **Root Directory must be `frontend`** — this is required so Vercel does not detect `manage.py` at the repo root as Django.
+4. Framework preset: **Vite** (auto-detected from `frontend/vercel.json`)
+5. Build command: `npm run build` (default)
+6. Output directory: `dist` (default)
 
 ### Environment variables (Vercel → Settings → Environment Variables)
 
