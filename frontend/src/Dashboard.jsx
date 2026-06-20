@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
 import { sortByGradeOrder } from './utils/gradeOrder';
+import { mediaUrl } from './config/api';
 
 // --- SHARED SIDEBAR COMPONENT ---
 export const Sidebar = ({ isDark: isDarkProp }) => {
@@ -235,13 +236,13 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      const statsResponse = await axios.get('http://127.0.0.1:8000/api/dashboard-stats', {
+      const statsResponse = await axios.get('/api/dashboard-stats', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const financeResponse = await axios.get('http://127.0.0.1:8000/api/finances/monthly-summary/', {
+      const financeResponse = await axios.get('/api/finances/monthly-summary/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
-      const trendsResponse = await axios.get('http://127.0.0.1:8000/api/financial-trends/', {
+      const trendsResponse = await axios.get('/api/financial-trends/', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -636,7 +637,7 @@ const Dashboard = () => {
                                     : 'bg-gradient-to-br from-slate-500 to-slate-600'
                                   } shadow-lg shadow-black/20`}>
                                   {s.student_image ? (
-                                    <img src={s.student_image.startsWith('http') ? s.student_image : `http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
+                                    <img src={mediaUrl(s.student_image)} alt={s.name} className="w-full h-full object-cover" />
                                   ) : (
                                     s.name.charAt(0)
                                   )}

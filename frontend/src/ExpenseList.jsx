@@ -49,7 +49,7 @@ const ExpenseList = () => {
                 ...(sortField && { sort: sortField }),
             });
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/expenses/?${params.toString()}`, {
+            const response = await axios.get(`/api/expenses/?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -107,7 +107,7 @@ const ExpenseList = () => {
         const toastId = toast.loading("Deleting record...");
         try {
             const token = localStorage.getItem('access_token');
-            await axios.delete(`http://127.0.0.1:8000/api/expenses/${id}`, {
+            await axios.delete(`/api/expenses/${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             toast.success("Record deleted successfully", { id: toastId });

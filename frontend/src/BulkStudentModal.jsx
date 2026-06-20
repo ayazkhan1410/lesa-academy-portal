@@ -52,7 +52,7 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
             setIsSearching(true);
             const token = localStorage.getItem('access_token');
             // Querying your Django backend
-            const response = await axios.get(`http://127.0.0.1:8000/api/guardian/?search=${value}`, {
+            const response = await axios.get(`/api/guardian/?search=${value}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -141,7 +141,7 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
 
         try {
             const token = localStorage.getItem('access_token');
-            await axios.post('http://127.0.0.1:8000/api/bulk-enroll-students', payload, {
+            await axios.post('/api/bulk-enroll-students', payload, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                     // Back to application/json default

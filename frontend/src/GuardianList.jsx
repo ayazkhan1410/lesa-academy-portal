@@ -52,7 +52,7 @@ const GuardianList = () => {
                 ...(searchTerm && { search: searchTerm }),
             });
 
-            const response = await axios.get(`http://127.0.0.1:8000/api/guardian/?${params.toString()}`, {
+            const response = await axios.get(`/api/guardian/?${params.toString()}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

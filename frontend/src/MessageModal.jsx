@@ -30,7 +30,7 @@ const MessageModal = ({ isOpen, onClose, students = [], onSuccess }) => {
                 ? { send_to_all: true, message: message.trim() }
                 : { student_ids: students.map(s => s.id), message: message.trim() };
 
-            const response = await axios.post('http://127.0.0.1:8000/api/send-message/', payload, {
+            const response = await axios.post('/api/send-message/', payload, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

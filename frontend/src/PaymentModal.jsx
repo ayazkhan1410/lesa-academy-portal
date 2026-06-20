@@ -78,7 +78,7 @@ const PaymentModal = ({ isOpen, onClose, studentId, studentName, currentAmount, 
 
     try {
       const token = localStorage.getItem('access_token');
-      const response = await axios.post('http://127.0.0.1:8000/api/payments/', data, {
+      const response = await axios.post('/api/payments/', data, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data'

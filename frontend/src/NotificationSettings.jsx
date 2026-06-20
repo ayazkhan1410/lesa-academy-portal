@@ -33,7 +33,7 @@ const NotificationSettings = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get('http://127.0.0.1:8000/api/notification-preference/', {
+            const response = await axios.get('/api/notification-preference/', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const results = response.data.results || [];
@@ -80,7 +80,7 @@ const NotificationSettings = () => {
         setSaving(true);
         try {
             const token = localStorage.getItem('access_token');
-            await axios.patch(`http://127.0.0.1:8000/api/notification-preference/${selectedId}/`, formData, {
+            await axios.patch(`/api/notification-preference/${selectedId}/`, formData, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             toast.success(t('notice.updated_success'));
@@ -102,7 +102,7 @@ const NotificationSettings = () => {
                 default_notification_type: 'STUDENT',
                 is_active: true
             };
-            const response = await axios.post('http://127.0.0.1:8000/api/notification-preference/', defaults, {
+            const response = await axios.post('/api/notification-preference/', defaults, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -121,7 +121,7 @@ const NotificationSettings = () => {
         setDeleting(true);
         try {
             const token = localStorage.getItem('access_token');
-            await axios.delete(`http://127.0.0.1:8000/api/notification-preference/${selectedId}/`, {
+            await axios.delete(`/api/notification-preference/${selectedId}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             toast.success(t('notice.delete_success'));

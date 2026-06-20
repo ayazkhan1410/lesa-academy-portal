@@ -14,6 +14,7 @@ import PaymentModal from './PaymentModal';
 import MessageModal from './MessageModal';
 import TestRecordModal from './TestRecordModal';
 import Lightbox from './Lightbox';
+import { mediaUrl } from './config/api';
 import toast from 'react-hot-toast';
 
 const AttendanceHeatmap = ({ attendance, overall }) => {
@@ -105,7 +106,7 @@ const StudentDetail = () => {
     const fetchAcademicSummary = useCallback(async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/students/${id}/academic-summary/`, {
+            const response = await axios.get(`/api/students/${id}/academic-summary/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setAcademicData(response.data);
@@ -117,7 +118,7 @@ const StudentDetail = () => {
     const fetchStudent = async (page = 1) => {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/students/${id}/?page=${page}`, {
+            const response = await axios.get(`/api/students/${id}/?page=${page}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setStudent(response.data);
@@ -278,14 +279,14 @@ const StudentDetail = () => {
                         <div
                             onClick={() => {
                                 if (student.student_image) {
-                                    setLightboxSrc(student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`);
+                                    setLightboxSrc(mediaUrl(student.student_image));
                                     setLightboxTitle(`${student.name} - Profile Image`);
                                 }
                             }}
                             className="w-24 h-24 bg-blue-600 rounded-3xl flex items-center justify-center text-3xl font-bold text-white shadow-xl shadow-blue-900/50 overflow-hidden shrink-0 border-4 border-slate-900 cursor-zoom-in"
                         >
                             {student.student_image ? (
-                                <img src={student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`} alt={student.name} className="w-full h-full object-cover" />
+                                <img src={mediaUrl(student.student_image)} alt={student.name} className="w-full h-full object-cover" />
                             ) : (
                                 student.name.charAt(0)
                             )}
@@ -498,7 +499,7 @@ const StudentDetail = () => {
                                                         {payment.screenshot && (
                                                             <button
                                                                 onClick={() => {
-                                                                    setLightboxSrc(`http://127.0.0.1:8000${payment.screenshot}`);
+                                                                    setLightboxSrc(mediaUrl(payment.screenshot));
                                                                     setLightboxTitle(`Fee Proof - ${new Date(payment.month_paid_for).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`);
                                                                 }}
                                                                 className="p-3 bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white rounded-xl transition-all" title="View Proof"

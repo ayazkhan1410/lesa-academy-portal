@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-const BASE_URL = 'http://127.0.0.1:8000';
-
 const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, onSuccess }) => {
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
@@ -30,7 +28,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
             formData.append('month', form.month);
             if (form.salary_slip) formData.append('salary_slip', form.salary_slip);
 
-            await axios.post(`${BASE_URL}/api/teachers/${teacherId}/salary/`, formData, {
+            await axios.post(`/api/teachers/${teacherId}/salary/`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data',

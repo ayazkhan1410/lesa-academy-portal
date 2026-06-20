@@ -19,8 +19,6 @@ import {
     paginationBarCls, navBtnCls, emptyStateCls, loadingStateCls,
 } from './components/layout/layoutClasses';
 
-const BASE_URL = 'http://127.0.0.1:8000';
-
 const TeacherList = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -51,7 +49,7 @@ const TeacherList = () => {
     const fetchSubjects = useCallback(async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const r = await axios.get(`${BASE_URL}/api/subjects/`, {
+            const r = await axios.get(`/api/subjects/`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setSubjects(r.data);
@@ -66,7 +64,7 @@ const TeacherList = () => {
             if (search) params.search = search;
             if (selectedSubject) params.subject_id = selectedSubject;
 
-            const r = await axios.get(`${BASE_URL}/api/teachers/`, {
+            const r = await axios.get(`/api/teachers/`, {
                 headers: { Authorization: `Bearer ${token}` },
                 params
             });
