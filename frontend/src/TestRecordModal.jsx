@@ -49,7 +49,7 @@ const TestRecordModal = ({ isOpen, onClose, studentId, studentName, onSuccess })
                 }))
             };
 
-            await axios.post(`http://127.0.0.1:8000/api/students/${studentId}/test-records-bulk/`, payload, {
+            await axios.post(`/api/students/${studentId}/test-records-bulk/`, payload, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 

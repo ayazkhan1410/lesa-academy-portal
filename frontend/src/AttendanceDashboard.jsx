@@ -10,9 +10,7 @@ import {
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
-
-const BASE_URL = 'http://127.0.0.1:8000';
-const API_BASE_URL = `${BASE_URL}/api`;
+import { mediaUrl } from './config/api';
 
 const AttendanceDashboard = () => {
     const { t } = useTranslation();
@@ -52,7 +50,7 @@ const AttendanceDashboard = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`${API_BASE_URL}/attendance/by-class/`, {
+            const response = await axios.get(`/api/attendance/by-class/`, {
                 params: { grade, date },
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -140,7 +138,7 @@ const AttendanceDashboard = () => {
             }
 
             const payload = { date, records: recordsToSave };
-            const response = await axios.post(`${API_BASE_URL}/attendance/bulk/`, payload, {
+            const response = await axios.post(`/api/attendance/bulk/`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
@@ -335,7 +333,7 @@ const AttendanceDashboard = () => {
                                         <div className="flex items-center gap-5 relative z-10">
                                             <div className="w-16 h-16 rounded-[1.5rem] overflow-hidden shrink-0 bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-2xl font-black text-slate-400 border-2 border-white/10 shadow-lg">
                                                 {student.student_image ? (
-                                                    <img src={`${BASE_URL}${student.student_image}`} className="w-full h-full object-cover transition-transform group-hover/card:scale-110" alt="Student" />
+                                                    <img src={mediaUrl(student.student_image)} className="w-full h-full object-cover transition-transform group-hover/card:scale-110" alt="Student" />
                                                 ) : (
                                                     <span className="uppercase tracking-tighter">{student.student_name.charAt(0)}</span>
                                                 )}

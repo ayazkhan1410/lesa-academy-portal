@@ -4,6 +4,7 @@ import { X, Loader2, Save, User, Shield, Activity, Sparkles, Image as ImageIcon,
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { compressImage } from './utils/imageUtils';
+import { mediaUrl } from './config/api';
 
 const GRADE_OPTIONS = [
     { value: 'Nursery', label: 'Nursery' }, { value: 'Prep', label: 'Prep' },
@@ -41,7 +42,7 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
                 fee_status: studentToEdit.latest_fee_status || 'pending',
                 is_active: studentToEdit.is_active ?? true
             });
-            setImagePreview(studentToEdit.student_image ? `http://127.0.0.1:8000${studentToEdit.student_image}` : null);
+            setImagePreview(studentToEdit.student_image ? mediaUrl(studentToEdit.student_image) : null);
         } else {
             setFormData({
                 name: '', age: '', grade: '',
@@ -125,10 +126,10 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
             };
 
             if (studentToEdit) {
-                await axios.patch(`http://127.0.0.1:8000/api/students/${studentToEdit.id}/`, payload, config);
+                await axios.patch(`/api/students/${studentToEdit.id}/`, payload, config);
                 toast.success("Student updated", { id: toastId });
             } else {
-                await axios.post('http://127.0.0.1:8000/api/students/', payload, config);
+                await axios.post('/api/students/', payload, config);
                 toast.success("Student registered", { id: toastId });
             }
             onSuccess();

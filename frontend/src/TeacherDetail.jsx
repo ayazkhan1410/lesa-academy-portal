@@ -13,8 +13,7 @@ import TeacherModal from './TeacherModal';
 import SalaryModal from './SalaryModal';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
-
-const BASE_URL = 'http://127.0.0.1:8000';
+import { mediaUrl } from './config/api';
 
 const InfoField = ({ label, value, icon: Icon, isDark }) => (
     <div className={`border rounded-2xl p-5 ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
@@ -52,7 +51,7 @@ const TeacherDetail = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const r = await axios.get(`${BASE_URL}/api/teachers/${id}/`, {
+            const r = await axios.get(`/api/teachers/${id}/`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTeacher(r.data);
@@ -71,7 +70,7 @@ const TeacherDetail = () => {
         setDeleting(true);
         try {
             const token = localStorage.getItem('access_token');
-            await axios.delete(`${BASE_URL}/api/teachers/${id}/`, {
+            await axios.delete(`/api/teachers/${id}/`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Teacher deleted!');
@@ -292,7 +291,7 @@ const TeacherDetail = () => {
                                                         <td className={`px-8 py-5 text-xs font-bold ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{p.paid_on || '—'}</td>
                                                         <td className="px-8 py-5 text-right">
                                                             {p.salary_slip ? (
-                                                                <a href={p.salary_slip.startsWith('http') ? p.salary_slip : `${BASE_URL}${p.salary_slip}`} target="_blank" rel="noreferrer"
+                                                                <a href={p.salary_slip.startsWith('http') ? p.salary_slip : mediaUrl(p.salary_slip)} target="_blank" rel="noreferrer"
                                                                     className="text-violet-400 text-xs font-black uppercase tracking-widest hover:text-violet-300 underline">
                                                                     View
                                                                 </a>

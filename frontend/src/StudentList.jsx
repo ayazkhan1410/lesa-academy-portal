@@ -15,6 +15,7 @@ import StudentModal from './StudentModal';
 import MessageModal from './MessageModal';
 import { Sidebar } from './Dashboard';
 import { TableSkeleton } from './Skeleton';
+import { mediaUrl } from './config/api';
 
 const CustomCheckbox = ({ checked, onChange, isDark }) => (
   <div
@@ -94,7 +95,7 @@ const StudentList = () => {
         ...(selectedGrade !== 'All' && { grade: selectedGrade })
       });
 
-      const response = await axios.get(`http://127.0.0.1:8000/api/students/?${params.toString()}`, {
+      const response = await axios.get(`/api/students/?${params.toString()}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -163,7 +164,7 @@ const StudentList = () => {
   const executeDelete = async () => {
     try {
       const token = localStorage.getItem('access_token');
-      await axios.delete(`http://127.0.0.1:8000/api/students/${studentToDelete.id}/`, {
+      await axios.delete(`/api/students/${studentToDelete.id}/`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       toast.success("Student record deleted");
@@ -189,7 +190,7 @@ const StudentList = () => {
           page: page,
           ...(selectedGrade !== 'All' && { grade: selectedGrade })
         });
-        const response = await axios.get(`http://127.0.0.1:8000/api/students/?${params.toString()}`, {
+        const response = await axios.get(`/api/students/?${params.toString()}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
@@ -543,7 +544,7 @@ const StudentList = () => {
                                     : 'bg-gradient-to-br from-slate-500 to-slate-600'
                                   } shadow-lg shadow-black/20`}>
                                   {s.student_image ? (
-                                    <img src={`http://127.0.0.1:8000${s.student_image}`} alt={s.name} className="w-full h-full object-cover" />
+                                    <img src={mediaUrl(s.student_image)} alt={s.name} className="w-full h-full object-cover" />
                                   ) : (
                                     s.name.charAt(0)
                                   )}

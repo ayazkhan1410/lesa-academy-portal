@@ -11,9 +11,6 @@ import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 
-const BASE_URL = 'http://127.0.0.1:8000';
-const API_BASE_URL = `${BASE_URL}/api`;
-
 const TeacherAttendanceDashboard = () => {
     const { t } = useTranslation();
     const navigate = useNavigate();
@@ -51,7 +48,7 @@ const TeacherAttendanceDashboard = () => {
         setIsLoading(true);
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`${API_BASE_URL}/teacher-attendance/`, {
+            const response = await axios.get(`/api/teacher-attendance/`, {
                 params: { date },
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -140,7 +137,7 @@ const TeacherAttendanceDashboard = () => {
             }
 
             const payload = { date, records: recordsToSave };
-            const response = await axios.post(`${API_BASE_URL}/teacher-attendance/bulk/`, payload, {
+            const response = await axios.post(`/api/teacher-attendance/bulk/`, payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 

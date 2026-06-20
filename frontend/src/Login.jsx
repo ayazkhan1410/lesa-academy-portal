@@ -41,7 +41,7 @@ const Login = ({ onLogin }) => {
         const cleanEmail = formData.email.trim();
 
         try {
-            const response = await axios.post('http://127.0.0.1:8000/api/secure-login/', {
+            const response = await axios.post('/api/secure-login/', {
                 email: cleanEmail,
                 password: formData.password
             });

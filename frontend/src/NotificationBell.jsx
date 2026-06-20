@@ -17,7 +17,7 @@ const NotificationBell = ({ isDark }) => {
             const token = localStorage.getItem('access_token');
             if (!token) return;
 
-            const response = await axios.get('http://127.0.0.1:8000/api/notification/', {
+            const response = await axios.get('/api/notification/', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
 
@@ -87,7 +87,7 @@ const NotificationBell = ({ isDark }) => {
     const handleMarkRead = async (id) => {
         try {
             const token = localStorage.getItem('access_token');
-            await axios.patch(`http://127.0.0.1:8000/api/notification/${id}/`, { is_read: true }, {
+            await axios.patch(`/api/notification/${id}/`, { is_read: true }, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setNotifications(prev => prev.map(n => n.id === id ? { ...n, is_read: true } : n));
@@ -104,7 +104,7 @@ const NotificationBell = ({ isDark }) => {
         try {
             const token = localStorage.getItem('access_token');
             await Promise.all(unread.map(n =>
-                axios.patch(`http://127.0.0.1:8000/api/notification/${n.id}/`, { is_read: true }, {
+                axios.patch(`/api/notification/${n.id}/`, { is_read: true }, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ));
@@ -119,7 +119,7 @@ const NotificationBell = ({ isDark }) => {
     const handleDelete = async (id) => {
         try {
             const token = localStorage.getItem('access_token');
-            await axios.delete(`http://127.0.0.1:8000/api/notification/${id}/`, {
+            await axios.delete(`/api/notification/${id}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setNotifications(prev => prev.filter(n => n.id !== id));

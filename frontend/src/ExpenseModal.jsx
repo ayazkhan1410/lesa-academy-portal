@@ -73,8 +73,8 @@ const ExpenseModal = ({ isOpen, onClose, onSuccess, expenseToEdit = null }) => {
         try {
             const token = localStorage.getItem('access_token');
             const url = expenseToEdit
-                ? `http://127.0.0.1:8000/api/expenses/${expenseToEdit.id}`
-                : 'http://127.0.0.1:8000/api/expenses/';
+                ? `/api/expenses/${expenseToEdit.id}`
+                : '/api/expenses/';
 
             const method = expenseToEdit ? 'patch' : 'post';
 

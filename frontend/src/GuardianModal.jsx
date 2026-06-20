@@ -53,8 +53,8 @@ const GuardianModal = ({ isOpen, onClose, onSuccess, guardianToEdit = null }) =>
         try {
             const token = localStorage.getItem('access_token');
             const url = guardianToEdit
-                ? `http://127.0.0.1:8000/api/guardian/${guardianToEdit.id}/`
-                : 'http://127.0.0.1:8000/api/guardian/';
+                ? `/api/guardian/${guardianToEdit.id}/`
+                : '/api/guardian/';
 
             const method = guardianToEdit ? 'put' : 'post';
 

@@ -9,6 +9,7 @@ import {
 import { motion } from 'framer-motion';
 import toast, { Toaster } from 'react-hot-toast';
 import { Sidebar } from './Dashboard';
+import { mediaUrl } from './config/api';
 
 const GuardianDetail = () => {
     const { id } = useParams();
@@ -33,7 +34,7 @@ const GuardianDetail = () => {
     const fetchGuardian = async () => {
         try {
             const token = localStorage.getItem('access_token');
-            const response = await axios.get(`http://127.0.0.1:8000/api/guardian/${id}/`, {
+            const response = await axios.get(`/api/guardian/${id}/`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             setGuardian(response.data);
@@ -67,7 +68,7 @@ const GuardianDetail = () => {
         try {
             const token = localStorage.getItem('access_token');
             // Using PATCH as provided in user cURL for partial updates
-            await axios.patch(`http://127.0.0.1:8000/api/guardian/${id}/`, editData, {
+            await axios.patch(`/api/guardian/${id}/`, editData, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
@@ -284,7 +285,7 @@ const GuardianDetail = () => {
                                             <div className="flex items-center gap-5">
                                                 <div className="w-12 h-12 bg-blue-600/10 text-blue-500 rounded-xl flex items-center justify-center font-black text-lg overflow-hidden border border-blue-500/20 transition-transform group-hover:scale-110">
                                                     {student.student_image ? (
-                                                        <img src={student.student_image.startsWith('http') ? student.student_image : `http://127.0.0.1:8000${student.student_image}`} alt={student.name} className="w-full h-full object-cover" />
+                                                        <img src={mediaUrl(student.student_image)} alt={student.name} className="w-full h-full object-cover" />
                                                     ) : (
                                                         student.name?.charAt(0) || 'S'
                                                     )}

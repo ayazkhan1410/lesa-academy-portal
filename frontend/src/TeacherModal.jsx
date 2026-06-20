@@ -5,8 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { useTranslation } from 'react-i18next';
 
-const BASE_URL = 'http://127.0.0.1:8000';
-
 const COMMON_SUBJECTS = [
     "Mathematics", "English", "Urdu", "Science", "Islamiyat",
     "Physics", "Chemistry", "Biology", "Computer", "Pakistan Studies"
@@ -27,7 +25,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
 
     useEffect(() => {
         const token = localStorage.getItem('access_token');
-        axios.get(`${BASE_URL}/api/subjects/`, {
+        axios.get(`/api/subjects/`, {
             headers: { Authorization: `Bearer ${token}` }
         }).then(r => setSubjects(r.data)).catch((err) => {
             console.error("Failed to fetch subjects:", err);
@@ -57,7 +55,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
             // Create the subject on the fly
             try {
                 const token = localStorage.getItem('access_token');
-                const resp = await axios.post(`${BASE_URL}/api/subjects/`, { name: subName }, {
+                const resp = await axios.post(`/api/subjects/`, { name: subName }, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 subject = resp.data.data;
@@ -88,12 +86,12 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
             const token = localStorage.getItem('access_token');
             const payload = { ...form, salary: form.salary || null };
             if (isEdit) {
-                await axios.patch(`${BASE_URL}/api/teachers/${teacher.id}/`, payload, {
+                await axios.patch(`/api/teachers/${teacher.id}/`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 toast.success(t('teacher.updated_success') || 'Teacher updated successfully!');
             } else {
-                await axios.post(`${BASE_URL}/api/teachers/`, payload, {
+                await axios.post(`/api/teachers/`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 toast.success(t('teacher.created_success') || 'Teacher created successfully!');
