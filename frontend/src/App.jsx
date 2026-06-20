@@ -23,6 +23,11 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
+const HomeRedirect = () => {
+  const isAuthenticated = !!localStorage.getItem('access_token');
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />;
+};
+
 const App = () => {
   const { i18n } = useTranslation();
   const direction = i18n.language === 'ur' ? 'rtl' : 'ltr';
@@ -74,7 +79,7 @@ const App = () => {
           <Route path="/teachers/:id" element={<ProtectedRoute><TeacherDetail /></ProtectedRoute>} />
           <Route path="/notification-settings" element={<ProtectedRoute><NotificationSettings /></ProtectedRoute>} />
 
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="/" element={<HomeRedirect />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Router>
