@@ -28,7 +28,7 @@ const App = () => {
   const direction = i18n.language === 'ur' ? 'rtl' : 'ltr';
 
   return (
-    <div dir={direction} className={`admin-app ${i18n.language === 'ur' ? 'font-urdu' : ''}`}>
+    <div dir={direction} className="admin-app font-sans antialiased">
       <Router>
         {/* ✅ GLOBAL DYNAMIC TOASTER CONFIGURATION */}
         <Toaster

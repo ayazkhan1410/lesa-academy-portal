@@ -107,7 +107,7 @@ const GuardianModal = ({ isOpen, onClose, onSuccess, guardianToEdit = null }) =>
                             <div className="p-8 border-b border-white/5 bg-gradient-to-br from-blue-600/10 to-transparent">
                                 <div className="flex justify-between items-center">
                                     <div>
-                                        <h2 className="text-2xl font-black text-white italic tracking-tight">
+                                        <h2 className="text-2xl font-black text-white tracking-tight">
                                             {guardianToEdit ? 'Edit Guardian' : 'Add New Guardian'}
                                         </h2>
                                         <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Enter guardian details below</p>
@@ -162,7 +162,7 @@ const GuardianModal = ({ isOpen, onClose, onSuccess, guardianToEdit = null }) =>
                                             <label className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest">
                                                 <Phone size={12} className="text-blue-500" /> Phone Number
                                             </label>
-                                            <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter italic">Format: 03130753830</span>
+                                            <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter">Format: 03130753830</span>
                                         </div>
                                         <input
                                             type="text"

@@ -131,7 +131,7 @@ const TeacherModal = ({ isOpen, onClose, teacher = null, onSuccess }) => {
                                     <User size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-black text-white italic tracking-tight uppercase">
+                                    <h2 className="text-lg font-black text-white tracking-tight uppercase">
                                         {isEdit ? t('teacher.edit_teacher') || 'Edit Teacher' : t('teacher.add_teacher')}
                                     </h2>
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">

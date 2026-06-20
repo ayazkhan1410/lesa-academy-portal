@@ -88,7 +88,7 @@ const TeacherDetail = () => {
             <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-slate-950' : 'bg-slate-50'}`}>
                 <Sidebar isDark={isDark} />
                 <div className="flex-1 flex items-center justify-center">
-                    <p className="text-slate-400 font-bold italic animate-pulse text-xl">{t('common.loading')}</p>
+                    <p className="text-slate-400 font-bold animate-pulse text-xl">{t('common.loading')}</p>
                 </div>
             </div>
         );
@@ -136,7 +136,7 @@ const TeacherDetail = () => {
                                     {teacher.name ? teacher.name.charAt(0).toUpperCase() : '?'}
                                 </div>
                                 <div>
-                                    <h1 className={`text-3xl font-black italic tracking-tight uppercase ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                                    <h1 className={`text-3xl font-black tracking-tight uppercase ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                         {teacher.name || '—'}
                                     </h1>
                                     <p className={`font-bold text-sm mt-1 flex items-center gap-1.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
@@ -199,7 +199,7 @@ const TeacherDetail = () => {
                                             <div className={`bg-${c.color}-600/20 p-3 rounded-2xl text-${c.color}-400`}><c.icon size={22} /></div>
                                             <div>
                                                 <p className={`text-[9px] font-black text-${c.color}-400 uppercase tracking-widest mb-1`}>{c.label}</p>
-                                                <p className={`text-2xl font-black italic ${isDark ? 'text-white' : 'text-slate-800'}`}>{c.value}</p>
+                                                <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{c.value}</p>
                                             </div>
                                         </div>
                                     ))}
@@ -248,13 +248,13 @@ const TeacherDetail = () => {
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className={`border rounded-2xl p-5 text-center ${isDark ? 'bg-emerald-600/5 border-emerald-500/10' : 'bg-emerald-50 border-emerald-200'}`}>
                                         <p className="text-[9px] font-black text-emerald-400 uppercase tracking-widest mb-1">{t('teacher.total_paid')}</p>
-                                        <p className={`text-2xl font-black italic ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                             Rs. {parseFloat(teacher.total_salary_paid || 0).toLocaleString()}
                                         </p>
                                     </div>
                                     <div className={`border rounded-2xl p-5 text-center ${isDark ? 'bg-slate-800/40 border-white/5' : 'bg-slate-50 border-slate-200'}`}>
                                         <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">{t('teacher.payment_count')}</p>
-                                        <p className={`text-2xl font-black italic ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                                        <p className={`text-2xl font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                             {(teacher.salary_payments || []).length}
                                         </p>
                                     </div>
@@ -262,7 +262,7 @@ const TeacherDetail = () => {
 
                                 <div className={`border rounded-[2rem] overflow-hidden ${isDark ? 'bg-slate-900/30 border-white/5' : 'bg-white border-slate-200 shadow-md'}`}>
                                     {(teacher.salary_payments || []).length === 0 ? (
-                                        <div className="py-16 text-center text-slate-500 font-bold italic">No salary payments yet</div>
+                                        <div className="py-16 text-center text-slate-500 font-bold">No salary payments yet</div>
                                     ) : (
                                         <table className="w-full">
                                             <thead>
@@ -296,7 +296,7 @@ const TeacherDetail = () => {
                                                                     className="text-violet-400 text-xs font-black uppercase tracking-widest hover:text-violet-300 underline">
                                                                     View
                                                                 </a>
-                                                            ) : <span className="text-slate-600 text-xs italic">—</span>}
+                                                            ) : <span className="text-slate-600 text-xs">—</span>}
                                                         </td>
                                                     </motion.tr>
                                                 ))}

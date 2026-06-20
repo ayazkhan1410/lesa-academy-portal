@@ -39,7 +39,7 @@ const AttendanceHeatmap = ({ attendance, overall }) => {
             <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
                 <div className="flex items-center gap-3">
                     <Calendar className="text-amber-500" size={20} />
-                    <h3 className="text-lg font-black text-white italic tracking-tight uppercase">Presence Heatmap</h3>
+                    <h3 className="text-lg font-black text-white tracking-tight uppercase">Presence Heatmap</h3>
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="flex items-center gap-1.5">
@@ -291,7 +291,7 @@ const StudentDetail = () => {
                             )}
                         </div>
                         <div>
-                            <h1 className="text-4xl font-black text-white italic tracking-tight mb-2 uppercase">{student.name}</h1>
+                            <h1 className="text-4xl font-black text-white tracking-tight mb-2 uppercase">{student.name}</h1>
                             <div className="flex flex-wrap gap-2">
                                 <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-700 flex items-center gap-2">
                                     <Hash size={12} /> ID: {student.id}
@@ -305,7 +305,7 @@ const StudentDetail = () => {
                     </div>
                     <div className="bg-slate-800/50 px-8 py-5 rounded-3xl border border-slate-700 text-right relative z-10">
                         <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Current Enrollment</p>
-                        <p className="text-3xl font-black text-white italic tracking-tighter">Class {student.grade}</p>
+                        <p className="text-3xl font-black text-white tracking-tighter">Class {student.grade}</p>
                     </div>
                 </motion.div>
 
@@ -316,7 +316,7 @@ const StudentDetail = () => {
                                 <section className="bg-slate-900 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
                                     <div className="flex items-center gap-3 mb-8 pb-4 border-b border-white/5">
                                         <User className="text-blue-500" size={20} />
-                                        <h3 className="text-lg font-black text-white italic tracking-tight uppercase">Student Details</h3>
+                                        <h3 className="text-lg font-black text-white tracking-tight uppercase">Student Details</h3>
                                     </div>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <InfoField label="Full Name" value={student.name} />
@@ -330,7 +330,7 @@ const StudentDetail = () => {
                                     <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
                                         <div className="flex items-center gap-3">
                                             <Users className="text-indigo-500" size={20} />
-                                            <h3 className="text-lg font-black text-white italic tracking-tight uppercase">Guardian Information</h3>
+                                            <h3 className="text-lg font-black text-white tracking-tight uppercase">Guardian Information</h3>
                                         </div>
                                         <button onClick={() => setIsMessageModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 hover:bg-blue-600 text-blue-400 hover:text-white rounded-xl transition-all text-[10px] font-black uppercase tracking-widest border border-blue-500/20">
                                             <MessageSquare size={14} /> Send SMS
@@ -358,7 +358,7 @@ const StudentDetail = () => {
                                         <Award size={32} />
                                     </div>
                                     <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-1">Academic Rank</h4>
-                                    <p className="text-5xl font-black text-white italic mb-2 tracking-tighter">
+                                    <p className="text-5xl font-black text-white mb-2 tracking-tighter">
                                         {academicData?.summary?.class_position ? `${academicData.summary.class_position}` : '--'}
                                         <span className="text-xl text-indigo-400 font-bold tracking-normal ml-1">/ {academicData?.summary?.total_students_in_class || '--'}</span>
                                     </p>
@@ -369,7 +369,7 @@ const StudentDetail = () => {
                                         <TrendingUp size={32} />
                                     </div>
                                     <h4 className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Fee Status</h4>
-                                    <p className={`text-3xl font-black italic tracking-tighter ${student.latest_fee_status === 'paid' ? 'text-white' : 'text-amber-400'}`}>
+                                    <p className={`text-3xl font-black tracking-tighter ${student.latest_fee_status === 'paid' ? 'text-white' : 'text-amber-400'}`}>
                                         {student.latest_fee_status === 'paid' ? 'CLEAR' : 'REMAINING'}
                                     </p>
                                     <button onClick={() => setActiveTab('fees')} className="mt-4 text-[10px] font-black text-emerald-500 hover:text-white uppercase tracking-widest">View Ledger →</button>
@@ -379,7 +379,7 @@ const StudentDetail = () => {
                                         <CalendarCheck size={32} />
                                     </div>
                                     <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-widest mb-1">Overall Attendance</h4>
-                                    <p className={`text-5xl font-black italic tracking-tighter ${student.overall_attendance >= 75 ? 'text-white' : 'text-rose-400'}`}>
+                                    <p className={`text-5xl font-black tracking-tighter ${student.overall_attendance >= 75 ? 'text-white' : 'text-rose-400'}`}>
                                         {student.overall_attendance != null ? `${Math.round(student.overall_attendance)}%` : '--'}
                                     </p>
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-2">Presence Rate</p>
@@ -397,7 +397,7 @@ const StudentDetail = () => {
                                             <Award size={24} />
                                         </div>
                                         <div>
-                                            <h3 className="text-xl font-black text-white italic tracking-tight uppercase">Academic Performance</h3>
+                                            <h3 className="text-xl font-black text-white tracking-tight uppercase">Academic Performance</h3>
                                             <p className="text-[10px] text-indigo-400 font-black uppercase tracking-widest">Aggregate Results & Tracking</p>
                                         </div>
                                     </div>
@@ -456,7 +456,7 @@ const StudentDetail = () => {
                                                     </tr>
                                                 ))
                                             ) : (
-                                                <tr><td colSpan="6" className="py-20 text-center text-slate-500 font-bold italic">No academic records found for this student.</td></tr>
+                                                <tr><td colSpan="6" className="py-20 text-center text-slate-500 font-bold">No academic records found for this student.</td></tr>
                                             )}
                                         </tbody>
                                     </table>
@@ -472,7 +472,7 @@ const StudentDetail = () => {
                                     <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
                                         <div className="flex items-center gap-3">
                                             <CreditCard className="text-emerald-500" size={20} />
-                                            <h3 className="text-lg font-black text-white italic tracking-tight uppercase">Payment Ledger</h3>
+                                            <h3 className="text-lg font-black text-white tracking-tight uppercase">Payment Ledger</h3>
                                         </div>
                                         <button onClick={() => setIsPaymentModalOpen(true)} className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white hover:bg-emerald-500 rounded-xl transition-all text-[10px] font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20">
                                             <PlusCircle size={14} /> Post Payment
@@ -488,7 +488,7 @@ const StudentDetail = () => {
                                                             <Calendar size={20} />
                                                         </div>
                                                         <div>
-                                                            <p className="text-xl font-black text-white italic tracking-tight">Rs. {payment.amount}</p>
+                                                            <p className="text-xl font-black text-white tracking-tight">Rs. {payment.amount}</p>
                                                             <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest">
                                                                 {new Date(payment.month_paid_for).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
                                                             </p>
@@ -513,7 +513,7 @@ const StudentDetail = () => {
                                                 </div>
                                             ))
                                         ) : (
-                                            <div className="text-slate-600 text-sm text-center py-20 italic">No formal payment history found.</div>
+                                            <div className="text-slate-600 text-sm text-center py-20">No formal payment history found.</div>
                                         )}
                                     </div>
 
@@ -539,11 +539,11 @@ const StudentDetail = () => {
                                     <div className="space-y-6">
                                         <div className="flex justify-between items-center group">
                                             <span className="text-slate-400 text-xs font-bold uppercase tracking-widest group-hover:text-emerald-400 transition-colors">Total Paid</span>
-                                            <span className="text-xl font-black text-white italic">Rs. {student.total_fees_paid || 0}</span>
+                                            <span className="text-xl font-black text-white">Rs. {student.total_fees_paid || 0}</span>
                                         </div>
                                         <div className="flex justify-between items-center group">
                                             <span className="text-slate-400 text-xs font-bold uppercase tracking-widest group-hover:text-rose-400 transition-colors">Pending</span>
-                                            <span className="text-xl font-black text-rose-400 italic">Rs. {student.total_fees_pending || 0}</span>
+                                            <span className="text-xl font-black text-rose-400">Rs. {student.total_fees_pending || 0}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -609,7 +609,7 @@ const InfoField = ({ label, value, icon, color = "blue" }) => (
 const SummaryCard = ({ label, value, sub, color }) => (
     <div className={`p-6 rounded-2xl bg-${color}-600/5 border border-${color}-500/10`}>
         <p className={`text-[9px] font-black uppercase tracking-widest text-${color}-500 mb-2`}>{label}</p>
-        <p className="text-2xl font-black text-white italic tracking-tighter mb-1 uppercase">{value}</p>
+        <p className="text-2xl font-black text-white tracking-tighter mb-1 uppercase">{value}</p>
         <p className="text-[9px] text-slate-600 font-bold uppercase tracking-widest">{sub}</p>
     </div>
 );
