@@ -320,16 +320,16 @@ const StudentList = () => {
       <Sidebar isDark={isDark} />
 
       <main className="flex-1 flex flex-col overflow-y-auto relative z-10">
-        <div className="p-6 md:p-8 lg:p-10 max-w-[1400px] mx-auto w-full">
+        <div className="p-4 sm:p-5 max-w-[1400px] mx-auto w-full">
 
           {/* Header */}
-          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3 mb-4">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
               <div className="flex items-center gap-3 mb-1">
                 <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
                   <Users size={20} className="text-white" />
                 </div>
-                <h2 className={`text-3xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>Student Records</h2>
+                <h2 className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>Student Records</h2>
               </div>
               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] ml-12 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
                 Fee Priority View • {totalCount} Entries
