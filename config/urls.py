@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from students.views import (
+    HealthCheckAPIView,
     SecureLoginAPIView,
     ListCreateStudentAPIView,
     BulkEnrollStudentAPIView,
@@ -61,6 +62,9 @@ urlpatterns = [
         "api/token/refresh/",
         TokenRefreshView.as_view(), name='token_refresh'
     ),
+
+    # Health Check
+    path('api/health-check/', HealthCheckAPIView.as_view(), name='health-check'),
 
     # Endpoints
     path("api/secure-login/", SecureLoginAPIView.as_view()),

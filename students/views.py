@@ -61,6 +61,23 @@ class StudentPagination(PageNumberPagination):
     max_page_size = 100
 
 
+class HealthCheckAPIView(APIView):
+    @extend_schema(
+        summary="Health Check",
+        description="Check if the server is healthy",
+        responses={200: {
+            "type": "object",
+            "properties": {
+                "status": {"type": "string", "example": "healthy"}
+            }
+        }}
+    )
+    def get(self, request):
+        return Response({
+            "message": "Server is healthy"
+        }, status=status.HTTP_200_OK)
+
+
 class SecureLoginAPIView(APIView):
     @extend_schema(
         summary="User Login",
