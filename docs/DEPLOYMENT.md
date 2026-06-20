@@ -93,6 +93,16 @@ docker compose up
 - Backend: `http://127.0.0.1:8000`
 - Frontend defaults to local API when `VITE_API_BASE_URL` is unset
 
+### After changing `requirements.txt`
+
+Rebuild backend images so new packages (e.g. `dj-database-url`, `gunicorn`) are installed:
+
+```bash
+docker compose build backend celery_worker flower
+docker compose up -d
+docker compose exec backend python manage.py check
+```
+
 ---
 
 ## Production checklist
