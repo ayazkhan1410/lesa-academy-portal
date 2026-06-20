@@ -1,0 +1,22 @@
+/* Enterprise compact density — applied app-wide via .admin-app wrapper */
+
+.admin-app {
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (min-width: 1280px) {
+  .admin-app {
+    font-size: 14px;
+  }
+}
+
+/* Scrollable main content without oversized chrome stealing viewport */
+.admin-app .page-main {
+  min-height: 0;
+}
+
+.admin-app .custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}

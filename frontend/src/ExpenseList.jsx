@@ -137,16 +137,16 @@ const ExpenseList = () => {
                 </div>
 
                 {/* Header Section */}
-                <div className={`sticky top-0 z-10 p-8 ${isDark ? 'bg-slate-950/80' : 'bg-slate-50/80'} backdrop-blur-xl border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
+                <div className={`sticky top-0 z-10 px-4 py-3 sm:px-5 sm:py-3.5 ${isDark ? 'bg-slate-950/90' : 'bg-white/90'} backdrop-blur-md border-b ${isDark ? 'border-white/5' : 'border-slate-200'}`}>
                     <div className="max-w-[1440px] mx-auto">
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                             <div className="flex items-center gap-5">
-                                <div className="bg-amber-600 p-4 rounded-3xl shadow-lg shadow-amber-500/20">
-                                    <Wallet className="text-white" size={32} />
+                                <div className="bg-amber-600 p-2 rounded-xl shadow-md shrink-0">
+                                    <Wallet className="text-white" size={18} />
                                 </div>
                                 <div>
-                                    <h1 className="text-3xl font-black tracking-tighter italic uppercase underline decoration-amber-500 decoration-4 underline-offset-8">Expense Ledger</h1>
-                                    <p className={`text-[10px] font-black uppercase tracking-widest mt-4 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+                                    <h1 className="text-lg sm:text-xl font-bold tracking-tight uppercase">Expense Ledger</h1>
+                                    <p className={`text-[10px] font-semibold uppercase tracking-wide mt-0.5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                                         Tracking {totalCount} academy expenses
                                     </p>
                                 </div>
@@ -173,7 +173,7 @@ const ExpenseList = () => {
                         </div>
 
                         {/* Filters & Search */}
-                        <div className="mt-12 flex flex-col lg:flex-row gap-4">
+                        <div className="mt-3 flex flex-col lg:flex-row gap-2">
                             <div className="flex-1 relative group">
                                 <Search className={`absolute left-6 top-1/2 -translate-y-1/2 transition-colors ${isDark ? 'text-slate-600 group-focus-within:text-amber-500' : 'text-slate-400 group-focus-within:text-amber-600'}`} size={20} />
                                 <input
@@ -181,7 +181,7 @@ const ExpenseList = () => {
                                     placeholder="Search expenses..."
                                     value={searchTerm}
                                     onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
-                                    className={`w-full pl-16 pr-8 py-5 rounded-[2rem] border text-sm font-bold transition-all outline-none ${isDark ? 'bg-slate-900/50 border-white/5 focus:border-amber-500/50 focus:bg-slate-900 text-white placeholder:text-slate-700' : 'bg-white border-slate-200 focus:border-amber-500 focus:ring-8 focus:ring-amber-500/5 text-slate-900 shadow-sm'}`}
+                                    className={`w-full pl-9 pr-3 py-2 rounded-lg border text-sm outline-none transition-all ${isDark ? 'bg-slate-900/60 border-white/5 focus:border-amber-500/50 text-white placeholder:text-slate-600' : 'bg-white border-slate-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 text-slate-900 shadow-sm'}`}
                                 />
                             </div>
 
@@ -217,7 +217,7 @@ const ExpenseList = () => {
                         </div>
 
                         {/* Quick Stats Grid */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 mt-3">
                             <StatCard
                                 label="Monthly Expenses"
                                 value={`Rs. ${expenses.reduce((acc, curr) => acc + (curr.status === 'paid' ? parseFloat(curr.amount) : 0), 0).toLocaleString()}`}
@@ -251,10 +251,10 @@ const ExpenseList = () => {
                 </div>
 
                 {/* Content Section */}
-                <div className="max-w-[1440px] mx-auto p-8 pb-32">
+                <div className="max-w-[1440px] mx-auto px-4 py-4 sm:px-5 sm:py-5 pb-20">
                     <AnimatePresence mode="wait">
                         {loading ? (
-                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center py-48 gap-8">
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col items-center justify-center py-16 gap-8">
                                 <div className="relative">
                                     <div className="absolute inset-0 bg-amber-500 blur-3xl opacity-20 animate-pulse" />
                                     <Loader2 className="animate-spin text-amber-500 relative" size={64} strokeWidth={3} />
@@ -262,31 +262,31 @@ const ExpenseList = () => {
                                 <p className={`text-[11px] font-black uppercase tracking-[0.4em] animate-pulse ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Loading Expenses...</p>
                             </motion.div>
                         ) : expenses.length === 0 ? (
-                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className={`flex flex-col items-center justify-center py-48 rounded-[3.5rem] border-2 border-dashed ${isDark ? 'border-white/5 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'}`}>
+                            <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className={`flex flex-col items-center justify-center py-16 rounded-xl border-2 border-dashed ${isDark ? 'border-white/5 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'}`}>
                                 <SearchSlash size={80} strokeWidth={1} className="text-slate-800 mb-8 opacity-20" />
                                 <h3 className="text-2xl font-black mb-2 italic tracking-tighter uppercase text-slate-500">No Expenses Found</h3>
                                 <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Clear the filters to see active records</p>
                             </motion.div>
                         ) : (
                             <div className="relative group">
-                                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className={`relative z-0 rounded-[3.5rem] border overflow-hidden backdrop-blur-sm max-w-full ${isDark ? 'bg-slate-900/30 border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
+                                <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} className={`relative z-0 rounded-xl border overflow-hidden backdrop-blur-sm max-w-full ${isDark ? 'bg-slate-900/30 border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}>
                                     <div className="overflow-x-auto custom-scrollbar">
                                         <table className="w-full text-left border-collapse">
                                             <thead>
                                                 <tr className={`${isDark ? 'bg-white/[0.03]' : 'bg-slate-50'} border-b ${isDark ? 'border-white/5' : 'border-slate-100'}`}>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">ID</th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('title')}>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">ID</th>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('title')}>
                                                         <div className="flex items-center gap-2">Title <ArrowUpDown size={10} /></div>
                                                     </th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Category</th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('amount')}>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500">Category</th>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('amount')}>
                                                         <div className="flex items-center gap-2">Amount <ArrowUpDown size={10} /></div>
                                                     </th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('expense_date')}>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 cursor-pointer hover:text-amber-500 transition-colors" onClick={() => toggleSort('expense_date')}>
                                                         <div className="flex items-center gap-2">Date <ArrowUpDown size={10} /></div>
                                                     </th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Status</th>
-                                                    <th className="px-10 py-8 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Actions</th>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Status</th>
+                                                    <th className="px-3 py-2.5 sm:px-4 text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 text-center">Actions</th>
                                                 </tr>
                                             </thead>
                                             <tbody className="divide-y divide-white/5">
@@ -298,12 +298,12 @@ const ExpenseList = () => {
                                                         transition={{ delay: index * 0.04 }}
                                                         className="group hover:bg-amber-600/[0.04] transition-all"
                                                     >
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <span className={`text-[12px] font-black font-mono transition-colors ${isDark ? 'text-slate-700 group-hover:text-amber-500' : 'text-slate-300 group-hover:text-amber-600'}`}>
                                                                 #{expense.id.toString().padStart(4, '0')}
                                                             </span>
                                                         </td>
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <div
                                                                 onClick={() => handleEditExpense(expense)}
                                                                 className="cursor-pointer group/title"
@@ -312,23 +312,23 @@ const ExpenseList = () => {
                                                                 <span className="text-[10px] font-bold text-slate-500 truncate max-w-[200px] block">{expense.description || 'No additional notes'}</span>
                                                             </div>
                                                         </td>
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${isDark ? 'bg-slate-800 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
                                                                 {expense.category_display || expense.category}
                                                             </span>
                                                         </td>
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <span className="font-black text-base tracking-tighter text-rose-500">
                                                                 -Rs. {parseFloat(expense.amount).toLocaleString()}
                                                             </span>
                                                         </td>
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <div className="flex items-center gap-2 text-xs font-black">
                                                                 <Calendar size={12} className="text-slate-500" />
                                                                 {expense.expense_date}
                                                             </div>
                                                         </td>
-                                                        <td className="px-10 py-7 text-center">
+                                                        <td className="px-3 py-2 sm:px-4 text-center">
                                                             <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.2em] border ${expense.status === 'paid'
                                                                 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20'
                                                                 : 'bg-amber-500/10 text-amber-500 border-amber-500/20 animate-pulse'
@@ -336,7 +336,7 @@ const ExpenseList = () => {
                                                                 {expense.status_display || expense.status}
                                                             </span>
                                                         </td>
-                                                        <td className="px-10 py-7">
+                                                        <td className="px-3 py-2 sm:px-4">
                                                             <div className="flex justify-center gap-2">
                                                                 <button
                                                                     onClick={() => handleEditExpense(expense)}
@@ -359,7 +359,7 @@ const ExpenseList = () => {
                                     </div>
 
                                     {/* Pagination */}
-                                    <div className={`px-10 py-8 border-t ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-100 bg-slate-50/50'} flex flex-col lg:flex-row items-center justify-between gap-8`}>
+                                    <div className={`px-3 py-2.5 sm:px-4 border-t ${isDark ? 'border-white/5 bg-white/[0.02]' : 'border-slate-100 bg-slate-50/50'} flex flex-col lg:flex-row items-center justify-between gap-8`}>
                                         <div className="flex items-center gap-4">
                                             <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                                             <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>
@@ -451,18 +451,18 @@ const StatCard = ({ label, value, icon, color, isDark }) => {
         <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`p-6 rounded-[2rem] border transition-all relative overflow-hidden group ${isDark ? 'bg-slate-900 border-white/5' : 'bg-white border-slate-200 shadow-sm'}`}
+            className={`p-3 sm:p-4 rounded-xl border transition-all relative overflow-hidden group ${isDark ? 'bg-slate-900 border-white/5' : 'bg-white border-slate-200 shadow-sm'}`}
         >
-            <div className={`absolute top-0 right-0 w-24 h-24 blur-[60px] opacity-20 transition-opacity group-hover:opacity-40 pointer-events-none rounded-full ${bgColors[color].split(' ')[0]}`} />
+            <div className={`absolute top-0 right-0 w-16 h-16 blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 pointer-events-none rounded-full ${bgColors[color].split(' ')[0]}`} />
 
-            <div className="flex justify-between items-start mb-4 relative z-10">
-                <div className={`p-4 rounded-2xl border ${bgColors[color]} ${iconColors[color]} shadow-lg transition-transform group-hover:scale-110`}>
-                    {React.cloneElement(icon, { size: 24, strokeWidth: 2.5 })}
+            <div className="flex justify-between items-start mb-2 relative z-10">
+                <div className={`p-2 rounded-lg border ${bgColors[color]} ${iconColors[color]} shadow-sm`}>
+                    {React.cloneElement(icon, { size: 16, strokeWidth: 2.5 })}
                 </div>
             </div>
-            <div className="space-y-1 relative z-10">
-                <p className={`text-[10px] font-black uppercase tracking-widest ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</p>
-                <h4 className="text-xl font-black italic tracking-tight">{value}</h4>
+            <div className="space-y-0.5 relative z-10">
+                <p className={`text-[9px] font-bold uppercase tracking-wide ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{label}</p>
+                <h4 className="text-base font-bold tracking-tight">{value}</h4>
             </div>
         </motion.div>
     );

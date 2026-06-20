@@ -20,6 +20,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import NotificationBell from './NotificationBell';
+import { sortByGradeOrder } from './utils/gradeOrder';
 
 // --- SHARED SIDEBAR COMPONENT ---
 export const Sidebar = ({ isDark: isDarkProp }) => {
@@ -54,7 +55,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
 
   return (
     <motion.aside
-      animate={{ width: isCollapsed ? "5rem" : "20rem" }}
+      animate={{ width: isCollapsed ? "4rem" : "15rem" }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`hidden lg:flex flex-col z-20 relative h-screen backdrop-blur-xl border-r transition-colors duration-500 ${isDark ? 'bg-slate-950/50 border-white/5' : 'bg-white/80 border-slate-200'}`}
     >
@@ -65,16 +66,16 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>
 
-      <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
+      <div className={`${isCollapsed ? 'p-2' : 'p-4'} transition-all`}>
         <div
           onClick={() => navigate('/dashboard')}
-          className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-4 cursor-pointer group`}
+          className={`flex ${isCollapsed ? 'justify-center' : 'justify-start'} items-center gap-3 cursor-pointer group`}
         >
-          <div className="rounded-2xl shadow-lg group-hover:scale-105 transition-transform overflow-hidden w-12 h-12 shrink-0">
+          <div className="rounded-xl shadow-md group-hover:scale-105 transition-transform overflow-hidden w-9 h-9 shrink-0">
             <img src={academyLogo} alt="Academy Logo" className="w-full h-full object-cover" />
           </div>
           {!isCollapsed && (
-            <h1 className={`text-[11px] font-black uppercase leading-tight group-hover:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-slate-800'}`}>
+            <h1 className={`text-[10px] font-bold uppercase leading-tight group-hover:text-blue-400 transition-colors ${isDark ? 'text-white' : 'text-slate-800'}`}>
               {t('sidebar.admin_portal')}<br />
               {t('sidebar.digital_campus')}
             </h1>
@@ -82,7 +83,7 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         </div>
       </div>
 
-      <nav className="flex-1 px-4 space-y-3 mt-4">
+      <nav className="flex-1 px-2 sm:px-3 space-y-1 mt-2">
         <NavItem icon={<LayoutDashboard size={20} />} label={t('common.dashboard')} collapsed={isCollapsed} active={isActive('/dashboard')} onClick={() => navigate('/dashboard')} isDark={isDark} />
         <NavItem icon={<UserCheck size={20} />} label={t('common.guardians')} collapsed={isCollapsed} active={isActive('/guardians')} onClick={() => navigate('/guardians')} isDark={isDark} />
         <NavItem icon={<Users size={20} />} label={t('common.students')} collapsed={isCollapsed} active={isActive('/students')} onClick={() => navigate('/students')} isDark={isDark} />
@@ -93,9 +94,9 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
         <NavItem icon={<Settings size={20} />} label={t('notice.management')} collapsed={isCollapsed} active={isActive('/notification-settings')} onClick={() => navigate('/notification-settings')} isDark={isDark} />
       </nav>
 
-      <div className={`${isCollapsed ? 'p-3' : 'p-6'} transition-all`}>
-        <button onClick={handleLogout} className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-3 px-4 py-3 rounded-2xl hover:bg-rose-500/10 hover:text-rose-400 transition-all font-bold ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-          <LogOut size={20} /> {!isCollapsed && "Sign Out"}
+      <div className={`${isCollapsed ? 'p-2' : 'p-4'} transition-all`}>
+        <button onClick={handleLogout} className={`w-full flex items-center ${isCollapsed ? 'justify-center' : 'justify-start'} gap-2 px-3 py-2 rounded-lg hover:bg-rose-500/10 hover:text-rose-400 transition-all font-semibold text-sm ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
+          <LogOut size={18} /> {!isCollapsed && "Sign Out"}
         </button>
       </div>
     </motion.aside>
@@ -103,8 +104,8 @@ export const Sidebar = ({ isDark: isDarkProp }) => {
 };
 
 const NavItem = ({ icon, label, collapsed, active, onClick, isDark }) => (
-  <button onClick={onClick} className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-4'} px-4 py-3 rounded-xl transition-all font-bold ${active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20' : isDark ? 'text-slate-500 hover:text-slate-200 hover:bg-white/5' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}>
-    <span>{icon}</span> {!collapsed && <span className="text-sm">{label}</span>}
+  <button onClick={onClick} className={`w-full flex items-center ${collapsed ? 'justify-center' : 'gap-2.5'} px-3 py-2 rounded-lg transition-all font-semibold text-sm ${active ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20' : isDark ? 'text-slate-500 hover:text-slate-200 hover:bg-white/5' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'}`}>
+    <span className="shrink-0">{icon}</span> {!collapsed && <span className="truncate">{label}</span>}
   </button>
 );
 
@@ -130,7 +131,7 @@ const AnimatedNumber = ({ value, prefix = '', isDark }) => {
   }, [value]);
 
   return (
-    <span className={`text-3xl font-black tabular-nums ${isDark ? 'text-white' : 'text-slate-800'}`}>
+    <span className={`text-xl sm:text-2xl font-bold tabular-nums ${isDark ? 'text-white' : 'text-slate-800'}`}>
       {prefix}{display.toLocaleString()}
     </span>
   );
@@ -143,7 +144,7 @@ const StatCard = ({ title, value, prefix = '', icon, gradient, delay, isDark, is
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5, delay }}
     whileHover={{ y: -4, transition: { duration: 0.2 } }}
-    className={`relative p-6 rounded-[2rem] border overflow-hidden group cursor-default transition-colors duration-500 ${isDark ? 'border-white/5 bg-slate-900/60 backdrop-blur-xl shadow-xl' : 'border-slate-200 bg-white shadow-lg shadow-slate-200/50'}`}
+    className={`relative p-4 sm:p-5 rounded-xl border overflow-hidden group cursor-default transition-colors duration-500 ${isDark ? 'border-white/5 bg-slate-900/60 backdrop-blur-xl shadow-lg' : 'border-slate-200 bg-white shadow-md'}`}
   >
     {/* Background glow */}
     <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity ${gradient}`} />
@@ -249,7 +250,9 @@ const Dashboard = () => {
       if (financeResponse.data) setFinanceSummary(financeResponse.data);
       if (trendsResponse.data) {
         setFinancialTrends(trendsResponse.data.financial_trends || []);
-        setEnrollmentDemographics(trendsResponse.data.enrollment_demographics || []);
+        setEnrollmentDemographics(
+          sortByGradeOrder(trendsResponse.data.enrollment_demographics || [])
+        );
       }
     } catch (error) {
       console.error("Dashboard Load Error", error);
@@ -280,7 +283,7 @@ const Dashboard = () => {
       <Sidebar isDark={isDark} />
 
       <main className="flex-1 overflow-y-auto relative z-10">
-        <div className="p-6 md:p-8 lg:p-10 max-w-[1400px] mx-auto">
+        <div className="p-4 sm:p-5 max-w-[1400px] mx-auto">
 
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
@@ -288,7 +291,7 @@ const Dashboard = () => {
               <p className={`text-sm font-medium mb-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                 {userName}, {t(`dashboard.${greeting}`)} 👋
               </p>
-              <h1 className={`text-3xl md:text-4xl font-black tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
+              <h1 className={`text-xl sm:text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 {t('common.dashboard')}
               </h1>
               <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mt-2 ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>

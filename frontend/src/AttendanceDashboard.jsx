@@ -251,7 +251,7 @@ const AttendanceDashboard = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className={`p-8 rounded-[3rem] border backdrop-blur-xl mb-10 flex flex-col md:flex-row gap-6 items-end transition-all ${isDark ? 'bg-slate-900/30 border-white/5 shadow-2xl' : 'bg-white border-slate-200 shadow-xl'}`}
+                        className={`p-4 sm:p-5 rounded-xl border backdrop-blur-xl mb-4 flex flex-col md:flex-row gap-3 items-end transition-all ${isDark ? 'bg-slate-900/30 border-white/5 shadow-lg' : 'bg-white border-slate-200 shadow-md'}`}
                     >
                         <div className="flex-1 w-full relative group">
                             <label className={`block text-[10px] font-black uppercase tracking-[0.2em] mb-3 ml-4 ${isDark ? 'text-slate-500 group-focus-within:text-blue-400' : 'text-slate-400 group-focus-within:text-blue-600'}`}>
@@ -260,7 +260,7 @@ const AttendanceDashboard = () => {
                             <select
                                 value={grade}
                                 onChange={(e) => setGrade(e.target.value)}
-                                className={`w-full pl-6 pr-4 py-5 rounded-2xl transition-all outline-none font-black text-sm uppercase italic tracking-tight ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
+                                className={`w-full pl-6 pr-4 py-2 rounded-lg transition-all outline-none font-black text-sm uppercase italic tracking-tight ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
                             >
                                 {["Nursery", "Prep", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].map(g => (
                                     <option key={g} value={g}>{isNaN(g) ? g : `Class ${g}`}</option>
@@ -278,14 +278,14 @@ const AttendanceDashboard = () => {
                                 max={new Date().toISOString().split("T")[0]}
                                 onChange={(e) => setDate(e.target.value)}
                                 style={{ colorScheme: isDark ? 'dark' : 'light' }}
-                                className={`w-full pl-6 pr-4 py-5 rounded-2xl transition-all outline-none font-black text-sm ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
+                                className={`w-full pl-6 pr-4 py-2 rounded-lg transition-all outline-none font-black text-sm ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
                             />
                         </div>
 
                         <div className="w-full md:w-auto">
                             <button
                                 onClick={fetchStudents}
-                                className={`w-full md:w-auto px-10 py-5 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 ${isDark ? 'bg-white text-slate-900 hover:bg-blue-50' : 'bg-slate-900 text-white hover:bg-blue-600'}`}
+                                className={`w-full md:w-auto px-4 py-2 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-3 ${isDark ? 'bg-white text-slate-900 hover:bg-blue-50' : 'bg-slate-900 text-white hover:bg-blue-600'}`}
                             >
                                 <Search size={16} strokeWidth={3} /> {t('attendance.load_roster')}
                             </button>
