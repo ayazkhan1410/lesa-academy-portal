@@ -89,7 +89,7 @@ const TestRecordModal = ({ isOpen, onClose, studentId, studentName, onSuccess })
                                 <Award size={24} />
                             </div>
                             <div>
-                                <h2 className="text-xl font-black text-white italic tracking-tight uppercase">Bulk Academic Entry</h2>
+                                <h2 className="text-xl font-black text-white tracking-tight uppercase">Bulk Academic Entry</h2>
                                 <p className="text-xs text-blue-400 font-bold uppercase tracking-widest">Student: {studentName}</p>
                             </div>
                         </div>

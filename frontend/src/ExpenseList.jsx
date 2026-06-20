@@ -264,7 +264,7 @@ const ExpenseList = () => {
                         ) : expenses.length === 0 ? (
                             <motion.div initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }} className={`flex flex-col items-center justify-center py-16 rounded-xl border-2 border-dashed ${isDark ? 'border-white/5 bg-white/[0.01]' : 'border-slate-200 bg-slate-50'}`}>
                                 <SearchSlash size={80} strokeWidth={1} className="text-slate-800 mb-8 opacity-20" />
-                                <h3 className="text-2xl font-black mb-2 italic tracking-tighter uppercase text-slate-500">No Expenses Found</h3>
+                                <h3 className="text-2xl font-black mb-2 tracking-tighter uppercase text-slate-500">No Expenses Found</h3>
                                 <p className={`text-[10px] font-black uppercase tracking-[0.2em] ${isDark ? 'text-slate-600' : 'text-slate-400'}`}>Clear the filters to see active records</p>
                             </motion.div>
                         ) : (
@@ -308,7 +308,7 @@ const ExpenseList = () => {
                                                                 onClick={() => handleEditExpense(expense)}
                                                                 className="cursor-pointer group/title"
                                                             >
-                                                                <span className="font-black text-base tracking-tight italic uppercase block group-hover/title:text-amber-500 transition-colors underline-offset-4 decoration-amber-500/30 group-hover/title:underline">{expense.title}</span>
+                                                                <span className="font-black text-base tracking-tight uppercase block group-hover/title:text-amber-500 transition-colors underline-offset-4 decoration-amber-500/30 group-hover/title:underline">{expense.title}</span>
                                                                 <span className="text-[10px] font-bold text-slate-500 truncate max-w-[200px] block">{expense.description || 'No additional notes'}</span>
                                                             </div>
                                                         </td>

@@ -70,7 +70,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                                     <Banknote size={20} />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-black text-white italic tracking-tight uppercase">
+                                    <h2 className="text-lg font-black text-white tracking-tight uppercase">
                                         {t('teacher.post_salary')}
                                     </h2>
                                     <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
@@ -88,7 +88,7 @@ const SalaryModal = ({ isOpen, onClose, teacherId, teacherName, monthlySalary, o
                         {monthlySalary && (
                             <div className="mx-6 mt-5 p-4 bg-emerald-600/5 border border-emerald-500/20 rounded-2xl flex justify-between items-center">
                                 <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">{t('teacher.salary')}</span>
-                                <span className="text-xl font-black text-white italic">Rs. {monthlySalary}</span>
+                                <span className="text-xl font-black text-white">Rs. {monthlySalary}</span>
                             </div>
                         )}
 

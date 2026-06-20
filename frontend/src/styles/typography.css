@@ -1,0 +1,36 @@
+/* Single enterprise font stack — Outfit across the admin portal */
+@theme {
+  --font-sans: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "Cascadia Code", "Segoe UI Mono", monospace;
+}
+
+html,
+body,
+#root {
+  font-family: var(--font-sans);
+  font-style: normal;
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.admin-app {
+  font-family: var(--font-sans);
+  font-style: normal;
+}
+
+.admin-app *,
+.admin-app *::before,
+.admin-app *::after {
+  font-family: inherit;
+}
+
+/* Academy admin UI: no decorative italics */
+.admin-app :where(em, i, cite, .italic) {
+  font-style: normal;
+}
+
+/* Keep monospace only for IDs, CNIC, codes */
+.admin-app .font-mono {
+  font-family: var(--font-mono);
+}

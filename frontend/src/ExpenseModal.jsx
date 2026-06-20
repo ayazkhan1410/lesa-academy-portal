@@ -131,7 +131,7 @@ const ExpenseModal = ({ isOpen, onClose, onSuccess, expenseToEdit = null }) => {
                                             <Receipt size={24} className="text-amber-500" />
                                         </div>
                                         <div>
-                                            <h2 className="text-2xl font-black text-white italic tracking-tight">
+                                            <h2 className="text-2xl font-black text-white tracking-tight">
                                                 {expenseToEdit ? 'Edit Expense' : 'Add New Expense'}
                                             </h2>
                                             <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mt-1">Expense Record Details</p>

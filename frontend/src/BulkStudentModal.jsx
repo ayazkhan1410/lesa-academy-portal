@@ -184,7 +184,7 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                                 <Sparkles size={24} />
                             </div>
                             <div>
-                                <h2 className="text-2xl font-black text-white tracking-tight italic">Batch Enrollment</h2>
+                                <h2 className="text-2xl font-black text-white tracking-tight">Batch Enrollment</h2>
                                 <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">Processing Multi-Node Identity</p>
                             </div>
                         </div>
@@ -239,7 +239,7 @@ const BulkStudentModal = ({ isOpen, onClose, onSuccess }) => {
                                 <div>
                                     <div className="flex justify-between items-center mb-2 ml-1">
                                         <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Contact String</label>
-                                        <span className="text-[8px] font-black text-blue-500/50 uppercase italic tracking-tighter">Format: 03130753830</span>
+                                        <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter">Format: 03130753830</span>
                                     </div>
                                     <input
                                         name="phone_number"

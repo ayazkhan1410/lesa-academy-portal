@@ -164,7 +164,7 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
                                     <Sparkles size={24} />
                                 </div>
                                 <div>
-                                    <h2 className="text-2xl font-black text-white italic">
+                                    <h2 className="text-2xl font-black text-white">
                                         {studentToEdit ? `Edit: ${studentToEdit.name}` : "New Admission"}
                                     </h2>
                                     <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">
@@ -239,7 +239,7 @@ const StudentModal = ({ isOpen, onClose, onSuccess, studentToEdit = null }) => {
                                     <div>
                                         <div className="flex justify-between items-center mb-2">
                                             <label htmlFor="guardian_phone" className="text-[10px] font-black text-slate-500 uppercase tracking-widest block">Phone Number</label>
-                                            <span className="text-[8px] font-black text-indigo-400/50 uppercase italic tracking-tighter">Format: 03130753830</span>
+                                            <span className="text-[8px] font-black text-indigo-400/50 uppercase tracking-tighter">Format: 03130753830</span>
                                         </div>
                                         <input
                                             id="guardian_phone"

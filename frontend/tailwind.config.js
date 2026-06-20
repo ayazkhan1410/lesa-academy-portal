@@ -7,7 +7,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'Inter', 'system-ui', 'sans-serif'],
+        sans: ['Outfit', 'system-ui', '-apple-system', 'Segoe UI', 'sans-serif'],
+        mono: ['ui-monospace', 'Cascadia Code', 'Segoe UI Mono', 'monospace'],
       },
     },
   },

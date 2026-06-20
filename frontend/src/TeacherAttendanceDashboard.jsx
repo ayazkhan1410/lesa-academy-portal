@@ -216,7 +216,7 @@ const TeacherAttendanceDashboard = () => {
                     {/* Header */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                            <h1 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tighter italic uppercase underline decoration-purple-500 decoration-4 underline-offset-8`}>
+                            <h1 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tighter uppercase underline decoration-purple-500 decoration-4 underline-offset-8`}>
                                 {t('teacher_attendance.daily_roll_call')}
                             </h1>
                             <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
@@ -317,13 +317,13 @@ const TeacherAttendanceDashboard = () => {
                                         {/* Teacher Info */}
                                         <div className="flex items-center gap-5 relative z-10">
                                             <div className={`w-16 h-16 rounded-[1.5rem] overflow-hidden shrink-0 flex items-center justify-center text-2xl font-black border-2 shadow-lg ${isDark ? 'bg-slate-800 border-white/10 text-purple-400' : 'bg-slate-100 border-slate-200 text-purple-600'}`}>
-                                                <span className="italic uppercase tracking-tighter">
+                                                <span className="uppercase tracking-tighter">
                                                     {teacher.teacher_name ? teacher.teacher_name.charAt(0) : '?'}
                                                 </span>
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <h3 className={`font-black text-lg italic tracking-tight uppercase truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                                                    <h3 className={`font-black text-lg tracking-tight uppercase truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
                                                         {teacher.teacher_name}
                                                     </h3>
                                                     {savingIds.has(teacher.teacher_id) ? (
@@ -376,7 +376,7 @@ const TeacherAttendanceDashboard = () => {
                                                             }, null, true);
                                                         }
                                                     }}
-                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
+                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
                                                 >
                                                     <option value="">Select Reason...</option>
                                                     {remarkOptions.map(opt => (
@@ -399,7 +399,7 @@ const TeacherAttendanceDashboard = () => {
                                                                 }, null, true);
                                                             }
                                                         }}
-                                                        className={`w-full h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
+                                                        className={`w-full h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-purple-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-purple-500'}`}
                                                     />
                                                 )}
                                             </div>

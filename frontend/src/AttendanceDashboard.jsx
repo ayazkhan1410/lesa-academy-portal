@@ -220,7 +220,7 @@ const AttendanceDashboard = () => {
 
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
                         <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-                            <h1 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tighter italic uppercase underline decoration-blue-500 decoration-4 underline-offset-8`}>
+                            <h1 className={`text-4xl font-black ${isDark ? 'text-white' : 'text-slate-900'} tracking-tighter uppercase underline decoration-blue-500 decoration-4 underline-offset-8`}>
                                 {t('attendance.daily_roll_call')}
                             </h1>
                             <p className={`text-[10px] font-black uppercase tracking-[0.3em] mt-5 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
@@ -260,7 +260,7 @@ const AttendanceDashboard = () => {
                             <select
                                 value={grade}
                                 onChange={(e) => setGrade(e.target.value)}
-                                className={`w-full pl-6 pr-4 py-2 rounded-lg transition-all outline-none font-black text-sm uppercase italic tracking-tight ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
+                                className={`w-full pl-6 pr-4 py-2 rounded-lg transition-all outline-none font-black text-sm uppercase tracking-tight ${isDark ? 'bg-slate-950/50 border-white/5 text-white focus:border-blue-500/50 focus:bg-slate-900' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-blue-500 focus:bg-white border'}`}
                             >
                                 {["Nursery", "Prep", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"].map(g => (
                                     <option key={g} value={g}>{isNaN(g) ? g : `Class ${g}`}</option>
@@ -337,12 +337,12 @@ const AttendanceDashboard = () => {
                                                 {student.student_image ? (
                                                     <img src={`${BASE_URL}${student.student_image}`} className="w-full h-full object-cover transition-transform group-hover/card:scale-110" alt="Student" />
                                                 ) : (
-                                                    <span className="italic uppercase tracking-tighter">{student.student_name.charAt(0)}</span>
+                                                    <span className="uppercase tracking-tighter">{student.student_name.charAt(0)}</span>
                                                 )}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <h3 className={`font-black text-lg italic tracking-tight uppercase truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{student.student_name}</h3>
+                                                    <h3 className={`font-black text-lg tracking-tight uppercase truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{student.student_name}</h3>
                                                     {savingIds.has(student.student_id) ? (
                                                         <div className="flex items-center gap-1.5 bg-blue-500/10 text-blue-400 px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border border-blue-500/20">
                                                             <Loader2 size={10} className="animate-spin" /> {t('common.loading')}
@@ -390,7 +390,7 @@ const AttendanceDashboard = () => {
                                                             }, null, true);
                                                         }
                                                     }}
-                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
+                                                    className={`w-full h-12 px-5 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-200 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
                                                 >
                                                     <option value="">Select Reason...</option>
                                                     {remarkOptions.map(opt => (
@@ -413,7 +413,7 @@ const AttendanceDashboard = () => {
                                                                 }, null, true);
                                                             }
                                                         }}
-                                                        className={`w-full h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border italic ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
+                                                        className={`w-full h-12 px-6 rounded-2xl text-[10px] font-black uppercase tracking-widest outline-none transition-all border ${isDark ? 'bg-slate-950/50 border-white/5 text-slate-400 focus:border-blue-500/50' : 'bg-slate-50 border-slate-200 text-slate-700 focus:border-blue-500'}`}
                                                     />
                                                 )}
                                             </div>

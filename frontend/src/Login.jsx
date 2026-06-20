@@ -131,7 +131,7 @@ const Login = ({ onLogin }) => {
                             <h2 className={`text-xs font-bold tracking-[0.3em] uppercase transition-colors duration-700 ${isDark ? 'text-blue-400' : 'text-indigo-500'}`}>Admin Access Portal</h2>
                             <h1 className={`text-2xl md:text-3xl font-black leading-tight tracking-tight transition-colors duration-700 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                                 The Learning & <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400 italic">Educational Science Academy</span>
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Educational Science Academy</span>
                             </h1>
                         </motion.div>
 

@@ -147,7 +147,7 @@ const GuardianDetail = () => {
                                 {guardian?.name ? guardian.name.charAt(0) : '?'}
                             </div>
                             <div>
-                                <h1 className="text-4xl font-black tracking-tight mb-2 italic">{guardian.name}</h1>
+                                <h1 className="text-4xl font-black tracking-tight mb-2">{guardian.name}</h1>
                                 <div className="flex flex-wrap gap-3">
                                     <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border flex items-center gap-2 ${isDark ? 'bg-slate-800 text-slate-400 border-white/5' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
                                         <CreditCard size={12} /> ID: {guardian.cnic}
@@ -189,7 +189,7 @@ const GuardianDetail = () => {
                                     <div className="group">
                                         <div className="flex justify-between items-center mb-2">
                                             <label className="text-[10px] font-black uppercase tracking-widest text-slate-500 block">Phone Node</label>
-                                            <span className="text-[8px] font-black text-blue-500/50 uppercase italic tracking-tighter">03130753830</span>
+                                            <span className="text-[8px] font-black text-blue-500/50 uppercase tracking-tighter">03130753830</span>
                                         </div>
                                         <input
                                             name="phone_number"
@@ -268,7 +268,7 @@ const GuardianDetail = () => {
 
                             {!guardian.students || guardian.students.length === 0 ? (
                                 <div className={`text-center py-16 rounded-2xl border-2 border-dashed ${isDark ? 'border-white/5 bg-white/[0.01]' : 'border-slate-100 bg-slate-50'}`}>
-                                    <p className="text-slate-500 font-bold italic">No child nodes linked to this identity.</p>
+                                    <p className="text-slate-500 font-bold">No child nodes linked to this identity.</p>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
