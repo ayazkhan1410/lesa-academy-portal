@@ -17,7 +17,10 @@ SECRET_KEY = (
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    host.strip() for host in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+    host.strip() for host in os.getenv(
+        'ALLOWED_HOSTS',
+        'localhost,127.0.0.1,https://lesa-academy-portal.vercel.app/'
+    ).split(',')
     if host.strip()
 ]
 
