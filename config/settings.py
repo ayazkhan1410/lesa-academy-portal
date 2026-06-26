@@ -32,10 +32,22 @@ def _hosts_from_env(env_name, default):
     return hosts
 
 
+def _merge_hosts(*host_lists):
+    merged = []
+    for host_list in host_lists:
+        for host in host_list:
+            if host and host not in merged:
+                merged.append(host)
+    return merged
+
+
 _DEFAULT_ALLOWED_HOSTS = (
     'localhost,127.0.0.1,.onrender.com,'
     'lesa-academy-portal.vercel.app,.vercel.app'
 )
+
+# Always allow Render/Vercel even when ALLOWED_HOSTS env overrides defaults
+_ALWAYS_ALLOWED_HOSTS = ('.onrender.com', '.vercel.app')
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -47,7 +59,10 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool('DEBUG', True)
 
-ALLOWED_HOSTS = _hosts_from_env('ALLOWED_HOSTS', _DEFAULT_ALLOWED_HOSTS)
+ALLOWED_HOSTS = _merge_hosts(
+    _hosts_from_env('ALLOWED_HOSTS', _DEFAULT_ALLOWED_HOSTS),
+    _ALWAYS_ALLOWED_HOSTS,
+)
 
 # CORS — local dev + optional production frontend (e.g. Vercel)
 CORS_ALLOWED_ORIGINS = [
