@@ -16,12 +16,11 @@ services:
 
   - type: web
     name: lesa-api
-    runtime: docker
+    runtime: python
     plan: free
-    dockerfilePath: ./Dockerfile
-    dockerCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    buildCommand: pip install -r requirements.txt
+    startCommand: bash start.sh
     healthCheckPath: /api/health-check/
-    releaseCommand: python manage.py migrate --noinput && python manage.py collectstatic --noinput
     envVars:
       - key: DEBUG
         value: "False"
@@ -46,6 +45,12 @@ services:
           name: lesa-redis
           property: connectionString
       - key: MOBILE_GATEWAY_URL
+        sync: false
+      - key: DJANGO_SUPERUSER_EMAIL
+        sync: false
+      - key: DJANGO_SUPERUSER_USERNAME
+        sync: false
+      - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
   - type: worker
