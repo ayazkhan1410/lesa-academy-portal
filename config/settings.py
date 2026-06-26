@@ -3,6 +3,7 @@ import dj_database_url
 
 from pathlib import Path
 from datetime import timedelta
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -136,7 +137,9 @@ AUTH_USER_MODEL = "students.CustomUser"
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+_ON_RENDER = bool(os.getenv('RENDER'))
 _database_url = os.getenv('DATABASE_URL')
+
 if _database_url:
     DATABASES = {
         'default': dj_database_url.parse(
@@ -145,6 +148,12 @@ if _database_url:
             ssl_require=not DEBUG,
         )
     }
+elif _ON_RENDER:
+    raise ImproperlyConfigured(
+        'DATABASE_URL is required on Render. Create a Render PostgreSQL '
+        'database, add DATABASE_URL to Environment Variables, and remove '
+        'any uploaded local .env secret file (it sets DB_HOST=db for Docker).'
+    )
 else:
     DATABASES = {
         'default': {

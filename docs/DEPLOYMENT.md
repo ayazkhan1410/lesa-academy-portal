@@ -31,21 +31,21 @@ After blueprint sync, open **lesa-api** → **Environment**:
 
 | Variable | Example |
 |----------|---------|
+| `DATABASE_URL` | From **Render PostgreSQL** (Internal Database URL) |
 | `CORS_ALLOWED_ORIGINS` | `https://lesa-academy-portal.vercel.app` |
-| `ALLOWED_HOSTS` | `lesa-api.onrender.com,.onrender.com` |
-| `MOBILE_GATEWAY_URL` | Public SMS gateway URL (not `192.168.x.x`) |
+| `DJANGO_SUPERUSER_EMAIL` | `admin@lesa.com` |
+| `DJANGO_SUPERUSER_USERNAME` | `admin` |
+| `DJANGO_SUPERUSER_PASSWORD` | strong password |
 
-`DATABASE_URL`, `SECRET_KEY`, Redis URLs are wired by `render.yaml`.
+> **Critical:** Do **not** upload your local `.env` as a Secret File on Render.  
+> It sets `DB_HOST=db` and `redis://redis` — those only work in Docker locally.  
+> On Render you must use `DATABASE_URL` from Render Postgres.
+
+`SECRET_KEY` and Redis URLs are wired by `render.yaml` if using Blueprint.
 
 ### 3. Initialize production database
 
-Render → **lesa-api** → **Shell**:
-
-```bash
-python manage.py createsuperuser
-```
-
-Migrations run automatically via `releaseCommand` on each deploy.
+Migrations and superuser run automatically via `start.sh` on each deploy (no Shell needed on free plan).
 
 ### 4. Verify API
 
