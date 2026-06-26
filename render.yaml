@@ -58,7 +58,7 @@ services:
     runtime: docker
     plan: free
     dockerfilePath: ./Dockerfile
-    dockerCommand: celery -A config.celery_app worker --loglevel=info
+    dockerCommand: celery -A config.celery_app worker --loglevel=info --concurrency=1 --pool=prefork
     envVars:
       - key: DEBUG
         value: "False"

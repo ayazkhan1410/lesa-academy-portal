@@ -11,17 +11,20 @@ from .models import Guardian
 @shared_task(bind=True, max_retries=3)
 def send_message(self, phone_number, message, guardian_id):
     try:
-        url = os.getenv('MOBILE_GATEWAY_URL')
-        print("URL IN SEND MESSAGE TASK ===", url)
+        url = os.getenv('MOBILE_GATEWAY_URL', '').strip()
+        if not url:
+            print('MOBILE_GATEWAY_URL is not set on this worker.')
+            return {
+                'status': 'failed',
+                'message': 'MOBILE_GATEWAY_URL is not configured',
+            }
 
         payload = {
             "phone": phone_number,
             "message": message
         }
-        print("PAYLOAD IN SEND MESSAGE TASK ===", payload)
 
         response = requests.post(url, json=payload, timeout=10)
-        print("RESPONSE IN SEND MESSAGE TASK ===", response)
         response.raise_for_status()
 
         # update last message send time

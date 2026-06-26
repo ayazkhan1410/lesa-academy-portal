@@ -116,6 +116,28 @@ docker compose exec backend python manage.py check
 
 ---
 
+## Celery worker (free tier)
+
+Use **low concurrency** or the worker OOMs on 512 MB:
+
+```
+celery -A config.celery_app worker --loglevel=info --concurrency=1
+```
+
+## SMS gateway (important)
+
+Local SMS Gateway apps (`192.168.x.x:8080`) only work on your **home/office network**.
+Render (cloud) **cannot reach** them.
+
+| Environment | SMS works? |
+|-------------|------------|
+| Local Docker | Yes (if gateway app running on PC) |
+| Render production | No — unless gateway has a **public URL** (ngrok for testing, Twilio/etc. for prod) |
+
+Set `MOBILE_GATEWAY_URL` on **both** Django web service and Celery worker.
+
+---
+
 ## Media files note
 
 Uploaded images (student photos, receipts) are stored on Render disk for now.
