@@ -12,11 +12,16 @@ from .models import Guardian
 def send_message(self, phone_number, message, guardian_id):
     try:
         url = os.getenv('MOBILE_GATEWAY_URL')
+        print("URL IN SEND MESSAGE TASK ===", url)
+
         payload = {
             "phone": phone_number,
             "message": message
         }
+        print("PAYLOAD IN SEND MESSAGE TASK ===", payload)
+
         response = requests.post(url, json=payload, timeout=10)
+        print("RESPONSE IN SEND MESSAGE TASK ===", response)
         response.raise_for_status()
 
         # update last message send time
