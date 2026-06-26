@@ -44,7 +44,8 @@ def _merge_hosts(*host_lists):
 
 _DEFAULT_ALLOWED_HOSTS = (
     'localhost,127.0.0.1,.onrender.com,'
-    'lesa-academy-portal.vercel.app,.vercel.app'
+    'lesa-academy-portal.vercel.app,.vercel.app,'
+    'the-learning-and-educational-science.onrender.com'
 )
 
 # Always allow Render/Vercel even when ALLOWED_HOSTS env overrides defaults
@@ -71,7 +72,8 @@ CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:5173",
     "http://127.0.0.1:3000",
-    "https://lesa-academy-portal.vercel.app",
+    "https://the-learning-and-educational-science.onrender.com",
+    "https://lesa-academy-portal.onrender.com",
 ]
 _extra_cors = os.getenv('CORS_ALLOWED_ORIGINS', '')
 if _extra_cors:
